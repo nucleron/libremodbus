@@ -405,13 +405,13 @@ xMBRTUTimerT35Expired( RTU_ARG_VOID )
     {
         /* Timer t35 expired. Startup phase is finished. */
     case STATE_RX_INIT:
-        xNeedPoll = xMBPortEventPost(&(inst->serial_port), EV_READY );//fixme
+        xNeedPoll = xMBPortEventPost(SERIAL_ARG EV_READY );
         break;
 
         /* A frame was received and t35 expired. Notify the listener that
          * a new frame was received. */
     case STATE_RX_RCV:
-        xNeedPoll = xMBPortEventPost(&(inst->serial_port), EV_FRAME_RECEIVED ); //fixme too
+        xNeedPoll = xMBPortEventPost(SERIAL_ARG EV_FRAME_RECEIVED );
         break;
 
         /* An error occured while receiving the frame. */

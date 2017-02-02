@@ -40,8 +40,13 @@
 #include "mbconfig.h"
 
 /* ----------------------- Platform includes --------------------------------*/
+#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
 #include "serial_port.h"
+#endif
+
+#if MB_TCP_ENABLED > 0
 #include "tcp_port.h"
+#endif
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_REQ_READ_ADDR_OFF            ( MB_PDU_DATA_OFF + 0 )

@@ -34,7 +34,7 @@
 
 /* ----------------------- Platform includes --------------------------------*/
 #include "serial_port.h"
-#include "tcp_port.h"
+//#include "tcp_port.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
@@ -285,11 +285,14 @@ eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
     	        	inst->pxMBFrameCBByteReceived = (mbBoolFunc)xMBRTUReceiveFSM;
     	        	inst->pxMBFrameCBTransmitterEmpty = (mbBoolFunc)xMBRTUTransmitFSM;
     	        	inst->pxMBPortCBTimerExpired = (mbBoolFunc)xMBRTUTimerT35Expired;
-    	        	inst->pvMBGetTxFrame = (pvGetTxFrame)vMBMasterGetPDUSndBuf;
+
     	        	inst->port = &(((MBRTUInstance*)transport)->serial_port);
     	        	inst->PDUSndLength = &(((MBRTUInstance*)transport)->usSendPDULength);
     	        	isMaster = ((MBRTUInstance*)transport)->rtuMaster;
-    	        	inst->pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBMasterRequestIsBroadcast;
+    	        	#if MB_MASTER > 0
+                    inst->pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBMasterRequestIsBroadcast;
+                    inst->pvMBGetTxFrame = (pvGetTxFrame)vMBMasterGetPDUSndBuf;
+					#endif
 					eStatus = eMBRTUInit((MBRTUInstance*)transport, inst->ucMBAddress, ucPort, ulBaudRate, eParity );
 					((MBRTUInstance*)(transport))->parent = (void*)(inst);
     	            break;
@@ -304,11 +307,14 @@ eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
     	        	inst->pxMBFrameCBByteReceived = (mbBoolFunc)xMBASCIIReceiveFSM;
     	        	inst->pxMBFrameCBTransmitterEmpty = (mbBoolFunc)xMBASCIITransmitFSM;
     	        	inst->pxMBPortCBTimerExpired = (mbBoolFunc)xMBASCIITimerT1SExpired;
-    	        	inst->pvMBGetTxFrame = (pvGetTxFrame)vMBASCIIMasterGetPDUSndBuf;
+
     	        	inst->port = &(((MBASCIIInstance*)transport)->serial_port);
     	        	inst->PDUSndLength = &(((MBASCIIInstance*)transport)->usSendPDULength);
     	        	isMaster = ((MBASCIIInstance*)transport)->asciiMaster;
-    	        	inst->pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBASCIIMasterRequestIsBroadcast;
+    	        	#if MB_MASTER > 0
+                    inst->pvMBGetTxFrame = (pvGetTxFrame)vMBASCIIMasterGetPDUSndBuf;
+                    inst->pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBASCIIMasterRequestIsBroadcast;
+                    #endif
     	        	eStatus = eMBASCIIInit((MBASCIIInstance*)transport, inst->ucMBAddress, ucPort, ulBaudRate, eParity );
     	        	((MBASCIIInstance*)(transport))->parent = (void*)(inst);
     	            break;
@@ -321,6 +327,7 @@ eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
 	inst->pvPortEventPostCur = (pvPortEventPost)xMBPortEventPost;
 	inst->pvMBGetTxFrame(inst->transport,(void*)&(inst->txFrame));
 
+    #if MB_MASTER > 0
     if(isMaster == TRUE)
     {
     	inst->xMBRunInMasterMode = TRUE;
@@ -328,6 +335,7 @@ eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
     				inst->xFuncHandlers[i]=xMasterFuncHandlers[i];
     }
     else
+    #endif
     {
     	for(i =0;i<MB_FUNC_HANDLERS_MAX;i++)
 			inst->xFuncHandlers[i]=defaultFuncHandlers[i];
@@ -745,6 +753,7 @@ eMBPoll(MB_INST_VOID)
 
             /* If the request was not sent to the broadcast address we
              * return a reply. */
+        #if MB_MASTER > 0
             if(xMBRunInMasterMode)
             {
             	 if (eException != MB_EX_NONE)
@@ -759,6 +768,7 @@ eMBPoll(MB_INST_VOID)
 				}
             }
             else
+        #endif
             {
             	if( ucRcvAddress != MB_ADDRESS_BROADCAST )
 				{
@@ -781,7 +791,7 @@ eMBPoll(MB_INST_VOID)
 
         case EV_FRAME_SENT:
                	/* Master is busy now. */
-        	if(xMBRunInMasterMode) //FIXME: check if always
+        	if(xMBRunInMasterMode)
         	{
         		pvMBGetTxFrame(inst->transport,(UCHAR**)(&txFrame));
        			eStatus = peMBFrameSendCur(inst->transport, ucMBMasterDestAddress,(UCHAR*)(txFrame), *PDUSndLength );
@@ -792,7 +802,7 @@ eMBPoll(MB_INST_VOID)
 		/* Execute specified error process callback function. */
 		errorType = eMBMasterCurErrorType;
 		//vMBMasterGetPDUSndBuf(inst->transport, &ucMBFrame );
-
+    #if MB_ASCII_ENABLED > 0
 		switch (errorType)
 		{
 		case ERR_EV_ERROR_RESPOND_TIMEOUT:
@@ -808,6 +818,7 @@ eMBPoll(MB_INST_VOID)
 					txFrame, *PDUSndLength);
 			break;
 		}
+    #endif
 		//vMBMasterRunResRelease(); FIXME
 		break;
         }

@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -151,7 +151,7 @@ eMBASCIIInit(ASCII_ARG UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMB
     eMBErrorCode    eStatus = MB_ENOERR;
     ( void )ucSlaveAddress;
     usSndBufferCount=0;
-    
+
     ENTER_CRITICAL_SECTION(  );
     ucMBLFCharacter = MB_ASCII_DEFAULT_LF;
 
@@ -184,7 +184,7 @@ eMBASCIIStart(ASCII_ARG_VOID )
     EXIT_CRITICAL_SECTION(  );
 
     /* No special startup required for ASCII. */
-    ( void )xMBPortEventPost(&(inst->serial_port), EV_READY ); //fixme
+    ( void )xMBPortEventPost(SERIAL_ARG EV_READY );
 }
 
 void
@@ -561,6 +561,8 @@ prvucMBLRC( UCHAR * pucFrame, USHORT usLen )
 
 #endif
 
+#ifdef ASCII_MULTIPORT
+
 /* Get Modbus Master send RTU's buffer address pointer.*/
 void vMBASCIIMasterGetRTUSndBuf( ASCII_ARG UCHAR ** pucFrame )
 {
@@ -596,3 +598,5 @@ BOOL xMBASCIIMasterRequestIsBroadcast( ASCII_ARG_VOID )
 {
 	return xFrameIsBroadcast;
 }
+
+#endif

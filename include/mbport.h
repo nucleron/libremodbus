@@ -160,7 +160,7 @@ extern          BOOL( *pxMBFrameCBTransmitterEmpty ) ( CALLBACK_ARG );
 extern          BOOL( *pxMBPortCBTimerExpired ) ( CALLBACK_ARG );
 
 /* ----------------------- TCP port functions -------------------------------*/
-#if MB_TCP_ENABLED
+#if MB_TCP_ENABLED > 0
 BOOL            xMBTCPPortInit(MULTIPORT_TCP_ARG USHORT usTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster );
 
 void            vMBTCPPortClose(MULTIPORT_TCP_ARG_VOID);
@@ -173,7 +173,7 @@ BOOL            xMBTCPPortSendResponse(MULTIPORT_TCP_ARG const UCHAR *pucMBTCPFr
 #endif
 
 
-#ifdef MB_MASTER
+#if MB_MASTER >0
 INLINE void     vMBPortTimersConvertDelayEnable( MULTIPORT_SERIAL_ARG_VOID );
 
 INLINE void     vMBPortTimersRespondTimeoutEnable( MULTIPORT_SERIAL_ARG_VOID );

@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -33,9 +33,13 @@
 #include "string.h"
 
 /* ----------------------- Platform includes --------------------------------*/
+#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
 #include "serial_port.h"
-#include "tcp_port.h"
+#endif
 
+#if MB_TCP_ENABLED > 0
+#include "tcp_port.h"
+#endif
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 #include "mbframe.h"

@@ -162,6 +162,8 @@ eMBTCPSend(TCP_ARG UCHAR _unused, const UCHAR * pucFrame, USHORT usLength )
     return eStatus;
 }
 
+#if MB_MASTER > 0
+
 void vMBTCPMasterSetPDUSndLength(  TCP_ARG USHORT SendPDULength )
 {
 	usSendPDULength = SendPDULength;
@@ -187,5 +189,6 @@ BOOL xMBTCPMasterRequestIsBroadcast(TCP_ARG_VOID)
 {
 	return FALSE; //no broadcasts on tcp
 }
+#endif
 
 #endif
