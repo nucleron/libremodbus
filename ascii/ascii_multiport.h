@@ -11,7 +11,7 @@
 #include "mb_types.h"
 #include "serial_multi.h"
 
-#if defined(MB_MULTIPORT) && (defined(MB_ASCII_ENABLED))
+#if MB_MULTIPORT>0 && (defined(MB_ASCII_ENABLED))
 
 
 typedef enum

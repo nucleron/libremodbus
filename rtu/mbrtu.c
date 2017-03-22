@@ -44,42 +44,15 @@
 #include "mbport.h"
 
 #include "rtu_multiport.h"
+
+#if MB_MASTER > 0
 #include "mb_master.h"
+#endif
 
 
 
-
-#ifndef MB_MULTIPORT
-/* ----------------------- Type definitions ---------------------------------*/
-typedef enum
-{
-    STATE_RX_INIT,              /*!< Receiver is in initial state. */
-    STATE_RX_IDLE,              /*!< Receiver is in idle state. */
-    STATE_RX_RCV,               /*!< Frame is beeing received. */
-    STATE_RX_ERROR              /*!< If the frame is invalid. */
-} eMBRcvState;
-
-typedef enum
-{
-    STATE_TX_IDLE,              /*!< Transmitter is in idle state. */
-    STATE_TX_XMIT               /*!< Transmitter is in transfer state. */
-} eMBSndState;
-
-
-/* ----------------------- Static variables ---------------------------------*/
-static volatile eMBSndState eSndState;
-static volatile eMBRcvState eRcvState;
-
-volatile UCHAR  ucRTUBuf[MB_SER_PDU_SIZE_MAX];
-
-static volatile UCHAR *pucSndBufferCur;
-static volatile USHORT usSndBufferCount;
-
-static volatile USHORT usRcvBufferPos;
-
-#else
-
-	#define STATE_RX_INIT RTU_STATE_RX_INIT
+#if MB_MULTIPORT > 0
+    #define STATE_RX_INIT RTU_STATE_RX_INIT
 	#define STATE_RX_IDLE RTU_STATE_RX_IDLE
 	#define STATE_RX_RCV  RTU_STATE_RX_RCV
 	#define STATE_RX_ERROR RTU_STATE_RX_ERROR
@@ -110,6 +83,43 @@ static volatile USHORT usRcvBufferPos;
 
 	#define usRcvBufferPos inst->usRcvBufferPos
 	#define usSendPDULength inst->usSendPDULength
+
+#else
+    /* ----------------------- Type definitions ---------------------------------*/
+    typedef enum
+    {
+        STATE_RX_INIT,              /*!< Receiver is in initial state. */
+        STATE_RX_IDLE,              /*!< Receiver is in idle state. */
+        STATE_RX_RCV,               /*!< Frame is beeing received. */
+        STATE_RX_ERROR              /*!< If the frame is invalid. */
+    } eMBRcvState;
+
+    typedef enum
+    {
+        STATE_TX_IDLE,              /*!< Transmitter is in idle state. */
+        STATE_TX_XMIT               /*!< Transmitter is in transfer state. */
+    } eMBSndState;
+
+
+    /* ----------------------- Static variables ---------------------------------*/
+    static volatile eMBSndState eSndState;
+    static volatile eMBRcvState eRcvState;
+
+    #define MB_SER_PDU_SIZE_MIN     4       /*!< Minimum size of a Modbus RTU frame. */
+    #define MB_SER_PDU_SIZE_MAX     256     /*!< Maximum size of a Modbus RTU frame. */
+    #define MB_SER_PDU_SIZE_CRC     2       /*!< Size of CRC field in PDU. */
+    #define MB_SER_PDU_ADDR_OFF     0       /*!< Offset of slave address in Ser-PDU. */
+    #define MB_SER_PDU_PDU_OFF      1       /*!< Offset of Modbus-PDU in Ser-PDU. */
+
+    volatile UCHAR  ucRTUBuf[MB_SER_PDU_SIZE_MAX];
+    volatile UCHAR*  ucRTURcvBuf = ucRTUBuf;
+    volatile UCHAR*  ucRTUSndBuf = ucRTUBuf;
+
+
+    static volatile UCHAR *pucSndBufferCur;
+    static volatile USHORT usSndBufferCount;
+
+    static volatile USHORT usRcvBufferPos;
 
 #endif /*ndef RTU_MULTIPORT*/
 
@@ -154,7 +164,7 @@ eMBRTUInit(RTU_ARG UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBPari
         {
             eStatus = MB_EPORTERR;
         }
-	#ifdef MB_MULTIPORT
+	#if MB_MULTIPORT > 0
         eSndState = STATE_TX_IDLE;
         eRcvState = STATE_RX_INIT;
 
@@ -299,12 +309,13 @@ xMBRTUReceiveFSM(RTU_ARG_VOID)
          * receiver is in the state STATE_RX_RECEIVCE.
          */
     case STATE_RX_IDLE:
-
+        #if MB_MASTER > 0
     	if(rtuMaster)
     	{
     		vMBPortTimersDisable( SERIAL_ARG_VOID );
 			eSndState = STATE_TX_IDLE;
     	}
+    	#endif
         usRcvBufferPos = 0;
         ucRTURcvBuf[usRcvBufferPos++] = ucByte;
         eRcvState = STATE_RX_RCV;
@@ -359,9 +370,10 @@ xMBRTUTransmitFSM( RTU_ARG_VOID )
         }
         else
         {
+            #if MB_MASTER >0
         	if(rtuMaster==TRUE)
         	{
-				#if MB_MASTER >0
+
         		xFrameIsBroadcast = ( ucRTUSndBuf[MB_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST ) ? TRUE : FALSE;
 				/* Disable transmitter. This prevents another transmit buffer
 				 * empty interrupt. */
@@ -377,9 +389,10 @@ xMBRTUTransmitFSM( RTU_ARG_VOID )
 				{
 					vMBPortTimersRespondTimeoutEnable( SERIAL_ARG_VOID );
 				}
-				#endif
+
         	}
         	else
+            #endif
         	{
 				xNeedPoll = xMBPortEventPost(SERIAL_ARG EV_FRAME_SENT );
 				/* Disable transmitter. This prevents another transmit buffer
@@ -461,20 +474,19 @@ xMBRTUTimerT35Expired( RTU_ARG_VOID )
     return xNeedPoll;
 }
 
-
-#if MB_MASTER > 0
-
-/* Get Modbus Master send RTU's buffer address pointer.*/
-void vMBMasterGetRTUSndBuf( RTU_ARG UCHAR ** pucFrame )
-{
-	*pucFrame = ( UCHAR * ) ucRTUSndBuf;
-}
-
 /* Get Modbus Master send PDU's buffer address pointer.*/
 void vMBMasterGetPDUSndBuf( RTU_ARG UCHAR ** pucFrame )
 {
 	*pucFrame = ( UCHAR * ) &ucRTUSndBuf[MB_SER_PDU_PDU_OFF];
 }
+
+#if MB_MASTER > 0
+/* Get Modbus send RTU's buffer address pointer.*/
+void vMBMasterGetRTUSndBuf( RTU_ARG UCHAR ** pucFrame )
+{
+	*pucFrame = ( UCHAR * ) ucRTUSndBuf;
+}
+
 
 /* Set Modbus Master send PDU's buffer length.*/
 void vMBMasterSetPDUSndLength(  RTU_ARG USHORT SendPDULength )

@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -69,7 +69,11 @@ PR_BEGIN_EXTERN_C
     MB_EX_GATEWAY_TGT_FAILED = 0x0B
 } eMBException;
 
+#if MB_MULTIPORT > 0
 typedef         eMBException( *pxMBFunctionHandler ) (void*, UCHAR * pucFrame, USHORT * pusLength );
+#else
+typedef         eMBException( *pxMBFunctionHandler ) (UCHAR * pucFrame, USHORT * pusLength );
+#endif
 
 typedef struct
 {

@@ -33,6 +33,12 @@
 
 #include "mbconfig.h"
 
+#if MB_MULTIPORT
+ #define CALLER_PROTO_ARG void* caller,
+#else
+ #define CALLER_PROTO_ARG
+#endif
+
 #if MB_TCP_ENABLED
 	#include "tcp_multi.h"
 #else
@@ -91,7 +97,7 @@ BOOL            xMBPortEventInit( MULTIPORT_SERIAL_ARG_VOID  );
 
 BOOL            xMBPortEventPost( MULTIPORT_SERIAL_ARG eMBEventType eEvent );
 
-BOOL            xMBPortEventGet(  MULTIPORT_SERIAL_ARG void* caller,/*@out@ */ eMBEventType * eEvent ); //FIXME
+BOOL            xMBPortEventGet(  MULTIPORT_SERIAL_ARG CALLER_PROTO_ARG/*@out@ */ eMBEventType * eEvent ); //FIXME
 
 /* ----------------------- TCP Supporting functions -----------------------------*/
 #if MB_TCP_ENABLED
@@ -99,7 +105,7 @@ BOOL            xMBTCPPortEventInit( MULTIPORT_TCP_ARG_VOID  );
 
 BOOL            xMBTCPPortEventPost( MULTIPORT_TCP_ARG eMBEventType eEvent );
 
-BOOL            xMBTCPPortEventGet(  MULTIPORT_TCP_ARG void* caller,/*@out@ */ eMBEventType * eEvent ); //FIXME
+BOOL            xMBTCPPortEventGet(  MULTIPORT_TCP_ARG CALLER_PROTO_ARG/*@out@ */ eMBEventType * eEvent ); //FIXME
 #endif
 /* ----------------------- Serial port functions ----------------------------*/
 

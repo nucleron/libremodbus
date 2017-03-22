@@ -39,12 +39,6 @@
 
 #include "mb_multiport.h"
 
-#if MB_MULTIPORT
-	#define FUNC_ARG MBInstance* inst,
-#else
-	#define FUNC_ARG
-#endif
-
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_FUNC_READ_ADDR_OFF           ( MB_PDU_DATA_OFF )
 #define MB_PDU_FUNC_READ_DISCCNT_OFF        ( MB_PDU_DATA_OFF + 2 )
@@ -59,7 +53,7 @@ eMBException    prveMBError2Exception( eMBErrorCode eErrorCode );
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 eMBException
-eMBFuncReadDiscreteInputs(FUNC_ARG UCHAR * pucFrame, USHORT * usLen )
+eMBFuncReadDiscreteInputs(MB_MULTI_ARG UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
     USHORT          usDiscreteCnt;

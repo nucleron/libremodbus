@@ -133,6 +133,8 @@ static volatile eMBRcvState eRcvState;
 extern volatile UCHAR ucRTUBuf[];
 static volatile UCHAR *ucASCIIRcvBuf = ucRTUBuf;
 
+static volatile UCHAR *ucASCIISndBuf = ucRTUBuf;
+
 static volatile USHORT usRcvBufferPos;
 static volatile eMBBytePos eBytePos;
 
@@ -362,11 +364,13 @@ xMBASCIIReceiveFSM(ASCII_ARG_VOID)
     case STATE_RX_IDLE:
         if( ucByte == ':' )
         {
+            #if MB_MASTER > 0
         	if(asciiMaster == TRUE)
         	{
 				vMBPortTimersDisable( SERIAL_ARG_VOID );
 				eSndState = ASCII_STATE_TX_IDLE;
         	}
+        	#endif
             /* Enable timer for character timeout. */
             vMBPortTimersEnable(SERIAL_ARG_VOID );
             /* Reset the input buffers to store the frame. */
@@ -440,9 +444,10 @@ xMBASCIITransmitFSM( ASCII_ARG_VOID )
         /* Notify the task which called eMBASCIISend that the frame has
          * been sent. */
     case STATE_TX_NOTIFY:
+        #if MB_MASTER >0
     	if(asciiMaster==TRUE)
 		{
-			#if MB_MASTER >0
+
 			xFrameIsBroadcast = ( ucASCIISndBuf[MB_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST ) ? TRUE : FALSE;
 			/* Disable transmitter. This prevents another transmit buffer
 			 * empty interrupt. */
@@ -458,9 +463,10 @@ xMBASCIITransmitFSM( ASCII_ARG_VOID )
 			{
 				vMBPortTimersRespondTimeoutEnable( SERIAL_ARG_VOID );
 			}
-			#endif
+
 		}
     	else
+        #endif
     	{
 			eSndState = STATE_TX_IDLE;
 			xNeedPoll = xMBPortEventPost(SERIAL_ARG EV_FRAME_SENT );
@@ -559,7 +565,15 @@ prvucMBLRC( UCHAR * pucFrame, USHORT usLen )
     return ucLRC;
 }
 
+/* Get Modbus send PDU's buffer address pointer.*/
+void vMBASCIIMasterGetPDUSndBuf( ASCII_ARG UCHAR ** pucFrame )
+{
+	*pucFrame = ( UCHAR * ) &ucASCIISndBuf[MB_SER_PDU_PDU_OFF];
+}
+
 #endif
+
+
 
 #ifdef ASCII_MULTIPORT
 
@@ -569,11 +583,7 @@ void vMBASCIIMasterGetRTUSndBuf( ASCII_ARG UCHAR ** pucFrame )
 	*pucFrame = ( UCHAR * ) ucASCIISndBuf;
 }
 
-/* Get Modbus Master send PDU's buffer address pointer.*/
-void vMBASCIIMasterGetPDUSndBuf( ASCII_ARG UCHAR ** pucFrame )
-{
-	*pucFrame = ( UCHAR * ) &ucASCIISndBuf[MB_SER_PDU_PDU_OFF];
-}
+
 
 /* Set Modbus Master send PDU's buffer length.*/
 void vMBASCIIMasterSetPDUSndLength(  ASCII_ARG USHORT SendPDULength )

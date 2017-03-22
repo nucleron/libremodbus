@@ -7,25 +7,7 @@
 #include <mbproto.h>
 #include <mbconfig.h>
 
-
-
-	#include "mbport.h"
-	#if MB_RTU_ENABLED == 1
-		#define RTU_MULTIPORT
-		#include "mbrtu.h"
-		#include "rtu_multiport.h"
-	#endif
-	#if MB_ASCII_ENABLED == 1
-		#define ASCII_MULTIPORT
-		#include "mbascii.h"
-		#include "ascii_multiport.h"
-	#endif
-	#if MB_TCP_ENABLED == 1
-		#define TCP_MULTIPORT
-		#include "mbtcp.h"
-		//#include "tcp_multiport.h"
-		#include "tcp_multi.h"
-	#endif
+#include "mbport.h"
 
 typedef enum
 {
@@ -33,6 +15,24 @@ typedef enum
     STATE_DISABLED,
     STATE_NOT_INITIALIZED
 } eMBState ;
+
+#if MB_MULTIPORT > 0
+    #if MB_RTU_ENABLED == 1
+        #define RTU_MULTIPORT
+        #include "mbrtu.h"
+        #include "rtu_multiport.h"
+    #endif
+    #if MB_ASCII_ENABLED == 1
+        #define ASCII_MULTIPORT
+        #include "mbascii.h"
+        #include "ascii_multiport.h"
+    #endif
+    #if MB_TCP_ENABLED == 1
+        #define TCP_MULTIPORT
+        #include "mbtcp.h"
+        //#include "tcp_multiport.h"
+        #include "tcp_multi.h"
+    #endif
 
 typedef BOOL( *mbBoolFunc) ( CALLBACK_ARG );
 
@@ -87,5 +87,12 @@ typedef struct
 } MBInstance;
 
 #define MB_MULTI_ARG MBInstance* inst,
+#else
+
+#define MB_MULTI_ARG
+
+#endif // MB_MULTIPORT
+
+
 
 #endif // MB_MULTIPORT_H

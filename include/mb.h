@@ -106,30 +106,43 @@ PR_BEGIN_EXTERN_C
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode    eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress,
-                         UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
-#if MB_RTU_ENABLED
-eMBErrorCode
-eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
-#endif
 
-#if MB_ASCII_ENABLED
-eMBErrorCode eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
-#endif
+#if MB_MULTIPORT > 0
+    eMBErrorCode    eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress,
+                             UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+    #if MB_RTU_ENABLED
+    eMBErrorCode
+    eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+    #endif
 
-#if MB_MASTER >0
+    #if MB_ASCII_ENABLED
+    eMBErrorCode eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+    #endif
 
-	#if MB_RTU_ENABLED > 0
+    #if MB_TCP_ENABLED > 0
+	eMBErrorCode eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster  );
+    #endif
 
-eMBErrorCode
-		eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
-	#endif
-	#if MB_ASCII_ENABLED > 0
-		eMBErrorCode eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
-	#endif
-	#if MB_TCP_ENABLED >0
-		eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr );
-	#endif
+    #if MB_MASTER >0
+
+        #if MB_RTU_ENABLED > 0
+
+    eMBErrorCode
+            eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+        #endif
+        #if MB_ASCII_ENABLED > 0
+            eMBErrorCode eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+        #endif
+        #if MB_TCP_ENABLED >0
+            eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr );
+        #endif
+    #endif
+    #define MBINST_VOID MBInstance* inst
+    #define MBINST_ARG MBInstance* inst,
+#else
+    eMBErrorCode eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+    #define MBINST_VOID
+    #define MBINST_ARG
 #endif
 /*! \ingroup modbus
  * \brief Initialize the Modbus protocol stack for Modbus TCP.
@@ -145,9 +158,7 @@ eMBErrorCode
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-#if MB_TCP_ENABLED > 0
-	eMBErrorCode eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster  );
-#endif
+
 /*! \ingroup modbus
  * \brief Release resources used by the protocol stack.
  *
@@ -162,7 +173,7 @@ eMBErrorCode
  *   If the protocol stack is not in the disabled state it returns
  *   eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode    eMBClose(MBInstance* inst);
+eMBErrorCode    eMBClose(MBINST_VOID);
 
 /*! \ingroup modbus
  * \brief Enable the Modbus protocol stack.
@@ -174,7 +185,7 @@ eMBErrorCode    eMBClose(MBInstance* inst);
  *   eMBErrorCode::MB_ENOERR. If it was not in the disabled state it
  *   return eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode    eMBEnable(MBInstance* inst );
+eMBErrorCode    eMBEnable(MBINST_VOID);
 
 /*! \ingroup modbus
  * \brief Disable the Modbus protocol stack.
@@ -185,7 +196,7 @@ eMBErrorCode    eMBEnable(MBInstance* inst );
  *  eMBErrorCode::MB_ENOERR. If it was not in the enabled state it returns
  *  eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode    eMBDisable(MBInstance* inst);
+eMBErrorCode    eMBDisable(MBINST_VOID);
 
 /*! \ingroup modbus
  * \brief The main pooling loop of the Modbus protocol stack.
@@ -199,7 +210,7 @@ eMBErrorCode    eMBDisable(MBInstance* inst);
  *   returns eMBErrorCode::MB_EILLSTATE. Otherwise it returns
  *   eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode    eMBPoll(MBInstance* inst );
+eMBErrorCode    eMBPoll(MBINST_VOID);
 
 /*! \ingroup modbus
  * \brief Configure the slave id of the device.
@@ -243,7 +254,7 @@ eMBErrorCode    eMBSetSlaveID(MB_MULTI_ARG UCHAR ucSlaveID, BOOL xIsRunning,
  *   case the values in mbconfig.h should be adjusted. If the argument was not
  *   valid it returns eMBErrorCode::MB_EINVAL.
  */
-eMBErrorCode    eMBRegisterCB(MBInstance* inst, UCHAR ucFunctionCode,
+eMBErrorCode    eMBRegisterCB( MBINST_ARG UCHAR ucFunctionCode,
                                pxMBFunctionHandler pxHandler );
 
 /* ----------------------- Callback -----------------------------------------*/

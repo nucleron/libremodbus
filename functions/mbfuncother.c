@@ -51,12 +51,12 @@
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
 
 /* ----------------------- Static variables ---------------------------------*/
-#ifndef MB_MULTIPORT
-static UCHAR    ucMBSlaveID[MB_FUNC_OTHER_REP_SLAVEID_BUF];
-static USHORT   usMBSlaveIDLen;
-#else
+#if MB_MULTIPORT > 0
 #define ucMBSlaveID inst->ucMBSlaveID
 #define usMBSlaveIDLen inst->usMBSlaveIDLen
+#else
+static UCHAR    ucMBSlaveID[MB_FUNC_OTHER_REP_SLAVEID_BUF];
+static USHORT   usMBSlaveIDLen;
 #endif
 /* ----------------------- Start implementation -----------------------------*/
 

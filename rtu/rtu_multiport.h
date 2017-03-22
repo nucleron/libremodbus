@@ -12,7 +12,7 @@
 #include "mb_types.h"
 #include "serial_multi.h"
 
-#if defined(MB_MULTIPORT) && (defined(MB_RTU_ENABLED))
+#if MB_MULTIPORT>0 && (defined(MB_RTU_ENABLED))
 
 
 /* ----------------------- Defines ------------------------------------------*/
@@ -69,6 +69,7 @@
 #define RTU_ARG
 #define RTU_ARG_VOID void
 #define SERIAL_ARG
+#define SERIAL_ARG_VOID
 
 #endif  /*RTU_MULTIPORT*/
 

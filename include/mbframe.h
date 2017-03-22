@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -68,7 +68,7 @@ PR_BEGIN_EXTERN_C
 
 /* ----------------------- Prototypes  0-------------------------------------*/
 
-#ifdef MB_MULTIPORT
+#if MB_MULTIPORT > 0
 #define FRAME_ARG void* transport,
 #define FRAME_ARG_VOID void* transport
 #else
