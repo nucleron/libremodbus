@@ -169,6 +169,7 @@ eMBASCIIInit(ASCII_ARG UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMB
     #ifdef MB_MULTIPORT
     eRcvState =  STATE_RX_IDLE;
     eSndState = STATE_TX_IDLE;
+    inst->serial_port.parent = (void*)(inst);
 	#endif
 
 

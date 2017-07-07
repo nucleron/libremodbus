@@ -49,8 +49,6 @@
 #include "mb_master.h"
 #endif
 
-
-
 #if MB_MULTIPORT > 0
     #define STATE_RX_INIT RTU_STATE_RX_INIT
 	#define STATE_RX_IDLE RTU_STATE_RX_IDLE
@@ -100,16 +98,15 @@
         STATE_TX_XMIT               /*!< Transmitter is in transfer state. */
     } eMBSndState;
 
+#   define MB_SER_PDU_SIZE_MIN     4       /*!< Minimum size of a Modbus RTU frame. */
+#   define MB_SER_PDU_SIZE_MAX     256     /*!< Maximum size of a Modbus RTU frame. */
+#   define MB_SER_PDU_SIZE_CRC     2       /*!< Size of CRC field in PDU. */
+#   define MB_SER_PDU_ADDR_OFF     0       /*!< Offset of slave address in Ser-PDU. */
+#   define MB_SER_PDU_PDU_OFF      1       /*!< Offset of Modbus-PDU in Ser-PDU. */
 
     /* ----------------------- Static variables ---------------------------------*/
     static volatile eMBSndState eSndState;
     static volatile eMBRcvState eRcvState;
-
-    #define MB_SER_PDU_SIZE_MIN     4       /*!< Minimum size of a Modbus RTU frame. */
-    #define MB_SER_PDU_SIZE_MAX     256     /*!< Maximum size of a Modbus RTU frame. */
-    #define MB_SER_PDU_SIZE_CRC     2       /*!< Size of CRC field in PDU. */
-    #define MB_SER_PDU_ADDR_OFF     0       /*!< Offset of slave address in Ser-PDU. */
-    #define MB_SER_PDU_PDU_OFF      1       /*!< Offset of Modbus-PDU in Ser-PDU. */
 
     volatile UCHAR  ucRTUBuf[MB_SER_PDU_SIZE_MAX];
     volatile UCHAR*  ucRTURcvBuf = ucRTUBuf;
@@ -122,7 +119,6 @@
     static volatile USHORT usRcvBufferPos;
 
 #endif /*ndef RTU_MULTIPORT*/
-
 
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode
