@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -35,31 +35,81 @@
 PR_BEGIN_EXTERN_C
 #endif
 
-#include "ascii_multiport.h"
+#include "mb_types.h"
 
-#if MB_ASCII_ENABLED > 0
-eMBErrorCode    eMBASCIIInit(ASCII_ARG UCHAR slaveAddress, UCHAR ucPort,
-                              ULONG ulBaudRate, eMBParity eParity );
-void            eMBASCIIStart(ASCII_ARG_VOID);
-void            eMBASCIIStop(ASCII_ARG_VOID);
+/* ----------------------- Defines ------------------------------------------*/
+#define MB_ASCII_DEFAULT_CR           '\r'    /*!< Default CR character for Modbus ASCII. */
+#define MB_ASCII_DEFAULT_LF           '\n'    /*!< Default LF character for Modbus ASCII. */
+#define MB_ASCII_SER_PDU_SIZE_MIN     3       /*!< Minimum size of a Modbus ASCII frame. */
+#define MB_ASCII_SER_PDU_SIZE_MAX     256     /*!< Maximum size of a Modbus ASCII frame. */
+#define MB_ASCII_SER_PDU_SIZE_LRC     1       /*!< Size of LRC field in PDU. */
+#define MB_ASCII_SER_PDU_ADDR_OFF     0       /*!< Offset of slave address in Ser-PDU. */
+#define MB_ASCII_SER_PDU_PDU_OFF      1       /*!< Offset of Modbus-PDU in Ser-PDU. */
 
-eMBErrorCode    eMBASCIIReceive(ASCII_ARG UCHAR * pucRcvAddress, UCHAR ** pucFrame,
-                                 USHORT * pusLength );
-eMBErrorCode    eMBASCIISend(ASCII_ARG UCHAR slaveAddress, const UCHAR * pucFrame,
-                              USHORT usLength );
-BOOL            xMBASCIIReceiveFSM(ASCII_ARG_VOID);
-BOOL            xMBASCIITransmitFSM(ASCII_ARG_VOID);
-BOOL            xMBASCIITimerT1SExpired(ASCII_ARG_VOID);
-#endif
+typedef enum
+{
+    MB_ASCII_RX_STATE_IDLE,              /*!< Receiver is in idle state. */
+	MB_ASCII_RX_STATE_RCV,               /*!< Frame is beeing received. */
+	MB_ASCII_RX_STATE_WAIT_EOF           /*!< Wait for End of Frame. */
+} mb_ascii_rx_state_enum;
 
+typedef enum
+{
+	MB_ASCII_TX_STATE_IDLE,              /*!< Transmitter is in idle state. */
+	MB_ASCII_TX_STATE_START,             /*!< Starting transmission (':' sent). */
+	MB_ASCII_TX_STATE_DATA,              /*!< Sending of data (Address, Data, LRC). */
+	MB_ASCII_TX_STATE_END,               /*!< End of transmission. */
+	MB_ASCII_TX_STATE_NOTIFY,             /*!< Notify sender that the frame has been sent. */
+	MB_ASCII_TX_STATE_XFWR
+} mb_ascii_tx_state_enum;
+
+typedef enum
+{
+    BYTE_HIGH_NIBBLE,           /*!< Character for high nibble of byte. */
+    BYTE_LOW_NIBBLE             /*!< Character for low nibble of byte. */
+} mb_ascii_byte_pos_enum;
+
+
+typedef struct
+{
+	void                            *parent;
+	MBSerialInstance                serial_port;
+	volatile mb_ascii_tx_state_enum snd_state;
+	volatile mb_ascii_rx_state_enum rcv_state;
+
+	volatile UCHAR                  rcv_buf[128];//[1+2*MB_ASCII_SER_PDU_SIZE_MAX];
+    volatile UCHAR                  snd_buf[128];//[1+2*MB_ASCII_SER_PDU_SIZE_MAX];
+    volatile USHORT                 snd_pdu_len;
+
+	volatile UCHAR                  *snd_buf_cur;
+	volatile USHORT                 snd_buf_cnt;
+
+	volatile USHORT                 rcv_buf_pos;
+	volatile mb_ascii_byte_pos_enum byte_pos;
+
+	volatile UCHAR                  mb_lf_char;
+	BOOL                            frame_is_broadcast;
+	BOOL                            is_master;
+	volatile eMBMasterTimerMode     cur_tmr_mode;
+	//volatile UCHAR                  ucLRC;
+}MBASCIIInstance;
+
+eMBErrorCode            eMBASCIIInit                    (MBASCIIInstance* inst, UCHAR slaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity);
+void                    eMBASCIIStart                   (MBASCIIInstance* inst                                                                       );
+void                    eMBASCIIStop                    (MBASCIIInstance* inst                                                                       );
+eMBErrorCode            eMBASCIIReceive                 (MBASCIIInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength         );
+eMBErrorCode            eMBASCIISend                    (MBASCIIInstance* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength          );
+BOOL                    xMBASCIIReceiveFSM              (MBASCIIInstance* inst                                                                       );
+BOOL                    xMBASCIITransmitFSM             (MBASCIIInstance* inst                                                                       );
+BOOL                    xMBASCIITimerT1SExpired         (MBASCIIInstance* inst                                                                       );
 //master
-void vMBASCIIMasterGetPDUSndBuf(ASCII_ARG UCHAR ** pucFrame );
-USHORT usMBASCIIMasterGetPDUSndLength( ASCII_ARG_VOID );
-void vMBASCIIMasterSetPDUSndLength(ASCII_ARG USHORT SendPDULength );
-void vMBASCIIMasterSetCurTimerMode(ASCII_ARG eMBMasterTimerMode eMBTimerMode );
-BOOL xMBASCIIMasterRequestIsBroadcast( ASCII_ARG_VOID );
-eMBMasterErrorEventType eMBASCIIMasterGetErrorType( ASCII_ARG_VOID );
-eMBMasterReqErrCode eMBASCIIMasterWaitRequestFinish( void );
+void                    vMBASCIIMasterGetPDUSndBuf      (MBASCIIInstance* inst, UCHAR ** pucFrame                                                    );
+USHORT                  usMBASCIIMasterGetPDUSndLength  (MBASCIIInstance* inst                                                                       );
+void                    vMBASCIIMasterSetPDUSndLength   (MBASCIIInstance* inst, USHORT SendPDULength                                                 );
+void                    vMBASCIIMasterSetCurTimerMode   (MBASCIIInstance* inst, eMBMasterTimerMode eMBTimerMode                                      );
+BOOL                    xMBASCIIMasterRequestIsBroadcast(MBASCIIInstance* inst                                                                       );
+eMBMasterErrorEventType eMBASCIIMasterGetErrorType      (MBASCIIInstance* inst                                                                       );
+//eMBMasterReqErrCode     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                        );
 
 #ifdef __cplusplus
 PR_END_EXTERN_C

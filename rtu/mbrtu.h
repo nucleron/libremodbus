@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -31,30 +31,73 @@
 #ifndef _MB_RTU_H
 #define _MB_RTU_H
 
-#include "rtu_multiport.h"
-
 #ifdef __cplusplus
 PR_BEGIN_EXTERN_C
 #endif
-    eMBErrorCode eMBRTUInit(RTU_ARG UCHAR slaveAddress, UCHAR ucPort, ULONG ulBaudRate,
-                             eMBParity eParity );
-void            eMBRTUStart(RTU_ARG_VOID);
-void            eMBRTUStop(RTU_ARG_VOID);
-eMBErrorCode    eMBRTUReceive(RTU_ARG UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength );
-eMBErrorCode    eMBRTUSend(RTU_ARG UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength );
-BOOL            xMBRTUReceiveFSM(RTU_ARG_VOID);
-BOOL            xMBRTUTransmitFSM(RTU_ARG_VOID);
-BOOL            xMBRTUTimerT15Expired(RTU_ARG_VOID);
-BOOL            xMBRTUTimerT35Expired(RTU_ARG_VOID);
 
+#include "mb_types.h"
+
+/* ----------------------- Defines ------------------------------------------*/
+#define MB_RTU_SER_PDU_SIZE_MIN     4       /*!< Minimum size of a Modbus RTU frame. */
+#define MB_RTU_SER_PDU_SIZE_MAX     256     /*!< Maximum size of a Modbus RTU frame. */
+#define MB_RTU_SER_PDU_SIZE_CRC     2       /*!< Size of CRC field in PDU. */
+#define MB_RTU_SER_PDU_ADDR_OFF     0       /*!< Offset of slave address in Ser-PDU. */
+#define MB_RTU_SER_PDU_PDU_OFF      1       /*!< Offset of Modbus-PDU in Ser-PDU. */
+
+/* ----------------------- Type definitions ---------------------------------*/
+typedef enum
+{
+    MB_RTU_RX_STATE_INIT,              /*!< Receiver is in initial state. */
+    MB_RTU_RX_STATE_IDLE,              /*!< Receiver is in idle state. */
+    MB_RTU_RX_STATE_RCV,               /*!< Frame is beeing received. */
+    MB_RTU_RX_STATE_ERROR              /*!< If the frame is invalid. */
+} mb_rtu_rcv_state_enum;
+
+typedef enum
+{
+    MB_RTU_TX_STATE_IDLE,              /*!< Transmitter is in idle state. */
+    MB_RTU_TX_STATE_XMIT,              /*!< Transmitter is in transfer state. */
+    MB_RTU_TX_STATE_XFWR
+} mb_rtu_snd_state_enum;
+
+typedef struct
+{
+    void                           *parent;
+    MBSerialInstance               serial_port;
+    volatile mb_rtu_snd_state_enum snd_state;
+    volatile mb_rtu_rcv_state_enum rcv_state;
+
+    volatile UCHAR                 snd_buf[MB_PDU_SIZE_MAX];
+    volatile UCHAR                 rcv_buf[MB_RTU_SER_PDU_SIZE_MAX];
+    volatile USHORT                snd_pdu_len;
+
+    volatile UCHAR                 *snd_buf_cur;
+    volatile USHORT                snd_buff_cnt;
+
+    volatile USHORT                rcv_buf_pos;
+
+    BOOL                           is_master;
+    BOOL                           frame_is_broadcast;
+    volatile eMBMasterTimerMode    cur_tmr_mode;
+} MBRTUInstance;
+
+eMBErrorCode            eMBRTUInit                 (MBRTUInstance* inst, UCHAR slaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity);
+void                    eMBRTUStart                (MBRTUInstance* inst                                                                       );
+void                    eMBRTUStop                 (MBRTUInstance* inst                                                                       );
+eMBErrorCode            eMBRTUReceive              (MBRTUInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength         );
+eMBErrorCode            eMBRTUSend                 (MBRTUInstance* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength          );
+BOOL                    xMBRTUReceiveFSM           (MBRTUInstance* inst                                                                       );
+BOOL                    xMBRTUTransmitFSM          (MBRTUInstance* inst                                                                       );
+BOOL                    xMBRTUTimerT15Expired      (MBRTUInstance* inst                                                                       );
+BOOL                    xMBRTUTimerT35Expired      (MBRTUInstance* inst                                                                       );
 //master
-void vMBMasterGetPDUSndBuf(RTU_ARG UCHAR ** pucFrame );
-USHORT usMBMasterGetPDUSndLength( RTU_ARG_VOID );
-void vMBMasterSetPDUSndLength(RTU_ARG USHORT SendPDULength );
-void vMBMasterSetCurTimerMode(RTU_ARG eMBMasterTimerMode eMBTimerMode );
-BOOL xMBMasterRequestIsBroadcast( RTU_ARG_VOID );
-eMBMasterErrorEventType eMBMasterGetErrorType( RTU_ARG_VOID );
-eMBMasterReqErrCode eMBMasterWaitRequestFinish( void );
+void                    vMBMasterGetPDUSndBuf      (MBRTUInstance* inst, UCHAR ** pucFrame                                                    );
+USHORT                  usMBMasterGetPDUSndLength  (MBRTUInstance* inst                                                                       );
+void                    vMBMasterSetPDUSndLength   (MBRTUInstance* inst, USHORT SendPDULength                                                 );
+void                    vMBMasterSetCurTimerMode   (MBRTUInstance* inst, eMBMasterTimerMode eMBTimerMode                                      );
+BOOL                    xMBMasterRequestIsBroadcast(MBRTUInstance* inst                                                                       );
+eMBMasterErrorEventType eMBMasterGetErrorType      (MBRTUInstance* inst                                                                       );
+eMBMasterReqErrCode     eMBMasterWaitRequestFinish (void /*Какого ???*/                                                                       );
 
 #ifdef __cplusplus
 PR_END_EXTERN_C

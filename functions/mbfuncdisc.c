@@ -53,7 +53,7 @@ eMBException    prveMBError2Exception( eMBErrorCode eErrorCode );
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 eMBException
-eMBFuncReadDiscreteInputs(MB_MULTI_ARG UCHAR * pucFrame, USHORT * usLen )
+eMBFuncReadDiscreteInputs(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
     USHORT          usDiscreteCnt;

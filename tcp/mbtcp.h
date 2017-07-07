@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -35,27 +35,29 @@
 PR_BEGIN_EXTERN_C
 #endif
 
-#include "tcp_multiport.h"
+#include "mb_types.h"
+
+typedef struct
+{
+    MBTCPPortInstance tcp_port;
+    BOOL tcpMaster;
+    USHORT usSendPDULength;
+    BOOL xFrameIsBroadcast;
+} MBTCPInstance;
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_TCP_PSEUDO_ADDRESS   255
 
 /* ----------------------- Function prototypes ------------------------------*/
-eMBErrorCode	eMBTCPDoInit(TCP_ARG USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster );
-void            eMBTCPStart(TCP_ARG_VOID);
-void            eMBTCPStop( TCP_ARG_VOID );
-eMBErrorCode    eMBTCPReceive(TCP_ARG UCHAR * pucRcvAddress, UCHAR ** pucFrame,
-                               USHORT * pusLength );
-eMBErrorCode    eMBTCPSend(TCP_ARG UCHAR _unused, const UCHAR * pucFrame,
-                            USHORT usLength );
-
-//master functions
+eMBErrorCode	eMBTCPDoInit       (MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster        );
+void            eMBTCPStart        (MBTCPInstance* inst                                                              );
+void            eMBTCPStop         (MBTCPInstance* inst                                                              );
+eMBErrorCode    eMBTCPReceive      (MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
+eMBErrorCode    eMBTCPSend         (MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength      );
 #if MB_MASTER > 0
-
-void vMBTCPMasterGetPDURcvBuf(TCP_ARG UCHAR ** pucFrame);
-void vMBTCPMasterGetPDUSndBuf(TCP_ARG UCHAR ** pucFrame);
-BOOL xMBTCPMasterRequestIsBroadcast(TCP_ARG_VOID);
-
+void vMBTCPMasterGetPDURcvBuf      (MBTCPInstance* inst, UCHAR ** pucFrame                                           );
+void vMBTCPMasterGetPDUSndBuf      (MBTCPInstance* inst, UCHAR ** pucFrame                                           );
+BOOL xMBTCPMasterRequestIsBroadcast(MBTCPInstance* inst                                                              );
 #endif
 
 #ifdef __cplusplus

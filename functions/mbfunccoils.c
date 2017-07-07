@@ -67,7 +67,7 @@ eMBException    prveMBError2Exception( eMBErrorCode eErrorCode );
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 eMBException
-eMBFuncReadCoils(MB_MULTI_ARG UCHAR * pucFrame, USHORT * usLen )
+eMBFuncReadCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
     USHORT          usCoilCount;
@@ -146,7 +146,7 @@ eMBFuncReadCoils(MB_MULTI_ARG UCHAR * pucFrame, USHORT * usLen )
 
 #if MB_FUNC_WRITE_COIL_ENABLED > 0
 eMBException
-eMBFuncWriteCoil(MB_MULTI_ARG UCHAR * pucFrame, USHORT * usLen )
+eMBFuncWriteCoil(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
     UCHAR           ucBuf[2];
@@ -200,7 +200,7 @@ eMBFuncWriteCoil(MB_MULTI_ARG UCHAR * pucFrame, USHORT * usLen )
 
 #if MB_FUNC_WRITE_MULTIPLE_COILS_ENABLED > 0
 eMBException
-eMBFuncWriteMultipleCoils(MB_MULTI_ARG UCHAR * pucFrame, USHORT * usLen )
+eMBFuncWriteMultipleCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
     USHORT          usCoilCnt;

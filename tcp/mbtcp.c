@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -56,10 +56,10 @@
  *  +-----------+---------------+------------------------------------------+
  *  | TID | PID | Length | UID  |Code | Data                               |
  *  +-----------+---------------+------------------------------------------+
- *  |     |     |        |      |                                           
- * (2)   (3)   (4)      (5)    (6)                                          
+ *  |     |     |        |      |
+ * (2)   (3)   (4)      (5)    (6)
  *
- * (2)  ... MB_TCP_TID          = 0 (Transaction Identifier - 2 Byte) 
+ * (2)  ... MB_TCP_TID          = 0 (Transaction Identifier - 2 Byte)
  * (3)  ... MB_TCP_PID          = 2 (Protocol Identifier - 2 Byte)
  * (4)  ... MB_TCP_LEN          = 4 (Number of bytes - 2 Byte)
  * (5)  ... MB_TCP_UID          = 6 (Unit Identifier - 1 Byte)
@@ -85,11 +85,11 @@
 
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode
-eMBTCPDoInit(TCP_ARG USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster )
+eMBTCPDoInit(MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
-    if( xMBTCPPortInit(TCPPORT_ARG ucTCPPort,hostaddr, bMaster ) == FALSE )
+    if( xMBTCPPortInit(&(inst->tcp_port), ucTCPPort,hostaddr, bMaster ) == FALSE )
     {
         eStatus = MB_EPORTERR;
     }
@@ -97,26 +97,26 @@ eMBTCPDoInit(TCP_ARG USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster )
 }
 
 void
-eMBTCPStart(TCP_ARG_VOID )
+eMBTCPStart(MBTCPInstance* inst )
 {
 }
 
 void
-eMBTCPStop( TCP_ARG_VOID )
+eMBTCPStop( MBTCPInstance* inst )
 {
     /* Make sure that no more clients are connected. */
-    vMBTCPPortDisable(TCPPORT_ARG_VOID );
+    vMBTCPPortDisable(&(inst->tcp_port) );
 }
 
 eMBErrorCode
-eMBTCPReceive(TCP_ARG UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLength )
+eMBTCPReceive(MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLength )
 {
     eMBErrorCode    eStatus = MB_EIO;
     UCHAR          *pucMBTCPFrame;
     USHORT          usLength;
     USHORT          usPID;
 
-    if( xMBTCPPortGetRequest(TCPPORT_ARG &pucMBTCPFrame, &usLength ) != FALSE )
+    if( xMBTCPPortGetRequest(&(inst->tcp_port), &pucMBTCPFrame, &usLength ) != FALSE )
     {
         usPID = pucMBTCPFrame[MB_TCP_PID] << 8U;
         usPID |= pucMBTCPFrame[MB_TCP_PID + 1];
@@ -141,21 +141,21 @@ eMBTCPReceive(TCP_ARG UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLen
 }
 
 eMBErrorCode
-eMBTCPSend(TCP_ARG UCHAR _unused, const UCHAR * pucFrame, USHORT usLength )
+eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     UCHAR          *pucMBTCPFrame = ( UCHAR * ) pucFrame - MB_TCP_FUNC;
     USHORT          usTCPLength = usLength + MB_TCP_FUNC;
 
     /* The MBAP header is already initialized because the caller calls this
-     * function with the buffer returned by the previous call. Therefore we 
-     * only have to update the length in the header. Note that the length 
-     * header includes the size of the Modbus PDU and the UID Byte. Therefore 
+     * function with the buffer returned by the previous call. Therefore we
+     * only have to update the length in the header. Note that the length
+     * header includes the size of the Modbus PDU and the UID Byte. Therefore
      * the length is usLength plus one.
      */
     pucMBTCPFrame[MB_TCP_LEN] = ( usLength + 1 ) >> 8U;
     pucMBTCPFrame[MB_TCP_LEN + 1] = ( usLength + 1 ) & 0xFF;
-    if( xMBTCPPortSendResponse(TCPPORT_ARG pucMBTCPFrame, usTCPLength ) == FALSE )
+    if( xMBTCPPortSendResponse(&(inst->tcp_port), pucMBTCPFrame, usTCPLength ) == FALSE )
     {
         eStatus = MB_EIO;
     }
@@ -164,28 +164,28 @@ eMBTCPSend(TCP_ARG UCHAR _unused, const UCHAR * pucFrame, USHORT usLength )
 
 #if MB_MASTER > 0
 
-void vMBTCPMasterSetPDUSndLength(  TCP_ARG USHORT SendPDULength )
+void vMBTCPMasterSetPDUSndLength(  MBTCPInstance* inst, USHORT SendPDULength )
 {
 	usSendPDULength = SendPDULength;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBTCPMasterGetPDUSndLength(  TCP_ARG_VOID )
+USHORT usMBTCPMasterGetPDUSndLength(  MBTCPInstance* inst )
 {
 	return usSendPDULength;
 }
 
-void vMBTCPMasterGetPDUSndBuf(TCP_ARG UCHAR ** pucFrame)
+void vMBTCPMasterGetPDUSndBuf(MBTCPInstance* inst, UCHAR ** pucFrame)
 {
 	*pucFrame = inst->tcp_port.aucTCPSndBuf+MB_TCP_FUNC;
 }
 
-void vMBTCPMasterGetPDURcvBuf(TCP_ARG UCHAR ** pucFrame)
+void vMBTCPMasterGetPDURcvBuf(MBTCPInstance* inst, UCHAR ** pucFrame)
 {
 	*pucFrame = inst->tcp_port.aucTCPRcvBuf+MB_TCP_FUNC;
 }
 
-BOOL xMBTCPMasterRequestIsBroadcast(TCP_ARG_VOID)
+BOOL xMBTCPMasterRequestIsBroadcast(MBTCPInstance* inst)
 {
 	return FALSE; //no broadcasts on tcp
 }

@@ -51,17 +51,14 @@
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
 
 /* ----------------------- Static variables ---------------------------------*/
-#if MB_MULTIPORT > 0
-#define ucMBSlaveID inst->ucMBSlaveID
-#define usMBSlaveIDLen inst->usMBSlaveIDLen
-#else
-static UCHAR    ucMBSlaveID[MB_FUNC_OTHER_REP_SLAVEID_BUF];
-static USHORT   usMBSlaveIDLen;
-#endif
+
+#define ucMBSlaveID inst->slave_id
+#define usMBSlaveIDLen inst->slave_id_len
+
 /* ----------------------- Start implementation -----------------------------*/
 
 eMBErrorCode
-eMBSetSlaveID(MB_MULTI_ARG UCHAR ucSlaveID, BOOL xIsRunning,
+eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning,
                UCHAR const *pucAdditional, USHORT usAdditionalLen )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
@@ -89,7 +86,7 @@ eMBSetSlaveID(MB_MULTI_ARG UCHAR ucSlaveID, BOOL xIsRunning,
 }
 
 eMBException
-eMBFuncReportSlaveID(MB_MULTI_ARG UCHAR * pucFrame, USHORT * usLen )
+eMBFuncReportSlaveID(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
 {
     memcpy( &pucFrame[MB_PDU_DATA_OFF], &ucMBSlaveID[0], ( size_t )usMBSlaveIDLen );
     *usLen = ( USHORT )( MB_PDU_DATA_OFF + usMBSlaveIDLen );
