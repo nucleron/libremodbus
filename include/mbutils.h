@@ -1,4 +1,4 @@
-/* 
+/*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
@@ -31,9 +31,9 @@
 #ifndef _MB_UTILS_H
 #define _MB_UTILS_H
 
-#ifdef __cplusplus
+#include "mb_common.h"
 PR_BEGIN_EXTERN_C
-#endif
+
 /*! \defgroup modbus_utils Utilities
  *
  * This module contains some utility functions which can be used by
@@ -101,8 +101,5 @@ UCHAR           xMBUtilGetBits( UCHAR * ucByteBuf, USHORT usBitOffset,
                                 UCHAR ucNBits );
 
 /*! @} */
-
-#ifdef __cplusplus
 PR_END_EXTERN_C
-#endif
 #endif

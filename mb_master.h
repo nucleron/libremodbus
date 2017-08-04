@@ -8,16 +8,11 @@
 #ifndef MODBUS_MB_MASTER_H_
 #define MODBUS_MB_MASTER_H_
 
-#include "mb_types.h"
-
-//void vMBMasterSetErrorType( eMBMasterErrorEventType errorType );
-
-#define PR_BEGIN_EXTERN_C			extern "C" {
-#define	PR_END_EXTERN_C				}
-
-#ifdef __cplusplus
+#include "mb_common.h"
 PR_BEGIN_EXTERN_C
-#endif
+
+#include "mb_types.h"
+//void vMBMasterSetErrorType( eMBMasterErrorEventType errorType );
 
 eMBMasterReqErrCode
 eMBMasterReqReadInputRegister(MBInstance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut );
@@ -63,9 +58,5 @@ eMBMasterFuncReadDiscreteInputs(MBInstance* inst, UCHAR * pucFrame, USHORT * usL
 eMBException
 eMBMasterFuncReadWriteMultipleHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen );
 
-#ifdef __cplusplus
 PR_END_EXTERN_C
-#endif
-
-
 #endif /* MODBUS_MB_MASTER_H_ */

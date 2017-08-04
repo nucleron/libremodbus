@@ -31,9 +31,8 @@
 #ifndef _MB_ASCII_H
 #define _MB_ASCII_H
 
-#ifdef __cplusplus
+#include "mb_common.h"
 PR_BEGIN_EXTERN_C
-#endif
 
 #include "mb_types.h"
 
@@ -111,7 +110,5 @@ BOOL                    xMBASCIIMasterRequestIsBroadcast(MBASCIIInstance* inst  
 eMBMasterErrorEventType eMBASCIIMasterGetErrorType      (MBASCIIInstance* inst                                                                       );
 //eMBMasterReqErrCode     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                        );
 
-#ifdef __cplusplus
 PR_END_EXTERN_C
-#endif
 #endif

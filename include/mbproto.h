@@ -31,9 +31,9 @@
 #ifndef _MB_PROTO_H
 #define _MB_PROTO_H
 
-#ifdef __cplusplus
+#include "mb_common.h"
 PR_BEGIN_EXTERN_C
-#endif
+
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_ADDRESS_BROADCAST    ( 0 )   /*! Modbus broadcast address. */
 #define MB_ADDRESS_MIN          ( 1 )   /*! Smallest possible slave address. */
@@ -81,7 +81,6 @@ typedef struct
     pxMBFunctionHandler pxHandler;
 } xMBFunctionHandler;
 
-#ifdef __cplusplus
+
 PR_END_EXTERN_C
-#endif
 #endif

@@ -31,6 +31,9 @@
 #ifndef _MB_PORT_H
 #define _MB_PORT_H
 
+#include "mb_common.h"
+PR_BEGIN_EXTERN_C
+
 #include "mbconfig.h"
 
 //#if MB_MULTIPORT
@@ -56,11 +59,6 @@ typedef enum
 		MB_PAR_ODD,                 /*!< Odd parity. */
 		MB_PAR_EVEN                 /*!< Even parity. */
 	} eMBParity;
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 //typedef enum
 //{
@@ -184,7 +182,5 @@ INLINE void     vMBPortTimersConvertDelayEnable(MBSerialInstance* inst);
 INLINE void     vMBPortTimersRespondTimeoutEnable(MBSerialInstance* inst);
 #endif
 
-#ifdef __cplusplus
-}
-#endif
+PR_END_EXTERN_C
 #endif

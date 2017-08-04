@@ -31,14 +31,11 @@
 #ifndef _MB_H
 #define _MB_H
 
+#include "mb_common.h"
+PR_BEGIN_EXTERN_C
 
 #include "serial_port.h"
 //#include "tcp_port.h"
-
-#ifdef __cplusplus
-PR_BEGIN_EXTERN_C
-#endif
-
 
 #include "mb_types.h"
 #include <mbframe.h>
@@ -170,8 +167,7 @@ typedef struct
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode    eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress,
-                        UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode    eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
 #if MB_RTU_ENABLED
 eMBErrorCode
 eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
@@ -285,9 +281,7 @@ eMBErrorCode    eMBPoll(MBInstance* inst);
  *   mbconfig.h is to small it returns eMBErrorCode::MB_ENORES. Otherwise
  *   it returns eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode    eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning,
-                              UCHAR const *pucAdditional,
-                              USHORT usAdditionalLen );
+eMBErrorCode    eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning, UCHAR const *pucAdditional, USHORT usAdditionalLen );
 
 /*! \ingroup modbus
  * \brief Registers a callback handler for a given function code.
@@ -357,8 +351,7 @@ eMBErrorCode    eMBRegisterCB( MBInstance* inst, UCHAR ucFunctionCode,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress,
-                              USHORT usNRegs );
+eMBErrorCode    eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs );
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Holding Register</em> value is
@@ -392,8 +385,7 @@ eMBErrorCode    eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress,
-                                USHORT usNRegs, eMBRegisterMode eMode );
+eMBErrorCode    eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode );
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Coil Register</em> value is
@@ -427,8 +419,7 @@ eMBErrorCode    eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress,
-                              USHORT usNCoils, eMBRegisterMode eMode );
+eMBErrorCode    eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode );
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Input Discrete Register</em> value is
@@ -456,10 +447,7 @@ eMBErrorCode    eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress,
-                                 USHORT usNDiscrete );
+eMBErrorCode    eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete );
 
-#ifdef __cplusplus
 PR_END_EXTERN_C
-#endif
 #endif

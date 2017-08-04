@@ -31,9 +31,8 @@
 #ifndef _MB_FRAME_H
 #define _MB_FRAME_H
 
-#ifdef __cplusplus
+#include "mb_common.h"
 PR_BEGIN_EXTERN_C
-#endif
 
 /*!
  * Constants which defines the format of a modbus frame. The example is
@@ -88,7 +87,5 @@ typedef void( *pvPortEventPost) (void*,eMBEventType);
 typedef BOOL ( *pvPortEventGet) (void*, void*, eMBEventType*);
 typedef BOOL (*pbMBMasterRequestIsBroadcast)(void*);
 
-#ifdef __cplusplus
 PR_END_EXTERN_C
-#endif
 #endif
