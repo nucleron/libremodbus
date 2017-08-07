@@ -29,24 +29,25 @@
  */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <string.h>
+/* ----------------------- Modbus includes ----------------------------------*/
+#include <mbconfig.h>
+#include <mb_types.h>
 
-/* ----------------------- Platform includes --------------------------------*/
 #if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
-#include "serial_port.h"
+#include <serial_port.h>
 #endif
 
 #if MB_TCP_ENABLED > 0
-#include "tcp_port.h"
+#   include <tcp_port.h>
 #endif
-/* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mbframe.h"
-#include "mbproto.h"
-#include "mbconfig.h"
 
-#include "mb_multiport.h"
+#include <mbport.h>
+#include <mbframe.h>
+#include <mbproto.h>
+#include <mb.h>
+#include <mbcrc.h>
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_FUNC_READ_ADDR_OFF               ( MB_PDU_DATA_OFF + 0)

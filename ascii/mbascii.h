@@ -31,10 +31,10 @@
 #ifndef _MB_ASCII_H
 #define _MB_ASCII_H
 
-#include "mb_common.h"
+#include <mb_common.h>
 PR_BEGIN_EXTERN_C
 
-#include "mb_types.h"
+#include <mb_types.h>
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_ASCII_DEFAULT_CR           '\r'    /*!< Default CR character for Modbus ASCII. */

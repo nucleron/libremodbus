@@ -31,23 +31,25 @@
 
 
 /* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <string.h>
+/* ----------------------- Modbus includes ----------------------------------*/
+#include <mbconfig.h>
+#include <mb_types.h>
 
-/* ----------------------- Platform includes --------------------------------*/
 #if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
-#include "serial_port.h"
+#include <serial_port.h>
 #endif
 
 #if MB_TCP_ENABLED > 0
-#include "tcp_port.h"
+#   include <tcp_port.h>
 #endif
-/* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mb_master.h"
-#include "mbframe.h"
-#include "mbproto.h"
-#include "mbconfig.h"
+
+#include <mbport.h>
+#include <mbframe.h>
+#include <mbproto.h>
+#include <mb.h>
+#include <mbcrc.h>
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_REQ_READ_ADDR_OFF            ( MB_PDU_DATA_OFF + 0 )
@@ -86,13 +88,13 @@ eMBMasterReqReadDiscreteInputs(MBInstance* inst, UCHAR ucSndAddr, USHORT usDiscr
     else
     {
     	inst->pvMBGetTxFrame(inst-> transport, &ucMBFrame);
-		inst->ucMBMasterDestAddress = ucSndAddr;
+		inst->master_dst_addr = ucSndAddr;
 		ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
 		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]        = usDiscreteAddr >> 8;
 		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]    = usDiscreteAddr;
 		ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF ]    = usNDiscreteIn >> 8;
 		ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = usNDiscreteIn;
-		*(inst->PDUSndLength) = ( MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE );
+		*(inst->pdu_snd_len) = ( MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE );
 		(void)inst->pvPortEventPostCur(inst->port, EV_FRAME_SENT );
 		eErrStatus = eMBMasterWaitRequestFinish( );
     }

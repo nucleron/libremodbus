@@ -29,16 +29,25 @@
  */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
-
-/* ----------------------- Platform includes --------------------------------*/
-#include "serial_port.h"
-//#include "tcp_port.h"
-
+#include <stdlib.h>
+#include <string.h>
 /* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mbproto.h"
+#include <mbconfig.h>
+#include <mb_types.h>
+
+#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
+#include <serial_port.h>
+#endif
+
+#if MB_TCP_ENABLED > 0
+#   include <tcp_port.h>
+#endif
+
+#include <mbport.h>
+#include <mbframe.h>
+#include <mbproto.h>
+#include <mb.h>
+#include <mbcrc.h>
 
 /* ----------------------- Defines ------------------------------------------*/
 #define BITS_UCHAR      8U

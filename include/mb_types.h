@@ -1,6 +1,8 @@
 #ifndef MB_TYPES_H
 #define MB_TYPES_H
 
+#include <mb_common.h>
+PR_BEGIN_EXTERN_C
 /* ----------------------- Type definitions ---------------------------------*/
 
 /*! \ingroup modbus
@@ -88,4 +90,5 @@ typedef enum
 	MB_TMODE_CONVERT_DELAY          /*!< Master sent broadcast ,then delay sometime.*/
 }eMBMasterTimerMode;
 
+PR_END_EXTERN_C
 #endif // MB_TYPES_H

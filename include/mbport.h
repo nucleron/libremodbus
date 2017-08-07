@@ -31,47 +31,52 @@
 #ifndef _MB_PORT_H
 #define _MB_PORT_H
 
-#include "mb_common.h"
+#include <mb_common.h>
 PR_BEGIN_EXTERN_C
 
-#include "mbconfig.h"
-
-//#if MB_MULTIPORT
-// #define void* caller, void* caller,
-//#else
-// #define void* caller,
-//#endif
+#include <mbconfig.h>
 
 #if MB_TCP_ENABLED
-	#include "tcp_multi.h"
-#else
-//#error "watafuck"
+typedef struct _mp_port_tcp mp_port_tcp; //!< TCP port, child of #mb_port_base
+#   include <tcp_port.h>
 #endif
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
-#include "serial_multi.h"
-
+typedef struct _mp_port_ser mp_port_ser; //!< Serial port, child of #mb_port_base
+#   include <serial_port.h>
 #endif
 
-typedef enum
-	{
-		MB_PAR_NONE,                /*!< No parity. */
-		MB_PAR_ODD,                 /*!< Odd parity. */
-		MB_PAR_EVEN                 /*!< Even parity. */
-	} eMBParity;
+typedef BOOL (*mb_fp_bool)(void *arg);
 
-//typedef enum
-//{
-//    EV_MASTER_READY                    = 1<<0,  /*!< Startup finished. */
-//    EV_MASTER_FRAME_RECEIVED           = 1<<1,  /*!< Frame received. */
-//    EV_MASTER_EXECUTE                  = 1<<2,  /*!< Execute function. */
-//    EV_MASTER_FRAME_SENT               = 1<<3,  /*!< Frame sent. */
- //   EV_MASTER_ERROR_PROCESS            = 1<<4,  /*!< Frame error process. */
-//    EV_MASTER_PROCESS_SUCESS           = 1<<5,  /*!< Request process success. */
-//    EV_MASTER_ERROR_RESPOND_TIMEOUT    = 1<<6,  /*!< Request respond timeout. */
-//    EV_MASTER_ERROR_RECEIVE_DATA       = 1<<7,  /*!< Request receive data error. */
-//    EV_MASTER_ERROR_EXECUTE_FUNCTION   = 1<<8,  /*!< Request execute function error. */
-//} eMBMasterEventType;
+typedef struct
+{
+    mb_fp_bool byte_rcvd;   //!<pxMBFrameCBByteReceived;
+    mb_fp_bool tx_empty;    //!<pxMBFrameCBTransmitterEmpty;
+    mb_fp_bool tmr_expired; //!<pxMBPortCBTimerExpired;
+}
+mb_port_cb;                 //!<port callback table
+
+typedef struct _mb_port_base
+{
+    mb_port_cb   cb; //!<Port callbacks.
+    void       *arg; //!<CB arg pointer.
+}mb_port_base; //!< Port base type
+
+#include <mbframe.h>
+typedef struct
+{
+    pvMBFrameClose  close;    //!<pvMBFrameCloseCur;
+    pvPortEventPost evt_post; //!<pvPortEventPostCur;
+    pvPortEventGet  evt_get;  //!<pvPortEventGetCur;
+}
+mb_port_mtab; //!< Port methods tab;
+
+typedef enum
+{
+    MB_PAR_NONE,                /*!< No parity. */
+    MB_PAR_ODD,                 /*!< Odd parity. */
+    MB_PAR_EVEN                 /*!< Even parity. */
+} eMBParity;
 
 typedef enum
 {
@@ -89,58 +94,37 @@ typedef enum
  * link. Please note that this values are actually passed to the porting
  * layer and therefore not all parity modes might be available.
 */
-
 /* ----------------------- Serial Supporting functions -----------------------------*/
-BOOL            xMBPortEventInit( MBSerialInstance* inst);
-
-BOOL            xMBPortEventPost( MBSerialInstance* inst, eMBEventType eEvent);
-
-BOOL            xMBPortEventGet(  MBSerialInstance* inst, void* caller,/*@out@ */ eMBEventType * eEvent); //FIXME
-
+BOOL xMBPortEventInit(MBSerialInstance* inst                                     );
+BOOL xMBPortEventPost(MBSerialInstance* inst, eMBEventType eEvent                );
+BOOL xMBPortEventGet (MBSerialInstance* inst, void* caller, eMBEventType * eEvent); //FIXME
 /* ----------------------- TCP Supporting functions -----------------------------*/
 #if MB_TCP_ENABLED
-BOOL            xMBTCPPortEventInit(MULTIPORT_TCP_ARG_VOID);
-
-BOOL            xMBTCPPortEventPost(MULTIPORT_TCP_ARG eMBEventType eEvent);
-
-BOOL            xMBTCPPortEventGet(MULTIPORT_TCP_ARG void* caller,/*@out@ */ eMBEventType * eEvent); //FIXME
+BOOL xMBTCPPortEventInit(MULTIPORT_TCP_ARG_void                               );
+BOOL xMBTCPPortEventPost(MULTIPORT_TCP_ARG eMBEventType eEvent                );
+BOOL xMBTCPPortEventGet (MULTIPORT_TCP_ARG void* caller, eMBEventType * eEvent); //FIXME
 #endif
 /* ----------------------- Serial port functions ----------------------------*/
-
-BOOL            xMBPortSerialInit(MBSerialInstance* inst,  UCHAR ucPort, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity);
-
-void            vMBPortClose(MBSerialInstance* inst);
-
-void            xMBPortSerialClose(MBSerialInstance* inst);
-
-void            vMBPortSerialEnable(MBSerialInstance* inst,  BOOL xRxEnable, BOOL xTxEnable);
-
-BOOL            xMBPortSerialGetByte(MBSerialInstance* inst,  CHAR * pucByte);
-
-BOOL            xMBPortSerialPutByte(MBSerialInstance* inst, CHAR ucByte);
-
+BOOL xMBPortSerialInit   (MBSerialInstance* inst, UCHAR ucPort, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity);
+void vMBPortClose        (MBSerialInstance* inst                                                                     );
+void xMBPortSerialClose  (MBSerialInstance* inst                                                                     );
+void vMBPortSerialEnable (MBSerialInstance* inst,  BOOL xRxEnable, BOOL xTxEnable                                    );
+BOOL xMBPortSerialGetByte(MBSerialInstance* inst,  CHAR * pucByte                                                    );
+BOOL xMBPortSerialPutByte(MBSerialInstance* inst, CHAR ucByte                                                        );
 /* ----------------------- Timers functions ---------------------------------*/
-BOOL            xMBPortTimersInit(MBSerialInstance* inst, USHORT usTimeOut50us);
-
-void            xMBPortTimersClose(MBSerialInstance* inst);
-
-void            vMBPortTimersEnable(MBSerialInstance* inst);
-
-void            vMBPortTimersDisable(MBSerialInstance* inst);
-
-void            vMBPortTimersDelay(MBSerialInstance* inst, USHORT usTimeOutMS);
+BOOL xMBPortTimersInit   (MBSerialInstance* inst, USHORT usTimeOut50us);
+void xMBPortTimersClose  (MBSerialInstance* inst                      );
+void vMBPortTimersEnable (MBSerialInstance* inst                      );
+void vMBPortTimersDisable(MBSerialInstance* inst                      );
+void vMBPortTimersDelay  (MBSerialInstance* inst, USHORT usTimeOutMS  );
 
 /*-------------------------TCP Timers functions ---------------------------------*/
 #if MB_TCP_ENABLED
-BOOL            xMBTCPPortTimersInit(MULTIPORT_TCP_ARG USHORT usTimeOut50us);
-
-void            xMBTCPPortTimersClose(MULTIPORT_TCP_ARG_VOID);
-
-void            vMBTCPPortTimersEnable(MULTIPORT_TCP_ARG_VOID);
-
-void            vMBTCPPortTimersDisable(MULTIPORT_TCP_ARG_VOID);
-
-void            vMBTCPPortTimersDelay(MULTIPORT_TCP_ARG USHORT usTimeOutMS);
+BOOL xMBTCPPortTimersInit   (MULTIPORT_TCP_ARG USHORT usTimeOut50us);
+void xMBTCPPortTimersClose  (MULTIPORT_TCP_ARG_VOID                );
+void vMBTCPPortTimersEnable (MULTIPORT_TCP_ARG_VOID                );
+void vMBTCPPortTimersDisable(MULTIPORT_TCP_ARG_VOID                );
+void vMBTCPPortTimersDelay  (MULTIPORT_TCP_ARG USHORT usTimeOutMS  );
 #endif
 /* ----------------------- Callback for the protocol stack ------------------*/
 
@@ -156,30 +140,20 @@ void            vMBTCPPortTimersDelay(MULTIPORT_TCP_ARG USHORT usTimeOutMS);
  *   a new byte was received. The port implementation should wake up the
  *   tasks which are currently blocked on the eventqueue.
  */
-//extern          BOOL( *pxMBFrameCBByteReceived ) ( void* transport );
-
-//extern          BOOL( *pxMBFrameCBTransmitterEmpty ) ( void* transport );
-
-//extern          BOOL( *pxMBPortCBTimerExpired ) ( void* transport );
-
+//extern BOOL(*pxMBFrameCBByteReceived)    (void* transport);
+//extern BOOL(*pxMBFrameCBTransmitterEmpty)(void* transport);
+//extern BOOL(*pxMBPortCBTimerExpired)     (void* transport);
 /* ----------------------- TCP port functions -------------------------------*/
 #if MB_TCP_ENABLED > 0
-BOOL            xMBTCPPortInit(MULTIPORT_TCP_ARG USHORT usTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster);
-
-void            vMBTCPPortClose(MULTIPORT_TCP_ARG_VOID);
-
-void            vMBTCPPortDisable(MULTIPORT_TCP_ARG_VOID);
-
-BOOL            xMBTCPPortGetRequest(MULTIPORT_TCP_ARG UCHAR **ppucMBTCPFrame, USHORT * usTCPLength);
-
-BOOL            xMBTCPPortSendResponse(MULTIPORT_TCP_ARG const UCHAR *pucMBTCPFrame, USHORT usTCPLength);
+BOOL xMBTCPPortInit        (MULTIPORT_TCP_ARG USHORT usTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster);
+void vMBTCPPortClose       (MULTIPORT_TCP_ARG_VOID                                                );
+void vMBTCPPortDisable     (MULTIPORT_TCP_ARG_VOID                                                );
+BOOL xMBTCPPortGetRequest  (MULTIPORT_TCP_ARG UCHAR **ppucMBTCPFrame, USHORT * usTCPLength        );
+BOOL xMBTCPPortSendResponse(MULTIPORT_TCP_ARG const UCHAR *pucMBTCPFrame, USHORT usTCPLength      );
 #endif
-
-
 #if MB_MASTER >0
-INLINE void     vMBPortTimersConvertDelayEnable(MBSerialInstance* inst);
-
-INLINE void     vMBPortTimersRespondTimeoutEnable(MBSerialInstance* inst);
+INLINE void vMBPortTimersConvertDelayEnable  (MBSerialInstance* inst);
+INLINE void vMBPortTimersRespondTimeoutEnable(MBSerialInstance* inst);
 #endif
 
 PR_END_EXTERN_C

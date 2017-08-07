@@ -29,19 +29,20 @@
  */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
-
-/* ----------------------- Platform includes --------------------------------*/
-#include "serial_port.h"
-//#include "tcp_port.h"
-
+#include <stdlib.h>
+#include <string.h>
 /* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mbconfig.h"
-#include "mbframe.h"
-#include "mbproto.h"
-#include "mbfunc.h"
+#include <mbconfig.h>
+#include <mb_types.h>
+
+#include <serial_port.h>
+
+#include <mbport.h>
+#include <mbframe.h>
+#include <mbproto.h>
+#include <mbfunc.h>
+#include <mb.h>
+#include <mbcrc.h>
 
 #include "mb_multiport.h"
 #if MB_MASTER > 0
@@ -193,7 +194,7 @@ eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress,
 eMBErrorCode
 eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity )
 {
-    transport->rtuMaster = TRUE;
+    transport->is_master = TRUE;
     return eMBInit(inst,(void*)transport, MB_RTU, 0, ucPort,ulBaudRate, eParity );
 }
 #endif
@@ -240,9 +241,9 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         peMBFrameReceiveCur = (peMBFrameReceive)eMBRTUReceive;
         pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? (pvMBFrameClose)vMBPortClose : NULL;
 
-        inst->pxMBFrameCBByteReceived = (mbBoolFunc)xMBRTUReceiveFSM;
-        inst->pxMBFrameCBTransmitterEmpty = (mbBoolFunc)xMBRTUTransmitFSM;
-        inst->pxMBPortCBTimerExpired = (mbBoolFunc)xMBRTUTimerT35Expired;
+        inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBRTUReceiveFSM;
+        inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBRTUTransmitFSM;
+        inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBRTUTimerT35Expired;
 
         inst->port = &(((MBRTUInstance*)transport)->serial_port);
         PDUSndLength = &(((MBRTUInstance*)transport)->snd_pdu_len);
@@ -262,9 +263,9 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         peMBFrameSendCur = (peMBFrameSend)eMBASCIISend;
         peMBFrameReceiveCur = (peMBFrameReceive)eMBASCIIReceive;
         pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? (pvMBFrameClose)vMBPortClose : NULL;
-        inst->pxMBFrameCBByteReceived = (mbBoolFunc)xMBASCIIReceiveFSM;
-        inst->pxMBFrameCBTransmitterEmpty = (mbBoolFunc)xMBASCIITransmitFSM;
-        inst->pxMBPortCBTimerExpired = (mbBoolFunc)xMBASCIITimerT1SExpired;
+        inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBASCIIReceiveFSM;
+        inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBASCIITransmitFSM;
+        inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBASCIITimerT1SExpired;
 
         inst->port = &(((MBASCIIInstance*)transport)->serial_port);
         PDUSndLength = &(((MBASCIIInstance*)transport)->snd_pdu_len);
@@ -283,21 +284,23 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
 
     pvPortEventGetCur = (pvPortEventGet)xMBPortEventGet;    //for both ASCII & RTU
     pvPortEventPostCur = (pvPortEventPost)xMBPortEventPost;
-    pvMBGetTxFrame(inst->transport,(void*)&(txFrame));
+    pvMBGetTxFrame(inst->transport, (void*)&(txFrame));      //Можно было прописать сразу.
 
 #if MB_MASTER > 0
     if(isMaster == TRUE)
     {
 
-        inst->xMBRunInMasterMode = TRUE;
-        for(i =0; i<MB_FUNC_HANDLERS_MAX; i++)
-            inst->xFuncHandlers[i]=xMasterFuncHandlers[i];
+        xMBRunInMasterMode = TRUE;
+        xFuncHandlers = xMasterFuncHandlers;
+        //for(i =0; i<MB_FUNC_HANDLERS_MAX; i++)
+        //    inst->xFuncHandlers[i]=xMasterFuncHandlers[i];
     }
     else
 #endif
     {
-        for(i =0; i<MB_FUNC_HANDLERS_MAX; i++)
-            xFuncHandlers[i]=defaultFuncHandlers[i];
+        xFuncHandlers = defaultFuncHandlers;
+        //for(i =0; i<MB_FUNC_HANDLERS_MAX; i++)
+        //    xFuncHandlers[i]=defaultFuncHandlers[i];
     }
 
     /* check preconditions */
@@ -372,19 +375,19 @@ eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADD
         inst->pvMBGetTxFrame = vMBTCPMasterGetPDUSndBuf;
         inst->pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? vMBTCPPortClose : NULL;
         inst->ucMBAddress = MB_TCP_PSEUDO_ADDRESS;
-        inst->eMBCurrentMode = MB_TCP;
+        inst->cur_mode = MB_TCP;
         inst->eMBCurrentState = STATE_DISABLED;
-        inst->PDUSndLength = &(((MBTCPInstance*)transport)->usSendPDULength);
+        inst->pdu_snd_len = &(((MBTCPInstance*)transport)->usSendPDULength);
         inst->port = (void*) &(((MBTCPInstance*)transport)->tcp_port);
         inst->pvMBGetRxFrame(inst->transport,&inst->rxFrame);
-        inst->pvMBGetTxFrame(inst->transport,&inst->txFrame);
+        inst->pvMBGetTxFrame(inst->transport,&inst->txFrame);//Зачем 2 раза???
 
         inst->pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBTCPMasterRequestIsBroadcast;
 
         inst->pvPortEventGetCur = (pvPortEventGet)xMBTCPPortEventGet;
         inst->pvPortEventPostCur = (pvPortEventPost)xMBTCPPortEventPost;
 
-        inst->pvMBGetTxFrame(inst->transport,&(inst->txFrame));
+        inst->pvMBGetTxFrame(inst->transport,&(inst->txFrame));//Зачем 2 раза???
     }
     return eStatus;
 }

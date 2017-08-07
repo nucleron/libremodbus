@@ -31,7 +31,7 @@
 #ifndef _MB_FRAME_H
 #define _MB_FRAME_H
 
-#include "mb_common.h"
+#include <mb_common.h>
 PR_BEGIN_EXTERN_C
 
 /*!
@@ -66,26 +66,19 @@ PR_BEGIN_EXTERN_C
 #define MB_PDU_DATA_OFF     1   /*!< Offset for response data in PDU. */
 
 /* ----------------------- Prototypes  0-------------------------------------*/
-typedef void    ( *pvMBFrameStart ) (void* transport);
+typedef void    (*pvMBFrameStart)(void* transport);
+typedef void    (*pvMBFrameStop) (void* transport);
 
-typedef void    ( *pvMBFrameStop ) (void* transport);
+typedef eMBErrorCode (*peMBFrameReceive) (void* transport, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
+typedef eMBErrorCode (*peMBFrameSend)    (void* transport, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength);
+typedef void         (*pvGetRxFrame)     (void* transport, UCHAR ** pucFrame);
+typedef void         ( *pvGetTxFrame)    (void* transport, UCHAR ** pucFrame);
 
-typedef eMBErrorCode( *peMBFrameReceive ) (void* transport, UCHAR * pucRcvAddress,
-                                            UCHAR ** pucFrame,
-                                            USHORT * pusLength );
+//Port
+typedef void( *pvMBFrameClose ) (mb_port_base * );
+typedef void( *pvPortEventPost) (mb_port_base *, eMBEventType);
+typedef BOOL ( *pvPortEventGet) (mb_port_base *, void*, eMBEventType*);
 
-typedef eMBErrorCode( *peMBFrameSend ) (void* transport, UCHAR slaveAddress,
-                                         const UCHAR * pucFrame,
-                                         USHORT usLength );
-
-typedef void( *pvMBFrameClose ) (void* transport);
-
-typedef void( *pvGetRxFrame) (void* transport, UCHAR ** pucFrame);
-typedef void( *pvGetTxFrame) (void* transport, UCHAR ** pucFrame);
-
-typedef void( *pvPortEventPost) (void*,eMBEventType);
-typedef BOOL ( *pvPortEventGet) (void*, void*, eMBEventType*);
 typedef BOOL (*pbMBMasterRequestIsBroadcast)(void*);
-
 PR_END_EXTERN_C
 #endif

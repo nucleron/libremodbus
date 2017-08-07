@@ -29,19 +29,19 @@
  */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
-
-/* ----------------------- Platform includes --------------------------------*/
-#include "serial_port.h"
-//#include "tcp_port.h"
-
+#include <stdlib.h>
+#include <string.h>
 /* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mbframe.h"
-#include "mbproto.h"
-#include "mbconfig.h"
+#include <mbconfig.h>
+#include <mb_types.h>
 
+#include <serial_port.h>
+
+#include <mbport.h>
+#include <mbframe.h>
+#include <mbproto.h>
+#include <mb.h>
+#include <mbcrc.h>
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_FUNC_READ_ADDR_OFF           ( MB_PDU_DATA_OFF )
 #define MB_PDU_FUNC_READ_COILCNT_OFF        ( MB_PDU_DATA_OFF + 2 )

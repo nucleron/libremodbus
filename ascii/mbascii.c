@@ -29,17 +29,19 @@
  */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <string.h>
 /* ----------------------- Modbus includes ----------------------------------*/
-#include "mbconfig.h"
-#include "mb.h"
-#include "mbascii.h"
-#include "mbframe.h"
-#include "mbcrc.h"
-#include "mbport.h"
-/* ----------------------- Platform includes --------------------------------*/
-#include "serial_port.h"
+#include <mbconfig.h>
+#include <mb_types.h>
+
+#include <serial_port.h>
+
+#include <mbport.h>
+#include <mbframe.h>
+#include <mbascii.h>
+#include <mb.h>
+#include <mbcrc.h>
 
 #if MB_ASCII_ENABLED > 0
 

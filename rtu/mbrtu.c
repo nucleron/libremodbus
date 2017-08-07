@@ -29,21 +29,21 @@
  */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
-
-/* ----------------------- Platform includes --------------------------------*/
-#include "serial_port.h"
-
+#include <stdlib.h>
+#include <string.h>
 /* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mbrtu.h"
-#include "mbframe.h"
+#include <mbconfig.h>
+#include <mb_types.h>
 
-#include "mbcrc.h"
-#include "mbport.h"
+#include <serial_port.h>
 
-#include "rtu_multiport.h"
+#include <mbport.h>
+#include <mbframe.h>
+#include <mbproto.h>
+#include <mbfunc.h>
+#include <mb.h>
+#include <mbrtu.h>
+#include <mbcrc.h>
 
 #if MB_MASTER > 0
 #include "mb_master.h"
@@ -394,7 +394,7 @@ xMBRTUTimerT35Expired( MBRTUInstance* inst )
         case MB_RTU_TX_STATE_XFWR:
             if ( xFrameIsBroadcast == FALSE )
             {
-                ((MBInstance*)(inst->parent))->eMBMasterCurErrorType = ERR_EV_ERROR_RESPOND_TIMEOUT;
+                ((MBInstance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
                 //vMBSetErrorType(ERR_EV_ERROR_RESPOND_TIMEOUT); //FIXME pass reference to instance
                 xNeedPoll = xMBPortEventPost(&(inst->serial_port), EV_ERROR_PROCESS);
             }

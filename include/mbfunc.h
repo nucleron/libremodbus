@@ -31,7 +31,7 @@
 #ifndef _MB_FUNC_H
 #define _MB_FUNC_H
 
-#include "mb_common.h"
+#include <mb_common.h>
 PR_BEGIN_EXTERN_C
 
 #if MB_FUNC_OTHER_REP_SLAVEID_BUF > 0

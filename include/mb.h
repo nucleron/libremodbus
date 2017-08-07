@@ -31,21 +31,39 @@
 #ifndef _MB_H
 #define _MB_H
 
-#include "mb_common.h"
+#include <mb_common.h>
 PR_BEGIN_EXTERN_C
+/* ----------------------- System includes ----------------------------------*/
+#include <stdlib.h>
+#include <string.h>
+/* ----------------------- Modbus includes ----------------------------------*/
+#include <mbconfig.h>
+#include <mb_types.h>
 
-#include "serial_port.h"
-//#include "tcp_port.h"
+#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
+#include <serial_port.h>
+#endif
 
-#include "mb_types.h"
+#if MB_TCP_ENABLED > 0
+#   include <tcp_port.h>
+#endif
+
+#include <mbport.h>
 #include <mbframe.h>
 #include <mbproto.h>
-#include <mbconfig.h>
+//#include <mbfunc.h>
+#include <mbutils.h>
 
 #include "mbport.h"
-
-#include <mbrtu.h>
-#include <mbascii.h>
+#if MB_RTU_ENABLED == 1
+#include "mbrtu.h"
+#endif
+#if MB_ASCII_ENABLED == 1
+#include "mbascii.h"
+#endif
+#if MB_TCP_ENABLED == 1
+#include "mbtcp.h"
+#endif
 
 typedef enum
 {
@@ -53,8 +71,6 @@ typedef enum
     STATE_DISABLED,
     STATE_NOT_INITIALIZED
 } eMBState ;
-
-typedef BOOL( *mbBoolFunc) ( void* transport );
 
 typedef struct
 {
@@ -72,29 +88,30 @@ typedef struct
 
     volatile USHORT* pdu_snd_len;
 
-    //Transport callback methods
-    mbBoolFunc pxMBFrameCBByteReceived;
-    mbBoolFunc pxMBFrameCBTransmitterEmpty;
-    mbBoolFunc pxMBPortCBTimerExpired;
+    //Port callback methods
+    mb_fp_bool pxMBFrameCBByteReceived;
+    mb_fp_bool pxMBFrameCBTransmitterEmpty;
+    mb_fp_bool pxMBPortCBTimerExpired;
+
     //Transport methods
     peMBFrameSend peMBFrameSendCur;
     pvMBFrameStart pvMBFrameStartCur;
     pvMBFrameStop pvMBFrameStopCur;
     peMBFrameReceive peMBFrameReceiveCur;
-    pvMBFrameClose pvMBFrameCloseCur;
+    //Transport methods!!!
+    pvGetRxFrame pvMBGetRxFrame;
+    pvGetRxFrame pvMBGetTxFrame;
+    //Transport methd
+    pbMBMasterRequestIsBroadcast pbMBMasterRequestIsBroadcastCur;
+
     //Port methods
+    pvMBFrameClose pvMBFrameCloseCur;
     pvPortEventPost pvPortEventPostCur;
     pvPortEventGet pvPortEventGetCur;
 
-    //mb method
-    pbMBMasterRequestIsBroadcast pbMBMasterRequestIsBroadcastCur;
-
-    //mb tcp master *STATIC* methods!!!
-    pvGetRxFrame pvMBGetRxFrame;
-    pvGetRxFrame pvMBGetTxFrame;
 
     //Place to const
-    xMBFunctionHandler xFuncHandlers[MB_FUNC_HANDLERS_MAX];
+    xMBFunctionHandler * xFuncHandlers;//[MB_FUNC_HANDLERS_MAX];
 
     //for slave id
     UCHAR    slave_id[MB_FUNC_OTHER_REP_SLAVEID_BUF];
@@ -106,6 +123,10 @@ typedef struct
     eMBMasterErrorEventType  master_err_cur;
 
 } MBInstance;
+
+#if MB_MASTER > 0
+#include "mb_master.h"
+#endif
 
 /*! \defgroup modbus Modbus
  * \code #include "mb.h" \endcode
@@ -167,7 +188,7 @@ typedef struct
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode    eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode eMBInit(MBInstance* inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
 #if MB_RTU_ENABLED
 eMBErrorCode
 eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
@@ -185,8 +206,7 @@ eMBErrorCode eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCP
 
 #if MB_RTU_ENABLED > 0
 
-eMBErrorCode
-eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
 #endif
 #if MB_ASCII_ENABLED > 0
 eMBErrorCode eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
@@ -224,7 +244,7 @@ eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT
  *   If the protocol stack is not in the disabled state it returns
  *   eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode    eMBClose(MBInstance* inst);
+eMBErrorCode eMBClose(MBInstance* inst);
 
 /*! \ingroup modbus
  * \brief Enable the Modbus protocol stack.
@@ -236,7 +256,7 @@ eMBErrorCode    eMBClose(MBInstance* inst);
  *   eMBErrorCode::MB_ENOERR. If it was not in the disabled state it
  *   return eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode    eMBEnable(MBInstance* inst);
+eMBErrorCode eMBEnable(MBInstance* inst);
 
 /*! \ingroup modbus
  * \brief Disable the Modbus protocol stack.
@@ -247,7 +267,7 @@ eMBErrorCode    eMBEnable(MBInstance* inst);
  *  eMBErrorCode::MB_ENOERR. If it was not in the enabled state it returns
  *  eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode    eMBDisable(MBInstance* inst);
+eMBErrorCode eMBDisable(MBInstance* inst);
 
 /*! \ingroup modbus
  * \brief The main pooling loop of the Modbus protocol stack.
@@ -261,7 +281,7 @@ eMBErrorCode    eMBDisable(MBInstance* inst);
  *   returns eMBErrorCode::MB_EILLSTATE. Otherwise it returns
  *   eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode    eMBPoll(MBInstance* inst);
+eMBErrorCode eMBPoll(MBInstance* inst);
 
 /*! \ingroup modbus
  * \brief Configure the slave id of the device.
@@ -281,7 +301,7 @@ eMBErrorCode    eMBPoll(MBInstance* inst);
  *   mbconfig.h is to small it returns eMBErrorCode::MB_ENORES. Otherwise
  *   it returns eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode    eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning, UCHAR const *pucAdditional, USHORT usAdditionalLen );
+eMBErrorCode eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning, UCHAR const *pucAdditional, USHORT usAdditionalLen );
 
 /*! \ingroup modbus
  * \brief Registers a callback handler for a given function code.
@@ -304,8 +324,7 @@ eMBErrorCode    eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning
  *   valid it returns eMBErrorCode::MB_EINVAL.
  */
  ///!!! ВЫПИЛИТЬ ЭТОТ КУСОК ГОВНА!!!!!
-eMBErrorCode    eMBRegisterCB( MBInstance* inst, UCHAR ucFunctionCode,
-                               pxMBFunctionHandler pxHandler );
+eMBErrorCode eMBRegisterCB( MBInstance* inst, UCHAR ucFunctionCode, pxMBFunctionHandler pxHandler );
 
 /* ----------------------- Callback -----------------------------------------*/
 
@@ -351,7 +370,7 @@ eMBErrorCode    eMBRegisterCB( MBInstance* inst, UCHAR ucFunctionCode,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs );
+eMBErrorCode eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Holding Register</em> value is
@@ -385,7 +404,7 @@ eMBErrorCode    eMBRegInputCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usN
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode );
+eMBErrorCode eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Coil Register</em> value is
@@ -419,7 +438,7 @@ eMBErrorCode    eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT u
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode );
+eMBErrorCode eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Input Discrete Register</em> value is
@@ -447,7 +466,7 @@ eMBErrorCode    eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usN
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete );
+eMBErrorCode eMBRegDiscreteCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete);
 
 PR_END_EXTERN_C
 #endif

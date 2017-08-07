@@ -31,13 +31,16 @@
 #ifndef _MB_PROTO_H
 #define _MB_PROTO_H
 
-#include "mb_common.h"
+#include <mb_common.h>
 PR_BEGIN_EXTERN_C
 
+#include <mbconfig.h>
+
 /* ----------------------- Defines ------------------------------------------*/
-#define MB_ADDRESS_BROADCAST    ( 0 )   /*! Modbus broadcast address. */
+#define MB_ADDRESS_BROADCAST    ( 0 )   /*! Modbus broadcast address.        */
 #define MB_ADDRESS_MIN          ( 1 )   /*! Smallest possible slave address. */
-#define MB_ADDRESS_MAX          ( 247 ) /*! Biggest possible slave address. */
+#define MB_ADDRESS_MAX          ( 247 ) /*! Biggest possible slave address.  */
+/* ------------------- Function codes ---------------------------------------*/
 #define MB_FUNC_NONE                          (  0 )
 #define MB_FUNC_READ_COILS                    (  1 )
 #define MB_FUNC_READ_DISCRETE_INPUTS          (  2 )
@@ -70,9 +73,9 @@ PR_BEGIN_EXTERN_C
 } eMBException;
 
 #if MB_MULTIPORT > 0
-typedef         eMBException( *pxMBFunctionHandler ) (void*, UCHAR * pucFrame, USHORT * pusLength );
+typedef eMBException( *pxMBFunctionHandler ) (void*, UCHAR * pucFrame, USHORT * pusLength );
 #else
-typedef         eMBException( *pxMBFunctionHandler ) (UCHAR * pucFrame, USHORT * pusLength );
+typedef eMBException( *pxMBFunctionHandler ) (UCHAR * pucFrame, USHORT * pusLength );
 #endif
 
 typedef struct
@@ -80,7 +83,6 @@ typedef struct
     UCHAR           ucFunctionCode;
     pxMBFunctionHandler pxHandler;
 } xMBFunctionHandler;
-
 
 PR_END_EXTERN_C
 #endif

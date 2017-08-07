@@ -29,24 +29,23 @@
  */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
-
+#include <stdlib.h>
+#include <string.h>
 /* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mb_master.h"
-#include "mbframe.h"
-#include "mbproto.h"
-#include "mbconfig.h"
+#include <mbconfig.h>
+#include <mb_types.h>
 
-/* ----------------------- Platform includes --------------------------------*/
-#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
-#include "serial_port.h"
-#endif
+#include <serial_port.h>
 
 #if MB_TCP_ENABLED > 0
-#include "tcp_port.h"
+#   include "tcp_port.h"
 #endif
+
+#include <mbport.h>
+#include <mbframe.h>
+#include <mbproto.h>
+#include <mb.h>
+#include <mbcrc.h>
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_REQ_READ_ADDR_OFF            ( MB_PDU_DATA_OFF + 0 )
@@ -101,13 +100,13 @@ eMBMasterReqReadCoils(MBInstance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHO
     else
     {
 		inst->pvMBGetTxFrame(inst->transport, &ucMBFrame);
-		inst->ucMBMasterDestAddress = ucSndAddr;
+		inst->master_dst_addr = ucSndAddr;
 		ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_COILS;
 		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]        = usCoilAddr >> 8;
 		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]    = usCoilAddr;
 		ucMBFrame[MB_PDU_REQ_READ_COILCNT_OFF ]    = usNCoils >> 8;
 		ucMBFrame[MB_PDU_REQ_READ_COILCNT_OFF + 1] = usNCoils;
-		*(inst->PDUSndLength) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE );
+		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE );
 		( void ) inst->pvPortEventPostCur(inst->port, EV_FRAME_SENT );
 		eErrStatus = eMBMasterWaitRequestFinish( );
 
@@ -208,13 +207,13 @@ eMBMasterReqWriteCoil(MBInstance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHO
     else
     {
 		inst->pvMBGetTxFrame(inst->transport, &ucMBFrame);
-		inst->ucMBMasterDestAddress = ucSndAddr;
+		inst->master_dst_addr = ucSndAddr;
 		ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_WRITE_SINGLE_COIL;
 		ucMBFrame[MB_PDU_REQ_WRITE_ADDR_OFF]      = usCoilAddr >> 8;
 		ucMBFrame[MB_PDU_REQ_WRITE_ADDR_OFF + 1]  = usCoilAddr;
 		ucMBFrame[MB_PDU_REQ_WRITE_VALUE_OFF ]    = usCoilData >> 8;
 		ucMBFrame[MB_PDU_REQ_WRITE_VALUE_OFF + 1] = usCoilData;
-		*(inst->PDUSndLength) = ( MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_SIZE );
+		*(inst->pdu_snd_len) = ( MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_SIZE );
 		( void ) inst->pvPortEventPostCur(inst->port, EV_FRAME_SENT );
 		eErrStatus = eMBMasterWaitRequestFinish( );
     }
@@ -304,7 +303,7 @@ eMBMasterReqWriteMultipleCoils(MBInstance* inst, UCHAR ucSndAddr,
     else
     {
 		inst->pvMBGetTxFrame(inst->transport, &ucMBFrame);
-		inst->ucMBMasterDestAddress = ucSndAddr;
+		inst->master_dst_addr = ucSndAddr;
 		ucMBFrame[MB_PDU_FUNC_OFF]                      = MB_FUNC_WRITE_MULTIPLE_COILS;
 		ucMBFrame[MB_PDU_REQ_WRITE_MUL_ADDR_OFF]        = usCoilAddr >> 8;
 		ucMBFrame[MB_PDU_REQ_WRITE_MUL_ADDR_OFF + 1]    = usCoilAddr;
@@ -324,7 +323,7 @@ eMBMasterReqWriteMultipleCoils(MBInstance* inst, UCHAR ucSndAddr,
 		{
 			*ucMBFrame++ = pucDataBuffer[usRegIndex++];
 		}
-		*(inst->PDUSndLength) = ( MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_MUL_SIZE_MIN + ucByteCount );
+		*(inst->pdu_snd_len) = ( MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_MUL_SIZE_MIN + ucByteCount );
 		( void ) inst->pvPortEventPostCur(inst->port, EV_FRAME_SENT );
 		eErrStatus = eMBMasterWaitRequestFinish( );
     }
