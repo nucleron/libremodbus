@@ -28,27 +28,7 @@
  * File: $Id: mbfuncholding_m.c,v 1.60 2013/09/02 14:13:40 Armink Add Master Functions  Exp $
  */
 
-/* ----------------------- System includes ----------------------------------*/
-#include <stdlib.h>
-#include <string.h>
-/* ----------------------- Modbus includes ----------------------------------*/
-#include <mbconfig.h>
-#include <mb_types.h>
-
-#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
-#include <serial_port.h>
-#endif
-
-#if MB_TCP_ENABLED > 0
-#   include <tcp_port.h>
-#endif
-
-#include <mbport.h>
-#include <mbframe.h>
-#include <mbproto.h>
 #include <mb.h>
-#include <mbcrc.h>
-
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_REQ_READ_ADDR_OFF                ( MB_PDU_DATA_OFF + 0 )
 #define MB_PDU_REQ_READ_REGCNT_OFF              ( MB_PDU_DATA_OFF + 2 )

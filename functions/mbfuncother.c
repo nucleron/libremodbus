@@ -28,26 +28,7 @@
  * File: $Id: mbfuncother.c,v 1.8 2006/12/07 22:10:34 wolti Exp $
  */
 
-/* ----------------------- System includes ----------------------------------*/
-#include <stdlib.h>
-#include <string.h>
-/* ----------------------- Modbus includes ----------------------------------*/
-#include <mbconfig.h>
-#include <mb_types.h>
-
-#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
-#include <serial_port.h>
-#endif
-
-#if MB_TCP_ENABLED > 0
-#   include <tcp_port.h>
-#endif
-
-#include <mbport.h>
-#include <mbframe.h>
-#include <mbproto.h>
 #include <mb.h>
-#include <mbcrc.h>
 
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
 

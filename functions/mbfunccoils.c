@@ -27,21 +27,21 @@
  *
  * File: $Id: mbfunccoils.c,v 1.8 2007/02/18 23:47:16 wolti Exp $
  */
-
-/* ----------------------- System includes ----------------------------------*/
-#include <stdlib.h>
-#include <string.h>
-/* ----------------------- Modbus includes ----------------------------------*/
-#include <mbconfig.h>
-#include <mb_types.h>
-
-#include <serial_port.h>
-
-#include <mbport.h>
-#include <mbframe.h>
-#include <mbproto.h>
 #include <mb.h>
-#include <mbcrc.h>
+///* ----------------------- System includes ----------------------------------*/
+//#include <stdlib.h>
+//#include <string.h>
+///* ----------------------- Modbus includes ----------------------------------*/
+//#include <mbconfig.h>
+//#include <mb_types.h>
+//
+//#include <serial_port.h>
+//
+//#include <mbport.h>
+//#include <mbframe.h>
+//#include <mbproto.h>
+//#include <mb.h>
+//#include <mbcrc.h>
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_FUNC_READ_ADDR_OFF           ( MB_PDU_DATA_OFF )
 #define MB_PDU_FUNC_READ_COILCNT_OFF        ( MB_PDU_DATA_OFF + 2 )
@@ -67,7 +67,7 @@ eMBException    prveMBError2Exception( eMBErrorCode eErrorCode );
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 eMBException
-eMBFuncReadCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
+eMBFuncReadCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usCoilCount;

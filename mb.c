@@ -27,38 +27,7 @@
  *
  * File: $Id: mb.c,v 1.28 2010/06/06 13:54:40 wolti Exp $
  */
-
-/* ----------------------- System includes ----------------------------------*/
-#include <stdlib.h>
-#include <string.h>
-/* ----------------------- Modbus includes ----------------------------------*/
-#include <mbconfig.h>
-#include <mb_types.h>
-
-#include <serial_port.h>
-
-#include <mbport.h>
-#include <mbframe.h>
-#include <mbproto.h>
-#include <mbfunc.h>
 #include <mb.h>
-#include <mbcrc.h>
-
-#include "mb_multiport.h"
-#if MB_MASTER > 0
-#include "mb_master.h"
-#endif
-
-#include "mbport.h"
-#if MB_RTU_ENABLED == 1
-#include "mbrtu.h"
-#endif
-#if MB_ASCII_ENABLED == 1
-#include "mbascii.h"
-#endif
-#if MB_TCP_ENABLED == 1
-#include "mbtcp.h"
-#endif
 
 #ifndef MB_PORT_HAS_CLOSE
 #define MB_PORT_HAS_CLOSE 0
@@ -348,13 +317,15 @@ eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADD
     if(transport->tcpMaster ==  TRUE)
     {
         inst->xMBRunInMasterMode = TRUE;
-        for(i =0; i<MB_FUNC_HANDLERS_MAX; i++)
-            inst->xFuncHandlers[i]=xMasterFuncHandlers[i];
+        xFuncHandlers = xMasterFuncHandlers;
+//        for(i =0; i<MB_FUNC_HANDLERS_MAX; i++)
+//            inst->xFuncHandlers[i]=xMasterFuncHandlers[i];
     }
     else
     {
-        for(i =0; i<MB_FUNC_HANDLERS_MAX; i++)
-            inst->xFuncHandlers[i]=defaultFuncHandlers[i];
+        xFuncHandlers = defaultFuncHandlers;
+//        for(i =0; i<MB_FUNC_HANDLERS_MAX; i++)
+//            inst->xFuncHandlers[i]=defaultFuncHandlers[i];
     }
     if( ( eStatus = eMBTCPDoInit(transport, ucTCPPort, hostaddr, bMaster  ) ) != MB_ENOERR )
     {
@@ -395,51 +366,51 @@ eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADD
 
 
 
-eMBErrorCode
-eMBRegisterCB(MBInstance* inst, UCHAR ucFunctionCode, pxMBFunctionHandler pxHandler )
-{
-    int             i;
-    eMBErrorCode    eStatus;
-
-    if( ( 0 < ucFunctionCode ) && ( ucFunctionCode <= 127 ) )
-    {
-        ENTER_CRITICAL_SECTION(  );
-        if( pxHandler != NULL )
-        {
-            for( i = 0; i < MB_FUNC_HANDLERS_MAX; i++ )
-            {
-                if( ( xFuncHandlers[i].pxHandler == NULL ) ||
-                        ( xFuncHandlers[i].pxHandler == pxHandler ) )
-                {
-                    xFuncHandlers[i].ucFunctionCode = ucFunctionCode;
-                    xFuncHandlers[i].pxHandler = pxHandler;
-                    break;
-                }
-            }
-            eStatus = ( i != MB_FUNC_HANDLERS_MAX ) ? MB_ENOERR : MB_ENORES;
-        }
-        else
-        {
-            for( i = 0; i < MB_FUNC_HANDLERS_MAX; i++ )
-            {
-                if( xFuncHandlers[i].ucFunctionCode == ucFunctionCode )
-                {
-                    xFuncHandlers[i].ucFunctionCode = 0;
-                    xFuncHandlers[i].pxHandler = NULL;
-                    break;
-                }
-            }
-            /* Remove can't fail. */
-            eStatus = MB_ENOERR;
-        }
-        EXIT_CRITICAL_SECTION(  );
-    }
-    else
-    {
-        eStatus = MB_EINVAL;
-    }
-    return eStatus;
-}
+//eMBErrorCode
+//eMBRegisterCB(MBInstance* inst, UCHAR ucFunctionCode, pxMBFunctionHandler pxHandler )
+//{
+//    int             i;
+//    eMBErrorCode    eStatus;
+//
+//    if( ( 0 < ucFunctionCode ) && ( ucFunctionCode <= 127 ) )
+//    {
+//        ENTER_CRITICAL_SECTION(  );
+//        if( pxHandler != NULL )
+//        {
+//            for( i = 0; i < MB_FUNC_HANDLERS_MAX; i++ )
+//            {
+//                if( ( xFuncHandlers[i].pxHandler == NULL ) ||
+//                        ( xFuncHandlers[i].pxHandler == pxHandler ) )
+//                {
+//                    xFuncHandlers[i].ucFunctionCode = ucFunctionCode;
+//                    xFuncHandlers[i].pxHandler = pxHandler;
+//                    break;
+//                }
+//            }
+//            eStatus = ( i != MB_FUNC_HANDLERS_MAX ) ? MB_ENOERR : MB_ENORES;
+//        }
+//        else
+//        {
+//            for( i = 0; i < MB_FUNC_HANDLERS_MAX; i++ )
+//            {
+//                if( xFuncHandlers[i].ucFunctionCode == ucFunctionCode )
+//                {
+//                    xFuncHandlers[i].ucFunctionCode = 0;
+//                    xFuncHandlers[i].pxHandler = NULL;
+//                    break;
+//                }
+//            }
+//            /* Remove can't fail. */
+//            eStatus = MB_ENOERR;
+//        }
+//        EXIT_CRITICAL_SECTION(  );
+//    }
+//    else
+//    {
+//        eStatus = MB_EINVAL;
+//    }
+//    return eStatus;
+//}
 
 
 eMBErrorCode

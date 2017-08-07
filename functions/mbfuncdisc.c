@@ -16,28 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
-/* ----------------------- System includes ----------------------------------*/
-#include <stdlib.h>
-#include <string.h>
-/* ----------------------- Modbus includes ----------------------------------*/
-#include <mbconfig.h>
-#include <mb_types.h>
-
-#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
-#include <serial_port.h>
-#endif
-
-#if MB_TCP_ENABLED > 0
-#   include <tcp_port.h>
-#endif
-
-#include <mbport.h>
-#include <mbframe.h>
-#include <mbproto.h>
-#include <mbascii.h>
 #include <mb.h>
-#include <mbcrc.h>
-
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_FUNC_READ_ADDR_OFF           ( MB_PDU_DATA_OFF )
 #define MB_PDU_FUNC_READ_DISCCNT_OFF        ( MB_PDU_DATA_OFF + 2 )

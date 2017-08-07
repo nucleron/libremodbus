@@ -27,27 +27,7 @@
  *
  * File: $Id: mbrtu.c,v 1.18 2007/09/12 10:15:56 wolti Exp $
  */
-
-/* ----------------------- System includes ----------------------------------*/
-#include <stdlib.h>
-#include <string.h>
-/* ----------------------- Modbus includes ----------------------------------*/
-#include <mbconfig.h>
-#include <mb_types.h>
-
-#include <serial_port.h>
-
-#include <mbport.h>
-#include <mbframe.h>
-#include <mbproto.h>
-#include <mbfunc.h>
 #include <mb.h>
-#include <mbrtu.h>
-#include <mbcrc.h>
-
-#if MB_MASTER > 0
-#include "mb_master.h"
-#endif
 
 #define eSndState         inst->snd_state
 #define eRcvState         inst->rcv_state

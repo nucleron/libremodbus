@@ -51,7 +51,6 @@ PR_BEGIN_EXTERN_C
 #include <mbport.h>
 #include <mbframe.h>
 #include <mbproto.h>
-//#include <mbfunc.h>
 #include <mbutils.h>
 
 #include "mbport.h"
@@ -123,6 +122,8 @@ typedef struct
     eMBMasterErrorEventType  master_err_cur;
 
 } MBInstance;
+
+#include <mbfunc.h>
 
 #if MB_MASTER > 0
 #include "mb_master.h"
