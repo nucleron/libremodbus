@@ -35,8 +35,6 @@
 PR_BEGIN_EXTERN_C
 #endif
 
-#include "mb_types.h"
-
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_RTU_SER_PDU_SIZE_MIN     4       /*!< Minimum size of a Modbus RTU frame. */
 #define MB_RTU_SER_PDU_SIZE_MAX     256     /*!< Maximum size of a Modbus RTU frame. */
@@ -63,7 +61,7 @@ typedef enum
 typedef struct
 {
     void                           *parent;
-    MBSerialInstance               serial_port;
+    mb_port_ser               serial_port;
     volatile mb_rtu_snd_state_enum snd_state;
     volatile mb_rtu_rcv_state_enum rcv_state;
 

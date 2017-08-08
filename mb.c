@@ -286,7 +286,7 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
 
         if( eStatus == MB_ENOERR )
         {
-            if( !xMBPortEventInit( (MBSerialInstance*)inst->port ) )
+            if( !xMBPortEventInit( (mb_port_ser*)inst->port ) )
             {
                 /* port dependent event module initalization failed. */
                 eStatus = MB_EPORTERR;

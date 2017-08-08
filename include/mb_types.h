@@ -90,5 +90,18 @@ typedef enum
 	MB_TMODE_CONVERT_DELAY          /*!< Master sent broadcast ,then delay sometime.*/
 }eMBMasterTimerMode;
 
+typedef uint8_t BOOL;
+
+typedef unsigned char UCHAR;
+typedef char CHAR;
+
+typedef uint16_t USHORT;
+typedef int16_t SHORT;
+
+typedef uint32_t ULONG;
+typedef int32_t LONG;
+
+typedef uint32_t DWORD;
+
 PR_END_EXTERN_C
 #endif // MB_TYPES_H

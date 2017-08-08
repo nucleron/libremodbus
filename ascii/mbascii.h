@@ -72,7 +72,7 @@ typedef enum
 typedef struct
 {
 	void                            *parent;
-	MBSerialInstance                serial_port;
+	mb_port_ser                serial_port;
 	volatile mb_ascii_tx_state_enum snd_state;
 	volatile mb_ascii_rx_state_enum rcv_state;
 

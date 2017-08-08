@@ -35,12 +35,14 @@
 PR_BEGIN_EXTERN_C
 /* ----------------------- System includes ----------------------------------*/
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 /* ----------------------- Modbus includes ----------------------------------*/
 #include <mbconfig.h>
 #include <mb_types.h>
+#include <mbport.h>
 
-#if (MB_RTU_ENABLED>0) && (MB_ASCII_ENABLED>0)
+#if (MB_RTU_ENABLED>0) || (MB_ASCII_ENABLED>0)
 #include <serial_port.h>
 #endif
 
@@ -48,20 +50,20 @@ PR_BEGIN_EXTERN_C
 #   include <tcp_port.h>
 #endif
 
-#include <mbport.h>
 #include <mbframe.h>
 #include <mbproto.h>
 #include <mbutils.h>
 
-#include "mbport.h"
 #if MB_RTU_ENABLED == 1
-#include "mbrtu.h"
+#   include <mbrtu.h>
 #endif
+
 #if MB_ASCII_ENABLED == 1
-#include "mbascii.h"
+#   include <mbascii.h>
 #endif
+
 #if MB_TCP_ENABLED == 1
-#include "mbtcp.h"
+#   include <mbtcp.h>
 #endif
 
 typedef enum
