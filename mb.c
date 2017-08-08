@@ -204,6 +204,16 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
     {
 #if MB_RTU_ENABLED > 0
     case MB_RTU:
+    {
+        static const mb_port_cb mb_rtu_cb =
+        {
+            .byte_rcvd   = (mb_fp_bool)xMBRTUReceiveFSM,
+            .tx_empty    = (mb_fp_bool)xMBRTUTransmitFSM,
+            .tmr_expired = (mb_fp_bool)xMBRTUTimerT35Expired
+        };
+        ((MBRTUInstance *)transport)->serial_port.base.cb  = &mb_rtu_cb;
+        ((MBRTUInstance *)transport)->serial_port.base.arg = transport;
+
         pvMBFrameStartCur = (pvMBFrameStart)eMBRTUStart;
         pvMBFrameStopCur = (pvMBFrameStop)eMBRTUStop;
         peMBFrameSendCur = (peMBFrameSend)eMBRTUSend;
@@ -218,20 +228,33 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         PDUSndLength = &(((MBRTUInstance*)transport)->snd_pdu_len);
         isMaster = ((MBRTUInstance*)transport)->is_master;
         pvMBGetTxFrame = (pvGetTxFrame)vMBMasterGetPDUSndBuf;
-#if MB_MASTER > 0
+#   if MB_MASTER > 0
         pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBMasterRequestIsBroadcast;
-#endif
+#   endif //master
         eStatus = eMBRTUInit((MBRTUInstance*)transport, ucMBAddress, ucPort, ulBaudRate, eParity );
         ((MBRTUInstance*)(transport))->parent = (void*)(inst);
         break;
-#endif
+    }
+#endif //RTU
 #if MB_ASCII_ENABLED > 0
     case MB_ASCII:
+    {
+        //TODO: move to tnasport init
+        static const mb_port_cb mb_ascii_cb =
+        {
+            .byte_rcvd   = (mb_fp_bool)xMBASCIIReceiveFSM,
+            .tx_empty    = (mb_fp_bool)xMBASCIITransmitFSM,
+            .tmr_expired = (mb_fp_bool)xMBASCIITimerT1SExpired
+        };
+        ((MBASCIIInstance *)transport)->serial_port.base.cb  = &mb_ascii_cb;
+        ((MBASCIIInstance *)transport)->serial_port.base.arg = transport;
+
         pvMBFrameStartCur = (pvMBFrameStart)eMBASCIIStart;
         pvMBFrameStopCur = (pvMBFrameStop)eMBASCIIStop;
         peMBFrameSendCur = (peMBFrameSend)eMBASCIISend;
         peMBFrameReceiveCur = (peMBFrameReceive)eMBASCIIReceive;
         pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? (pvMBFrameClose)vMBPortClose : NULL;
+
         inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBASCIIReceiveFSM;
         inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBASCIITransmitFSM;
         inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBASCIITimerT1SExpired;
@@ -240,13 +263,14 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         PDUSndLength = &(((MBASCIIInstance*)transport)->snd_pdu_len);
         isMaster = ((MBASCIIInstance*)transport)->is_master;
         pvMBGetTxFrame = (pvGetTxFrame)vMBASCIIMasterGetPDUSndBuf;
-#if MB_MASTER > 0
+#   if MB_MASTER > 0
         pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBASCIIMasterRequestIsBroadcast;
-#endif
+#   endif//master
         eStatus = eMBASCIIInit((MBASCIIInstance*)transport, ucMBAddress, ucPort, ulBaudRate, eParity );
         ((MBASCIIInstance*)(transport))->parent = (void*)(inst);
         break;
-#endif
+    }
+#endif//ASCII
     default:
         eStatus = MB_EINVAL;
     }

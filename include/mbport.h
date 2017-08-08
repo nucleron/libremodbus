@@ -56,7 +56,7 @@ mb_port_cb;                 //!<port callback table
 
 typedef struct _mb_port_base
 {
-    mb_port_cb   cb; //!<Port callbacks.
+    mb_port_cb  *cb; //!<Port callbacks.
     void       *arg; //!<CB arg pointer.
 }mb_port_base; //!< Port base type
 
