@@ -106,6 +106,8 @@ typedef struct
     pbMBMasterRequestIsBroadcast pbMBMasterRequestIsBroadcastCur;
 
     //Port methods
+    mb_port_mtab * pmt; //!< Port method tab
+
     pvMBFrameClose pvMBFrameCloseCur;
     pvPortEventPost pvPortEventPostCur;
     pvPortEventGet pvPortEventGetCur;

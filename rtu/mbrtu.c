@@ -88,12 +88,10 @@ eMBRTUInit(MBRTUInstance* inst, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaud
         {
             eStatus = MB_EPORTERR;
         }
-#if MB_MULTIPORT > 0
         eSndState = MB_RTU_TX_STATE_IDLE;
         eRcvState = MB_RTU_RX_STATE_INIT;
 
-        inst->serial_port.parent = (void*)(inst);
-#endif
+        //inst->serial_port.parent = (void*)(inst);
     }
     EXIT_CRITICAL_SECTION(  );
 

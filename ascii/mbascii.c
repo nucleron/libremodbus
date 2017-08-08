@@ -88,7 +88,7 @@ eMBErrorCode eMBASCIIInit(MBASCIIInstance* inst, UCHAR ucSlaveAddress, UCHAR ucP
 
     eRcvState =  MB_ASCII_RX_STATE_IDLE;
     eSndState = MB_ASCII_TX_STATE_IDLE;
-    inst->serial_port.parent = (void*)(inst);
+    //inst->serial_port.parent = (void*)(inst);
 
     EXIT_CRITICAL_SECTION(  );
 

@@ -205,6 +205,7 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
 #if MB_RTU_ENABLED > 0
     case MB_RTU:
     {
+        //TODO: move to RTU init
         static const mb_port_cb mb_rtu_cb =
         {
             .byte_rcvd   = (mb_fp_bool)xMBRTUReceiveFSM,
@@ -218,15 +219,11 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         pvMBFrameStopCur = (pvMBFrameStop)eMBRTUStop;
         peMBFrameSendCur = (peMBFrameSend)eMBRTUSend;
         peMBFrameReceiveCur = (peMBFrameReceive)eMBRTUReceive;
-        pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? (pvMBFrameClose)vMBPortClose : NULL;
-//
-//        inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBRTUReceiveFSM;
-//        inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBRTUTransmitFSM;
-//        inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBRTUTimerT35Expired;
 
         inst->port = &(((MBRTUInstance*)transport)->serial_port);
         PDUSndLength = &(((MBRTUInstance*)transport)->snd_pdu_len);
         isMaster = ((MBRTUInstance*)transport)->is_master;
+
         pvMBGetTxFrame = (pvGetTxFrame)vMBMasterGetPDUSndBuf;
 #   if MB_MASTER > 0
         pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBMasterRequestIsBroadcast;
@@ -239,7 +236,7 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
 #if MB_ASCII_ENABLED > 0
     case MB_ASCII:
     {
-        //TODO: move to tnasport init
+        //TODO: move to ASCII init
         static const mb_port_cb mb_ascii_cb =
         {
             .byte_rcvd   = (mb_fp_bool)xMBASCIIReceiveFSM,
@@ -249,15 +246,10 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         ((MBASCIIInstance *)transport)->serial_port.base.cb  = &mb_ascii_cb;
         ((MBASCIIInstance *)transport)->serial_port.base.arg = transport;
 
-        pvMBFrameStartCur = (pvMBFrameStart)eMBASCIIStart;
-        pvMBFrameStopCur = (pvMBFrameStop)eMBASCIIStop;
-        peMBFrameSendCur = (peMBFrameSend)eMBASCIISend;
+        pvMBFrameStartCur   = (pvMBFrameStart)  eMBASCIIStart;
+        pvMBFrameStopCur    = (pvMBFrameStop)   eMBASCIIStop;
+        peMBFrameSendCur    = (peMBFrameSend)   eMBASCIISend;
         peMBFrameReceiveCur = (peMBFrameReceive)eMBASCIIReceive;
-        pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? (pvMBFrameClose)vMBPortClose : NULL;
-
-//        inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBASCIIReceiveFSM;
-//        inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBASCIITransmitFSM;
-//        inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBASCIITimerT1SExpired;
 
         inst->port = &(((MBASCIIInstance*)transport)->serial_port);
         PDUSndLength = &(((MBASCIIInstance*)transport)->snd_pdu_len);
@@ -275,8 +267,10 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         eStatus = MB_EINVAL;
     }
 
+    pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? (pvMBFrameClose)vMBPortClose : NULL;
     pvPortEventGetCur = (pvPortEventGet)xMBPortEventGet;    //for both ASCII & RTU
     pvPortEventPostCur = (pvPortEventPost)xMBPortEventPost;
+
     pvMBGetTxFrame(inst->transport, (void*)&(txFrame));      //Можно было прописать сразу.
 
 #if MB_MASTER > 0
@@ -368,7 +362,7 @@ eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADD
         inst->peMBFrameSendCur = eMBTCPSend;
         inst->pvMBGetRxFrame = vMBTCPMasterGetPDURcvBuf;
         inst->pvMBGetTxFrame = vMBTCPMasterGetPDUSndBuf;
-        inst->pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? vMBTCPPortClose : NULL;
+
         inst->ucMBAddress = MB_TCP_PSEUDO_ADDRESS;
         inst->cur_mode = MB_TCP;
         inst->eMBCurrentState = STATE_DISABLED;
@@ -379,10 +373,11 @@ eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADD
 
         inst->pbMBMasterRequestIsBroadcastCur = (pbMBMasterRequestIsBroadcast)xMBTCPMasterRequestIsBroadcast;
 
+        inst->pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? vMBTCPPortClose : NULL;
         inst->pvPortEventGetCur = (pvPortEventGet)xMBTCPPortEventGet;
         inst->pvPortEventPostCur = (pvPortEventPost)xMBTCPPortEventPost;
 
-        inst->pvMBGetTxFrame(inst->transport,&(inst->txFrame));//Зачем 2 раза???
+        //inst->pvMBGetTxFrame(inst->transport,&(inst->txFrame));//Зачем 2 раза???
     }
     return eStatus;
 }
