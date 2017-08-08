@@ -219,10 +219,10 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         peMBFrameSendCur = (peMBFrameSend)eMBRTUSend;
         peMBFrameReceiveCur = (peMBFrameReceive)eMBRTUReceive;
         pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? (pvMBFrameClose)vMBPortClose : NULL;
-
-        inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBRTUReceiveFSM;
-        inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBRTUTransmitFSM;
-        inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBRTUTimerT35Expired;
+//
+//        inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBRTUReceiveFSM;
+//        inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBRTUTransmitFSM;
+//        inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBRTUTimerT35Expired;
 
         inst->port = &(((MBRTUInstance*)transport)->serial_port);
         PDUSndLength = &(((MBRTUInstance*)transport)->snd_pdu_len);
@@ -255,9 +255,9 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         peMBFrameReceiveCur = (peMBFrameReceive)eMBASCIIReceive;
         pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? (pvMBFrameClose)vMBPortClose : NULL;
 
-        inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBASCIIReceiveFSM;
-        inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBASCIITransmitFSM;
-        inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBASCIITimerT1SExpired;
+//        inst->pxMBFrameCBByteReceived = (mb_fp_bool)xMBASCIIReceiveFSM;
+//        inst->pxMBFrameCBTransmitterEmpty = (mb_fp_bool)xMBASCIITransmitFSM;
+//        inst->pxMBPortCBTimerExpired = (mb_fp_bool)xMBASCIITimerT1SExpired;
 
         inst->port = &(((MBASCIIInstance*)transport)->serial_port);
         PDUSndLength = &(((MBASCIIInstance*)transport)->snd_pdu_len);

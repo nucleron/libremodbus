@@ -90,9 +90,9 @@ typedef struct
     volatile USHORT* pdu_snd_len;
 
     //Port callback methods
-    mb_fp_bool pxMBFrameCBByteReceived;
-    mb_fp_bool pxMBFrameCBTransmitterEmpty;
-    mb_fp_bool pxMBPortCBTimerExpired;
+//    mb_fp_bool pxMBFrameCBByteReceived;
+//    mb_fp_bool pxMBFrameCBTransmitterEmpty;
+//    mb_fp_bool pxMBPortCBTimerExpired;
 
     //Transport methods
     peMBFrameSend peMBFrameSendCur;
