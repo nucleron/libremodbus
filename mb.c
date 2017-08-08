@@ -398,8 +398,9 @@ eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADD
         inst->eMBCurrentState = STATE_DISABLED;
         inst->pdu_snd_len = &(((MBTCPInstance*)transport)->usSendPDULength);
         inst->port = (void*) &(((MBTCPInstance*)transport)->tcp_port);
-        inst->pvMBGetRxFrame(inst->transport,&inst->rxFrame);
-        inst->pvMBGetTxFrame(inst->transport,&inst->txFrame);//Зачем 2 раза???
+
+        inst->trmt->get_rx_frm(inst->transport,&inst->rxFrame);
+        inst->trmt->get_tx_frm(inst->transport,&inst->txFrame);//Зачем 2 раза???
 
 #if (MB_PORT_HAS_CLOSE > 0)
 #   define MB_TCP_CLOSE vMBPortClose

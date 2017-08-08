@@ -108,17 +108,6 @@ typedef struct
     //Transport methods
     mb_tr_mtab * trmt;
 
-//    //Transport methods
-//    peMBFrameSend peMBFrameSendCur;
-//    pvMBFrameStart pvMBFrameStartCur;
-//    pvMBFrameStop pvMBFrameStopCur;
-//    peMBFrameReceive peMBFrameReceiveCur;
-//    //Transport methods!!!
-//    pvGetRxFrame pvMBGetRxFrame;
-//    pvGetRxFrame pvMBGetTxFrame;
-//    //Transport methd
-//    pbMBMasterRequestIsBroadcast pbMBMasterRequestIsBroadcastCur;
-
     //Port methods
     mb_port_mtab * pmt; //!< Port method tab
 

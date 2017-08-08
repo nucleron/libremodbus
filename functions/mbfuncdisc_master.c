@@ -64,7 +64,7 @@ eMBMasterReqReadDiscreteInputs(MBInstance* inst, UCHAR ucSndAddr, USHORT usDiscr
    // else if ( xMBMasterRunResTake( lTimeOut ) == FALSE ) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME: check
     else
     {
-    	inst->pvMBGetTxFrame(inst-> transport, &ucMBFrame);
+    	inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
 		inst->master_dst_addr = ucSndAddr;
 		ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
 		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]        = usDiscreteAddr >> 8;
@@ -72,8 +72,8 @@ eMBMasterReqReadDiscreteInputs(MBInstance* inst, UCHAR ucSndAddr, USHORT usDiscr
 		ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF ]    = usNDiscreteIn >> 8;
 		ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = usNDiscreteIn;
 		*(inst->pdu_snd_len) = ( MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE );
-		(void)inst->pvPortEventPostCur(inst->port, EV_FRAME_SENT );
-		eErrStatus = eMBMasterWaitRequestFinish( );
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT );
+		//eErrStatus = eMBMasterWaitRequestFinish( );
     }
     return eErrStatus;
 }
@@ -90,13 +90,13 @@ eMBMasterFuncReadDiscreteInputs(MBInstance* inst, UCHAR * pucFrame, USHORT * usL
     eMBErrorCode    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
-    if ( xMBMasterRequestIsBroadcast(inst->transport) )
+    if ( inst->trmt->rq_is_broadcast(inst->transport) )
     {
     	eStatus = MB_EX_NONE;
     }
     else if( *usLen >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN )
     {
-    	inst->pvMBGetTxFrame(inst-> transport, &ucMBFrame);
+    	inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
         usRegAddress = ( USHORT )( ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF] << 8 );
         usRegAddress |= ( USHORT )( ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1] );
         usRegAddress++;
