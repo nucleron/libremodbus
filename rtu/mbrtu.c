@@ -398,7 +398,7 @@ xMBRTUTimerT35Expired( MBRTUInstance* inst )
 }
 
 /* Get Modbus Master send PDU's buffer address pointer.*/
-void vMBMasterGetPDUSndBuf( MBRTUInstance* inst, UCHAR ** pucFrame )
+void vMBRTUMasterGetPDUSndBuf( MBRTUInstance* inst, UCHAR ** pucFrame )
 {
     *pucFrame = ( UCHAR * ) &ucRTUSndBuf[MB_RTU_SER_PDU_PDU_OFF];
 }
@@ -412,25 +412,25 @@ void vMBMasterGetRTUSndBuf( MBRTUInstance* inst, UCHAR ** pucFrame )
 
 
 /* Set Modbus Master send PDU's buffer length.*/
-void vMBMasterSetPDUSndLength(  MBRTUInstance* inst, USHORT SendPDULength )
+void vMBRTUMasterSetPDUSndLength(  MBRTUInstance* inst, USHORT SendPDULength )
 {
     usSendPDULength = SendPDULength;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBMasterGetPDUSndLength(  MBRTUInstance* inst )
+USHORT usMBRTUMasterGetPDUSndLength(  MBRTUInstance* inst )
 {
     return usSendPDULength;
 }
 
 /* Set Modbus Master current timer mode.*/
-void vMBMasterSetCurTimerMode( MBRTUInstance* inst, eMBMasterTimerMode eMBTimerMode )
+void vMBRTUMasterSetCurTimerMode( MBRTUInstance* inst, eMBMasterTimerMode eMBTimerMode )
 {
     eCurTimerMode = eMBTimerMode;
 }
 
 /* The master request is broadcast? */
-BOOL xMBMasterRequestIsBroadcast( MBRTUInstance* inst )
+BOOL xMBRTUMasterRequestIsBroadcast( MBRTUInstance* inst )
 {
     return xFrameIsBroadcast;
 }

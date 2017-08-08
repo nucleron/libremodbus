@@ -54,6 +54,21 @@ PR_BEGIN_EXTERN_C
 #include <mbproto.h>
 #include <mbutils.h>
 
+typedef struct
+{
+    peMBFrameSend    frm_send;
+    pvMBFrameStart   frm_start;
+    pvMBFrameStop    frm_stop;
+    peMBFrameReceive frm_rcv;
+
+    pvGetRxFrame     get_rx_frm;
+    pvGetRxFrame     get_tx_frm;
+#if MB_MASTER > 0
+    pbMBMasterRequestIsBroadcast rq_is_broadcast;
+#endif //MB_MASTER
+}
+mb_tr_mtab;//!< Transport method tab
+
 #if MB_RTU_ENABLED == 1
 #   include <mbrtu.h>
 #endif
@@ -89,29 +104,23 @@ typedef struct
 
     volatile USHORT* pdu_snd_len;
 
-    //Port callback methods
-//    mb_fp_bool pxMBFrameCBByteReceived;
-//    mb_fp_bool pxMBFrameCBTransmitterEmpty;
-//    mb_fp_bool pxMBPortCBTimerExpired;
 
     //Transport methods
-    peMBFrameSend peMBFrameSendCur;
-    pvMBFrameStart pvMBFrameStartCur;
-    pvMBFrameStop pvMBFrameStopCur;
-    peMBFrameReceive peMBFrameReceiveCur;
-    //Transport methods!!!
-    pvGetRxFrame pvMBGetRxFrame;
-    pvGetRxFrame pvMBGetTxFrame;
-    //Transport methd
-    pbMBMasterRequestIsBroadcast pbMBMasterRequestIsBroadcastCur;
+    mb_tr_mtab * trmt;
+
+//    //Transport methods
+//    peMBFrameSend peMBFrameSendCur;
+//    pvMBFrameStart pvMBFrameStartCur;
+//    pvMBFrameStop pvMBFrameStopCur;
+//    peMBFrameReceive peMBFrameReceiveCur;
+//    //Transport methods!!!
+//    pvGetRxFrame pvMBGetRxFrame;
+//    pvGetRxFrame pvMBGetTxFrame;
+//    //Transport methd
+//    pbMBMasterRequestIsBroadcast pbMBMasterRequestIsBroadcastCur;
 
     //Port methods
     mb_port_mtab * pmt; //!< Port method tab
-
-    pvMBFrameClose pvMBFrameCloseCur;
-    pvPortEventPost pvPortEventPostCur;
-    pvPortEventGet pvPortEventGetCur;
-
 
     //Place to const
     xMBFunctionHandler * xFuncHandlers;//[MB_FUNC_HANDLERS_MAX];

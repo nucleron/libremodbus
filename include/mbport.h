@@ -63,7 +63,7 @@ typedef struct _mb_port_base
 #include <mbframe.h>
 typedef struct
 {
-    pvMBFrameClose  close;    //!<pvMBFrameCloseCur;
+    pvMBFrameClose  frm_close;//!<pvMBFrameCloseCur;
     pvPortEventPost evt_post; //!<pvPortEventPostCur;
     pvPortEventGet  evt_get;  //!<pvPortEventGetCur;
 }
