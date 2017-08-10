@@ -251,7 +251,7 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
             .tx_empty    = (mb_fp_bool)xMBASCIITransmitFSM,
             .tmr_expired = (mb_fp_bool)xMBASCIITimerT1SExpired
         };
-        ((MBASCIIInstance *)transport)->serial_port.base.cb  = &mb_ascii_cb;
+        ((MBASCIIInstance *)transport)->serial_port.base.cb  = (mb_port_cb *)&mb_ascii_cb;
         ((MBASCIIInstance *)transport)->serial_port.base.arg = transport;
 
         //TODO: place const tu mb_ascii.c
@@ -484,8 +484,9 @@ eMBPoll(MBInstance* inst)
     static UCHAR    ucRcvAddress;
     static UCHAR    ucFunctionCode;
     static eMBException eException;
+#if MB_MASTER > 0
     eMBMasterErrorEventType errorType;
-
+#endif
     int             i,j;
     eMBErrorCode    eStatus = MB_ENOERR;
     eMBEventType    eEvent;

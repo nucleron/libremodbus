@@ -81,13 +81,6 @@ typedef enum
     MB_PAR_EVEN                 /*!< Even parity. */
 } eMBParity;
 
-typedef enum
-{
-    ERR_EV_ERROR_RESPOND_TIMEOUT,         /*!< Slave respond timeout. */
-    ERR_EV_ERROR_RECEIVE_DATA,            /*!< Receive frame data erroe. */
-    ERR_EV_ERROR_EXECUTE_FUNCTION,        /*!< Execute function error. */
-} eMBMasterErrorEventType;
-
 /* ----------------------- Type definitions ---------------------------------*/
 
 /*! \ingroup modbus

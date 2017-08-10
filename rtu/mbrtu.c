@@ -325,6 +325,8 @@ xMBRTUTransmitFSM( MBRTUInstance* inst )
             }
         }
         break;
+    default:
+        break;
     }
 
     return xNeedPoll;

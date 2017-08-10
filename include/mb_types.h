@@ -46,13 +46,20 @@ typedef enum
     EV_EXECUTE,                 /*!< Execute function. */
     EV_FRAME_SENT,               /*!< Frame sent. */
 	/*master events*/
-	EV_ERROR_PROCESS,
-	EV_ERROR_RESPOND_TIMEOUT,
-
-	EV_MASTER_ERROR_RESPOND_TIMEOUT    = 1<<6,  /*!< Request respond timeout. */
-	EV_MASTER_ERROR_RECEIVE_DATA       = 1<<7,  /*!< Request receive data error. */
-	EV_MASTER_ERROR_EXECUTE_FUNCTION   = 1<<8,  /*!< Request execute function error. */
+	EV_ERROR_PROCESS//,
+//	EV_ERROR_RESPOND_TIMEOUT,
+//
+//	EV_MASTER_ERROR_RESPOND_TIMEOUT    = 1<<6,  /*!< Request respond timeout. */
+//	EV_MASTER_ERROR_RECEIVE_DATA       = 1<<7,  /*!< Request receive data error. */
+//	EV_MASTER_ERROR_EXECUTE_FUNCTION   = 1<<8,  /*!< Request execute function error. */
 } eMBEventType;
+
+typedef enum
+{
+    ERR_EV_ERROR_RESPOND_TIMEOUT,         /*!< Slave respond timeout. */
+    ERR_EV_ERROR_RECEIVE_DATA,            /*!< Receive frame data erroe. */
+    ERR_EV_ERROR_EXECUTE_FUNCTION,        /*!< Execute function error. */
+} eMBMasterErrorEventType;
 
 /*! \ingroup modbus
  * \brief Errorcodes used by all function in the protocol stack.
