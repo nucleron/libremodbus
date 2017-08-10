@@ -89,7 +89,7 @@ eMBTCPDoInit(MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL b
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
-    if( xMBTCPPortInit(&(inst->tcp_port), ucTCPPort,hostaddr, bMaster ) == FALSE )
+    if( xMBTCPPortInit(inst->base.port_obj, ucTCPPort,hostaddr, bMaster ) == FALSE )
     {
         eStatus = MB_EPORTERR;
     }
@@ -105,7 +105,7 @@ void
 eMBTCPStop( MBTCPInstance* inst )
 {
     /* Make sure that no more clients are connected. */
-    vMBTCPPortDisable(&(inst->tcp_port) );
+    vMBTCPPortDisable(inst->base.port_obj );
 }
 
 eMBErrorCode
@@ -116,7 +116,7 @@ eMBTCPReceive(MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, US
     USHORT          usLength;
     USHORT          usPID;
 
-    if( xMBTCPPortGetRequest(&(inst->tcp_port), &pucMBTCPFrame, &usLength ) != FALSE )
+    if( xMBTCPPortGetRequest(inst->base.port_obj, &pucMBTCPFrame, &usLength ) != FALSE )
     {
         usPID = pucMBTCPFrame[MB_TCP_PID] << 8U;
         usPID |= pucMBTCPFrame[MB_TCP_PID + 1];
@@ -155,7 +155,7 @@ eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT us
      */
     pucMBTCPFrame[MB_TCP_LEN] = ( usLength + 1 ) >> 8U;
     pucMBTCPFrame[MB_TCP_LEN + 1] = ( usLength + 1 ) & 0xFF;
-    if( xMBTCPPortSendResponse(&(inst->tcp_port), pucMBTCPFrame, usTCPLength ) == FALSE )
+    if( xMBTCPPortSendResponse(inst->base.port_obj, pucMBTCPFrame, usTCPLength ) == FALSE )
     {
         eStatus = MB_EIO;
     }

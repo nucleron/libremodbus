@@ -140,18 +140,18 @@ static xMBFunctionHandler xMasterFuncHandlers[MB_FUNC_HANDLERS_MAX] =
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_RTU_ENABLED > 0
 eMBErrorCode
-eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity )
+eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity )
 {
-    return eMBInit(inst,(void*)transport, MB_RTU, ucSlaveAddress, ucPort,ulBaudRate, eParity );
+    return eMBInit(inst,(void*)transport, MB_RTU, ucSlaveAddress, port_obj,ulBaudRate, eParity );
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
 eMBErrorCode
-eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity )
+eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity )
 {
 
-    return eMBInit(inst,(void*)transport, MB_ASCII, ucSlaveAddress, ucPort,ulBaudRate, eParity );
+    return eMBInit(inst,(void*)transport, MB_ASCII, ucSlaveAddress, port_obj,ulBaudRate, eParity );
 }
 
 #endif
@@ -161,19 +161,19 @@ eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress,
 
 #if MB_RTU_ENABLED > 0
 eMBErrorCode
-eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity )
+eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity )
 {
     transport->is_master = TRUE;
-    return eMBInit(inst,(void*)transport, MB_RTU, 0, ucPort,ulBaudRate, eParity );
+    return eMBInit(inst,(void*)transport, MB_RTU, 0, port_obj,ulBaudRate, eParity );
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
 eMBErrorCode
-eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity )
+eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity )
 {
     transport->asciiMaster = TRUE;
-    return eMBInit(inst,(void*)transport, MB_ASCII, 0, ucPort,ulBaudRate, eParity );
+    return eMBInit(inst,(void*)transport, MB_ASCII, 0, port_obj,ulBaudRate, eParity );
 }
 
 #endif
@@ -191,14 +191,15 @@ eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
 eMBErrorCode
-eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity)
+eMBInit(MBInstance *inst, mb_trans_base *transport, eMBMode eMode, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
 {
-    inst->transport = transport;
     eMBCurrentState = STATE_NOT_INITIALIZED;
     eMBErrorCode    eStatus = MB_ENOERR;
     BOOL isMaster = FALSE;
 
-    //int i;
+    inst->transport = transport;
+    inst->port      = port_obj;
+    transport->port_obj = port_obj;
 
     switch ( eMode )
     {
@@ -212,8 +213,8 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
             .tx_empty    = (mb_fp_bool)xMBRTUTransmitFSM,
             .tmr_expired = (mb_fp_bool)xMBRTUTimerT35Expired
         };
-        ((MBRTUInstance *)transport)->serial_port.base.cb  = (mb_port_cb *)&mb_rtu_cb;
-        ((MBRTUInstance *)transport)->serial_port.base.arg = transport;
+        transport->port_obj->cb  = (mb_port_cb *)&mb_rtu_cb;
+        transport->port_obj->arg = transport;
 
         //TODO: place const tu mb_rtu.c
         static const mb_tr_mtab mb_rtu_mtab =
@@ -231,12 +232,12 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         };
         inst->trmt = (mb_tr_mtab *)&mb_rtu_mtab;
 
-        inst->port = &(((MBRTUInstance*)transport)->serial_port);
+        //inst->port = &(((MBRTUInstance*)transport)->serial_port);
         PDUSndLength = &(((MBRTUInstance*)transport)->snd_pdu_len);
         isMaster = ((MBRTUInstance*)transport)->is_master;
 
 
-        eStatus = eMBRTUInit((MBRTUInstance*)transport, ucMBAddress, ucPort, ulBaudRate, eParity );
+        eStatus = eMBRTUInit((MBRTUInstance*)transport, ucMBAddress, port_obj, ulBaudRate, eParity );
         ((MBRTUInstance*)(transport))->parent = (void*)(inst);
         break;
     }
@@ -251,8 +252,8 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
             .tx_empty    = (mb_fp_bool)xMBASCIITransmitFSM,
             .tmr_expired = (mb_fp_bool)xMBASCIITimerT1SExpired
         };
-        ((MBASCIIInstance *)transport)->serial_port.base.cb  = (mb_port_cb *)&mb_ascii_cb;
-        ((MBASCIIInstance *)transport)->serial_port.base.arg = transport;
+        transport->port_obj->cb  = (mb_port_cb *)&mb_ascii_cb;
+        transport->port_obj->arg = transport;
 
         //TODO: place const tu mb_ascii.c
         static const mb_tr_mtab mb_ascii_mtab =
@@ -270,7 +271,7 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
         };
         inst->trmt = (mb_tr_mtab *)&mb_ascii_mtab;
 
-        inst->port = &(((MBASCIIInstance*)transport)->serial_port);
+        //inst->port = &(((MBASCIIInstance*)transport)->serial_port);
         PDUSndLength = &(((MBASCIIInstance*)transport)->snd_pdu_len);
         isMaster = ((MBASCIIInstance*)transport)->is_master;
 
@@ -397,7 +398,7 @@ eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADD
         inst->cur_mode = MB_TCP;
         inst->eMBCurrentState = STATE_DISABLED;
         inst->pdu_snd_len = &(((MBTCPInstance*)transport)->usSendPDULength);
-        inst->port = (void*) &(((MBTCPInstance*)transport)->tcp_port);
+        //inst->port = (void*) &(((MBTCPInstance*)transport)->tcp_port);
 
         inst->trmt->get_rx_frm(inst->transport,&inst->rxFrame);
         inst->trmt->get_tx_frm(inst->transport,&inst->txFrame);//Зачем 2 раза???
@@ -428,7 +429,7 @@ eMBClose(MBInstance* inst)
     {
         if( pvMBFrameCloseCur != NULL )
         {
-            pvMBFrameCloseCur( inst->transport );
+            pvMBFrameCloseCur( (mb_port_base *)inst->transport );
         }
     }
     else
@@ -629,7 +630,7 @@ eMBPoll(MBInstance* inst)
                     }
                     if( ( eMBCurrentMode == MB_ASCII ) && MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS )
                     {
-                        vMBPortTimersDelay(inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS );
+                        vMBPortTimersDelay((mb_port_ser *)inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS );///WTF?????????
                     }
                     eStatus = peMBFrameSendCur(inst->transport, ucMBAddress,(UCHAR*)(txFrame), usLength );
                 }

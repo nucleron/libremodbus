@@ -39,7 +39,8 @@ PR_BEGIN_EXTERN_C
 
 typedef struct
 {
-    MBTCPPortInstance tcp_port;
+    mb_trans_base                   base;
+    //MBTCPPortInstance tcp_port;
     BOOL tcpMaster;
     USHORT usSendPDULength;
     BOOL xFrameIsBroadcast;

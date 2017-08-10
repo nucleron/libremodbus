@@ -60,8 +60,9 @@ typedef enum
 
 typedef struct
 {
+    mb_trans_base                  base;
     void                           *parent;
-    mb_port_ser               serial_port;
+    //mb_port_ser               serial_port;
     volatile mb_rtu_snd_state_enum snd_state;
     volatile mb_rtu_rcv_state_enum rcv_state;
 
@@ -79,7 +80,7 @@ typedef struct
     volatile eMBMasterTimerMode    cur_tmr_mode;
 } MBRTUInstance;
 
-eMBErrorCode            eMBRTUInit                    (MBRTUInstance* inst, UCHAR slaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity);
+eMBErrorCode            eMBRTUInit                    (MBRTUInstance* inst, UCHAR slaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 void                    eMBRTUStart                   (MBRTUInstance* inst                                                                       );
 void                    eMBRTUStop                    (MBRTUInstance* inst                                                                       );
 eMBErrorCode            eMBRTUReceive                 (MBRTUInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength         );

@@ -101,12 +101,12 @@ BOOL xMBTCPPortEventPost(MULTIPORT_TCP_ARG eMBEventType eEvent                );
 BOOL xMBTCPPortEventGet (MULTIPORT_TCP_ARG void* caller, eMBEventType * eEvent); //FIXME
 #endif
 /* ----------------------- Serial port functions ----------------------------*/
-BOOL xMBPortSerialInit   (mb_port_ser* inst, UCHAR ucPort, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity);
-void vMBPortClose        (mb_port_ser* inst                                                                     );
-void xMBPortSerialClose  (mb_port_ser* inst                                                                     );
-void vMBPortSerialEnable (mb_port_ser* inst,  BOOL xRxEnable, BOOL xTxEnable                                    );
-BOOL xMBPortSerialGetByte(mb_port_ser* inst,  CHAR * pucByte                                                    );
-BOOL xMBPortSerialPutByte(mb_port_ser* inst, CHAR ucByte                                                        );
+BOOL xMBPortSerialInit   (mb_port_ser* inst, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity);
+void vMBPortClose        (mb_port_ser* inst                                                       );
+void xMBPortSerialClose  (mb_port_ser* inst                                                       );
+void vMBPortSerialEnable (mb_port_ser* inst,  BOOL xRxEnable, BOOL xTxEnable                      );
+BOOL xMBPortSerialGetByte(mb_port_ser* inst,  CHAR * pucByte                                      );
+BOOL xMBPortSerialPutByte(mb_port_ser* inst, CHAR ucByte                                          );
 /* ----------------------- Timers functions ---------------------------------*/
 BOOL xMBPortTimersInit   (mb_port_ser* inst, USHORT usTimeOut50us);
 void xMBPortTimersClose  (mb_port_ser* inst                      );
