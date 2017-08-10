@@ -198,7 +198,7 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
     eMBErrorCode    eStatus = MB_ENOERR;
     BOOL isMaster = FALSE;
 
-    int i;
+    //int i;
 
     switch ( eMode )
     {
@@ -212,7 +212,7 @@ eMBInit(MBInstance *inst, void* transport, eMBMode eMode, UCHAR ucSlaveAddress, 
             .tx_empty    = (mb_fp_bool)xMBRTUTransmitFSM,
             .tmr_expired = (mb_fp_bool)xMBRTUTimerT35Expired
         };
-        ((MBRTUInstance *)transport)->serial_port.base.cb  = &mb_rtu_cb;
+        ((MBRTUInstance *)transport)->serial_port.base.cb  = (mb_port_cb *)&mb_rtu_cb;
         ((MBRTUInstance *)transport)->serial_port.base.arg = transport;
 
         //TODO: place const tu mb_rtu.c
@@ -608,7 +608,9 @@ eMBPoll(MBInstance* inst)
                 }
                 else
                 {
-                    vMBMasterCBRequestScuuess(inst->transport );
+                    ///WTF???
+                    //vMBMasterCBRequestScuuess(inst->transport);
+                    vMBMasterCBRequestScuuess();
                     //vMBMasterRunResRelease(inst->transport ); //FIXME
                 }
             }
@@ -653,16 +655,13 @@ eMBPoll(MBInstance* inst)
             switch (errorType)
             {
             case ERR_EV_ERROR_RESPOND_TIMEOUT:
-                vMBMasterErrorCBRespondTimeout(ucMBMasterDestAddress,
-                                               txFrame, *PDUSndLength);
+                vMBMasterErrorCBRespondTimeout(ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
                 break;
             case ERR_EV_ERROR_RECEIVE_DATA:
-                vMBMasterErrorCBReceiveData(ucMBMasterDestAddress,
-                                            txFrame, *PDUSndLength);
+                vMBMasterErrorCBReceiveData(ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
                 break;
             case ERR_EV_ERROR_EXECUTE_FUNCTION:
-                vMBMasterErrorCBExecuteFunction(ucMBMasterDestAddress,
-                                                txFrame, *PDUSndLength);
+                vMBMasterErrorCBExecuteFunction(ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
                 break;
             }
 #endif

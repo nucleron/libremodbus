@@ -73,7 +73,7 @@ eMBMasterReqReadInputRegister(MBInstance* inst, UCHAR ucSndAddr, USHORT usRegAdd
 		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]   = usRegAddr;
 		ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF]     = usNRegs >> 8;
 		ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF + 1] = usNRegs;
-		*(inst->pdu_snd_len) = (inst->transport, MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE );
+		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE); ///WTF?????
 
 		( void ) inst->pmt->evt_post(inst->port, EV_FRAME_SENT );
 		//eErrStatus = eMBMasterWaitRequestFinish( );

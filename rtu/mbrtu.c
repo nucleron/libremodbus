@@ -28,6 +28,7 @@
  * File: $Id: mbrtu.c,v 1.18 2007/09/12 10:15:56 wolti Exp $
  */
 #include <mb.h>
+#include <mbcrc.h>
 
 #define eSndState         inst->snd_state
 #define eRcvState         inst->rcv_state
@@ -126,7 +127,7 @@ eMBRTUStop(MBRTUInstance* inst)
 eMBErrorCode
 eMBRTUReceive(MBRTUInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength )
 {
-    BOOL            xFrameReceived = FALSE;
+    //BOOL            xFrameReceived = FALSE;
     eMBErrorCode    eStatus = MB_ENOERR;
 
     ENTER_CRITICAL_SECTION(  );
@@ -149,7 +150,7 @@ eMBRTUReceive(MBRTUInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USH
         /* Return the start of the Modbus PDU to the caller. */
         *pucFrame = ( UCHAR * ) & ucRTURcvBuf[MB_RTU_SER_PDU_PDU_OFF];
 
-        xFrameReceived = TRUE;
+        //xFrameReceived = TRUE;
     }
     else
     {

@@ -102,7 +102,7 @@ typedef struct
 
     volatile USHORT   len;
 
-    volatile USHORT* pdu_snd_len;
+    volatile USHORT * pdu_snd_len;
 
 
     //Transport methods

@@ -54,11 +54,16 @@ typedef struct
 }
 mb_port_cb;                 //!<port callback table
 
-typedef struct _mb_port_base
+typedef struct //_mb_port_base
 {
     mb_port_cb  *cb; //!<Port callbacks.
     void       *arg; //!<CB arg pointer.
 }mb_port_base; //!< Port base type
+
+typedef struct //_mb_trans_base
+{
+    mb_port_base * port_obj;
+}mb_trans_base; //!< Transport base type
 
 #include <mbframe.h>
 typedef struct

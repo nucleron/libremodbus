@@ -35,5 +35,15 @@ eMBException eMBMasterFuncWriteMultipleCoils               (MBInstance* inst, UC
 eMBException eMBMasterFuncReadDiscreteInputs               (MBInstance* inst, UCHAR * pucFrame, USHORT * usLen);
 eMBException eMBMasterFuncReadWriteMultipleHoldingRegister (MBInstance* inst, UCHAR * pucFrame, USHORT * usLen);
 
+void vMBMasterErrorCBExecuteFunction(UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
+void vMBMasterErrorCBReceiveData(UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
+void vMBMasterErrorCBRespondTimeout(UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
+void vMBMasterCBRequestScuuess(void);
+
+eMBErrorCode eMBMasterRegInputCB(MBInstance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs);
+eMBErrorCode eMBMasterRegHoldingCB(MBInstance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode);
+eMBErrorCode eMBMasterRegDiscreteCB(MBInstance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete);
+eMBErrorCode eMBMasterRegCoilsCB(MBInstance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode);
+
 PR_END_EXTERN_C
 #endif /* MODBUS_MB_MASTER_H_ */

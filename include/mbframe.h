@@ -66,13 +66,13 @@ PR_BEGIN_EXTERN_C
 #define MB_PDU_DATA_OFF     1   /*!< Offset for response data in PDU. */
 
 /* ----------------------- Prototypes  0-------------------------------------*/
-typedef void    (*pvMBFrameStart)(void* transport);
-typedef void    (*pvMBFrameStop) (void* transport);
+typedef void    (*pvMBFrameStart)(mb_trans_base * transport);
+typedef void    (*pvMBFrameStop) (mb_trans_base * transport);
 
-typedef eMBErrorCode (*peMBFrameReceive) (void* transport, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
-typedef eMBErrorCode (*peMBFrameSend)    (void* transport, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength);
-typedef void         (*pvGetRxFrame)     (void* transport, UCHAR ** pucFrame);
-typedef void         ( *pvGetTxFrame)    (void* transport, UCHAR ** pucFrame);
+typedef eMBErrorCode (*peMBFrameReceive) (mb_trans_base * transport, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
+typedef eMBErrorCode (*peMBFrameSend)    (mb_trans_base * transport, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength );
+typedef void         (*pvGetRxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                           );
+typedef void         (*pvGetTxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                           );
 
 //Port
 typedef void( *pvMBFrameClose ) (mb_port_base * );

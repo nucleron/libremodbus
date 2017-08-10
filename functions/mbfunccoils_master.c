@@ -28,6 +28,7 @@
  * File: $Id: mbfunccoils_m.c,v 1.60 2013/10/12 15:10:12 Armink Add Master Functions
  */
 #include <mb.h>
+#include <mb_master.h>
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_REQ_READ_ADDR_OFF            ( MB_PDU_DATA_OFF + 0 )
@@ -140,7 +141,7 @@ eMBMasterFuncReadCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
             ( ucByteCount == pucFrame[MB_PDU_FUNC_READ_COILCNT_OFF] ) )
         {
         	/* Make callback to fill the buffer. */
-            eRegStatus = eMBMasterRegCoilsCB( &pucFrame[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usCoilCount, MB_REG_READ );
+            eRegStatus = eMBMasterRegCoilsCB(inst, &pucFrame[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usCoilCount, MB_REG_READ );
 
             /* If an error occured convert it into a Modbus exception. */
             if( eRegStatus != MB_ENOERR )
@@ -231,7 +232,7 @@ eMBMasterFuncWriteCoil(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
                 ucBuf[0] = 0;
             }
             eRegStatus =
-                eMBMasterRegCoilsCB( &ucBuf[0], usRegAddress, 1, MB_REG_WRITE );
+                eMBMasterRegCoilsCB(inst, &ucBuf[0], usRegAddress, 1, MB_REG_WRITE );
 
             /* If an error occured convert it into a Modbus exception. */
             if( eRegStatus != MB_ENOERR )
@@ -350,7 +351,7 @@ eMBMasterFuncWriteMultipleCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usL
         if( ( usCoilCnt >= 1 ) && ( ucByteCountVerify == ucByteCount ) )
         {
             eRegStatus =
-                eMBMasterRegCoilsCB( &ucMBFrame[MB_PDU_REQ_WRITE_MUL_VALUES_OFF],
+                eMBMasterRegCoilsCB(inst, &ucMBFrame[MB_PDU_REQ_WRITE_MUL_VALUES_OFF],
                                usRegAddress, usCoilCnt, MB_REG_WRITE );
 
             /* If an error occured convert it into a Modbus exception. */
