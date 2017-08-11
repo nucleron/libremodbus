@@ -83,6 +83,20 @@
 
 #endif
 
+
+const mb_tr_mtab mb_tcp_mtab =
+{
+    .frm_start   = (pvMBFrameStart)  eMBTCPStart,
+    .frm_stop    = (pvMBFrameStop)   eMBTCPStop,
+    .frm_send    = (peMBFrameSend)   eMBTCPSend,
+    .frm_rcv     = (peMBFrameReceive)eMBTCPReceive,
+
+    .get_rx_frm      = (pvGetRxFrame)vMBTCPMasterGetPDURcvBuf,
+    .get_tx_frm      = (pvGetTxFrame)vMBTCPMasterGetPDUSndBuf
+#   if MB_MASTER > 0
+    , .rq_is_broadcast = (pbMBMasterRequestIsBroadcast)xMBTCPMasterRequestIsBroadcast
+#   endif //master
+};
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode
 eMBTCPDoInit(MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster )
@@ -166,28 +180,28 @@ eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT us
 
 void vMBTCPMasterSetPDUSndLength(  MBTCPInstance* inst, USHORT SendPDULength )
 {
-	usSendPDULength = SendPDULength;
+    usSendPDULength = SendPDULength;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
 USHORT usMBTCPMasterGetPDUSndLength(  MBTCPInstance* inst )
 {
-	return usSendPDULength;
+    return usSendPDULength;
 }
 
 void vMBTCPMasterGetPDUSndBuf(MBTCPInstance* inst, UCHAR ** pucFrame)
 {
-	*pucFrame = inst->tcp_port.aucTCPSndBuf+MB_TCP_FUNC;
+    *pucFrame = inst->tcp_port.aucTCPSndBuf+MB_TCP_FUNC;
 }
 
 void vMBTCPMasterGetPDURcvBuf(MBTCPInstance* inst, UCHAR ** pucFrame)
 {
-	*pucFrame = inst->tcp_port.aucTCPRcvBuf+MB_TCP_FUNC;
+    *pucFrame = inst->tcp_port.aucTCPRcvBuf+MB_TCP_FUNC;
 }
 
 BOOL xMBTCPMasterRequestIsBroadcast(MBTCPInstance* inst)
 {
-	return FALSE; //no broadcasts on tcp
+    return FALSE; //no broadcasts on tcp
 }
 #endif
 

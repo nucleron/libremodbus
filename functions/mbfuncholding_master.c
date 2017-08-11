@@ -285,7 +285,7 @@ eMBMasterFuncReadHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * us
     eMBErrorCode    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
-    BOOL isBroadcast;
+    BOOL isBroadcast = FALSE;
 
     if(inst->cur_mode == MB_RTU)
     {
@@ -296,7 +296,7 @@ eMBMasterFuncReadHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * us
     else if (inst->cur_mode == MB_ASCII)
 	{
 	    #if MB_ASCII_ENABLED
-    	 isBroadcast = xMBASCIIMasterRequestIsBroadcast(inst->transport);
+    	 isBroadcast = xMBASCIIMasterRequestIsBroadcast((MBASCIIInstance *)inst->transport);
         #endif // MB_ASCII_ENABLED
 	}
     else //TCP

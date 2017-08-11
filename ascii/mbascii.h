@@ -72,7 +72,7 @@ typedef enum
 typedef struct
 {
     mb_trans_base                   base;
-	void                            *parent;
+	//void                            *parent;
 	//mb_port_ser                serial_port;
 	volatile mb_ascii_tx_state_enum snd_state;
 	volatile mb_ascii_rx_state_enum rcv_state;
@@ -94,7 +94,9 @@ typedef struct
 	//volatile UCHAR                  ucLRC;
 }MBASCIIInstance;
 
-eMBErrorCode            eMBASCIIInit                    (MBASCIIInstance* inst, UCHAR slaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
+extern const mb_tr_mtab mb_ascii_mtab;
+
+eMBErrorCode            eMBASCIIInit                    (MBASCIIInstance* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
 void                    eMBASCIIStart                   (MBASCIIInstance* inst                                                                       );
 void                    eMBASCIIStop                    (MBASCIIInstance* inst                                                                       );
 eMBErrorCode            eMBASCIIReceive                 (MBASCIIInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength         );

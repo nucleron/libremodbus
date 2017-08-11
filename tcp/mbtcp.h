@@ -49,6 +49,8 @@ typedef struct
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_TCP_PSEUDO_ADDRESS   255
 
+extern const mb_tr_mtab mb_tcp_mtab;
+
 /* ----------------------- Function prototypes ------------------------------*/
 eMBErrorCode	eMBTCPDoInit       (MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster        );
 void            eMBTCPStart        (MBTCPInstance* inst                                                              );

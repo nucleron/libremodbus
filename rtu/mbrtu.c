@@ -49,14 +49,41 @@
 
 #define usRcvBufferPos    inst->rcv_buf_pos
 #define usSendPDULength   inst->snd_pdu_len
+
+const mb_tr_mtab mb_rtu_mtab =
+{
+    .frm_start   = (pvMBFrameStart)  eMBRTUStart,
+    .frm_stop    = (pvMBFrameStop)   eMBRTUStop,
+    .frm_send    = (peMBFrameSend)   eMBRTUSend,
+    .frm_rcv     = (peMBFrameReceive)eMBRTUReceive,
+
+    .get_rx_frm      = NULL,
+    .get_tx_frm      = (pvGetTxFrame)vMBRTUMasterGetPDUSndBuf
+#   if MB_MASTER > 0
+    , .rq_is_broadcast = (pbMBMasterRequestIsBroadcast)xMBRTUMasterRequestIsBroadcast
+#   endif //master
+};
+
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode
-eMBRTUInit(MBRTUInstance* inst, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity )
+eMBRTUInit(MBRTUInstance* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     ULONG           usTimerT35_50us;
 
-    ( void )ucSlaveAddress;
+    static const mb_port_cb mb_rtu_cb =
+    {
+        .byte_rcvd   = (mb_fp_bool)xMBRTUReceiveFSM,
+        .tx_empty    = (mb_fp_bool)xMBRTUTransmitFSM,
+        .tmr_expired = (mb_fp_bool)xMBRTUTimerT35Expired
+    };
+
+    (void)ucSlaveAddress;
+
+    inst->base.port_obj->cb  = (mb_port_cb *)&mb_rtu_cb;
+    inst->base.port_obj->arg = inst;
+    inst->is_master          = is_master;
+
     ENTER_CRITICAL_SECTION(  );
 
     /* Modbus RTU uses 8 Databits. */
@@ -213,24 +240,24 @@ xMBRTUReceiveFSM(MBRTUInstance* inst)
 
     switch ( eRcvState )
     {
-        /* If we have received a character in the init state we have to
-         * wait until the frame is finished.
-         */
+    /* If we have received a character in the init state we have to
+     * wait until the frame is finished.
+     */
     case MB_RTU_RX_STATE_INIT:
         vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj  );
         break;
 
-        /* In the error state we wait until all characters in the
-         * damaged frame are transmitted.
-         */
+    /* In the error state we wait until all characters in the
+     * damaged frame are transmitted.
+     */
     case MB_RTU_RX_STATE_ERROR:
         vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj  );
         break;
 
-        /* In the idle state we wait for a new character. If a character
-         * is received the t1.5 and t3.5 timers are started and the
-         * receiver is in the state MB_RTU_RX_STATE_RECEIVCE.
-         */
+    /* In the idle state we wait for a new character. If a character
+     * is received the t1.5 and t3.5 timers are started and the
+     * receiver is in the state MB_RTU_RX_STATE_RECEIVCE.
+     */
     case MB_RTU_RX_STATE_IDLE:
 #if MB_MASTER > 0
         if(rtuMaster)
@@ -247,11 +274,11 @@ xMBRTUReceiveFSM(MBRTUInstance* inst)
         vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj  );
         break;
 
-        /* We are currently receiving a frame. Reset the timer after
-         * every character received. If more than the maximum possible
-         * number of bytes in a modbus frame is received the frame is
-         * ignored.
-         */
+    /* We are currently receiving a frame. Reset the timer after
+     * every character received. If more than the maximum possible
+     * number of bytes in a modbus frame is received the frame is
+     * ignored.
+     */
     case MB_RTU_RX_STATE_RCV:
         if( usRcvBufferPos < MB_RTU_SER_PDU_SIZE_MAX )
         {
@@ -276,8 +303,8 @@ xMBRTUTransmitFSM( MBRTUInstance* inst )
 
     switch ( eSndState )
     {
-        /* We should not get a transmitter event if the transmitter is in
-         * idle state.  */
+    /* We should not get a transmitter event if the transmitter is in
+     * idle state.  */
     case MB_RTU_TX_STATE_IDLE:
         /* enable receiver/disable transmitter. */
         vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj,  TRUE, FALSE );
@@ -341,22 +368,22 @@ xMBRTUTimerT35Expired( MBRTUInstance* inst )
 
     switch ( eRcvState )
     {
-        /* Timer t35 expired. Startup phase is finished. */
+    /* Timer t35 expired. Startup phase is finished. */
     case MB_RTU_RX_STATE_INIT:
         xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_READY );
         break;
 
-        /* A frame was received and t35 expired. Notify the listener that
-         * a new frame was received. */
+    /* A frame was received and t35 expired. Notify the listener that
+     * a new frame was received. */
     case MB_RTU_RX_STATE_RCV:
         xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED );
         break;
 
-        /* An error occured while receiving the frame. */
+    /* An error occured while receiving the frame. */
     case MB_RTU_RX_STATE_ERROR:
         break;
 
-        /* Function called in an illegal state. */
+    /* Function called in an illegal state. */
     default:
         assert( ( eRcvState == MB_RTU_RX_STATE_INIT ) ||
                 ( eRcvState == MB_RTU_RX_STATE_RCV ) || ( eRcvState == MB_RTU_RX_STATE_ERROR ) );
@@ -369,9 +396,9 @@ xMBRTUTimerT35Expired( MBRTUInstance* inst )
     {
         switch (eSndState)
         {
-            /* A frame was send finish and convert delay or respond timeout expired.
-             * If the frame is broadcast,The master will idle,and if the frame is not
-             * broadcast.Notify the listener process error.*/
+        /* A frame was send finish and convert delay or respond timeout expired.
+         * If the frame is broadcast,The master will idle,and if the frame is not
+         * broadcast.Notify the listener process error.*/
         case MB_RTU_TX_STATE_XFWR:
             if ( xFrameIsBroadcast == FALSE )
             {
@@ -380,7 +407,7 @@ xMBRTUTimerT35Expired( MBRTUInstance* inst )
                 xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
             }
             break;
-            /* Function called in an illegal state. */
+        /* Function called in an illegal state. */
         default:
             assert(
                 ( eSndState == MB_RTU_TX_STATE_XFWR ) || ( eSndState == MB_RTU_TX_STATE_IDLE ));

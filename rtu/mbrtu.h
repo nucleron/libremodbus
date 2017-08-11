@@ -80,7 +80,9 @@ typedef struct
     volatile eMBMasterTimerMode    cur_tmr_mode;
 } MBRTUInstance;
 
-eMBErrorCode            eMBRTUInit                    (MBRTUInstance* inst, UCHAR slaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
+extern const mb_tr_mtab mb_rtu_mtab;
+
+eMBErrorCode            eMBRTUInit                    (MBRTUInstance* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
 void                    eMBRTUStart                   (MBRTUInstance* inst                                                                       );
 void                    eMBRTUStop                    (MBRTUInstance* inst                                                                       );
 eMBErrorCode            eMBRTUReceive                 (MBRTUInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength         );

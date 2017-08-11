@@ -191,7 +191,7 @@ typedef struct
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode eMBInit(MBInstance* inst, mb_trans_base *transport, eMBMode eMode, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode eMBInit(MBInstance* inst, mb_trans_base *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
 #if MB_RTU_ENABLED
 eMBErrorCode
 eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
@@ -212,7 +212,7 @@ eMBErrorCode eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCP
 eMBErrorCode eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
 #endif
 #if MB_ASCII_ENABLED > 0
-eMBErrorCode eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
 #endif
 #if MB_TCP_ENABLED >0
 eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr );
