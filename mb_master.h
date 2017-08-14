@@ -12,7 +12,7 @@
 PR_BEGIN_EXTERN_C
 
 #include "mb_types.h"
-//void vMBMasterSetErrorType( eMBMasterErrorEventType errorType );
+//void vMBMasterSetErrorType(eMBMasterErrorEventType errorType);
 
 eMBMasterReqErrCode eMBMasterReqReadInputRegister                (MBInstance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usNRegs, LONG lTimeOut                                                                        );
 eMBMasterReqErrCode eMBMasterReqWriteHoldingRegister             (MBInstance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usRegData, LONG lTimeOut                                                                      );

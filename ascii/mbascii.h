@@ -97,21 +97,21 @@ typedef struct
 extern const mb_tr_mtab mb_ascii_mtab;
 
 eMBErrorCode            eMBASCIIInit                    (MBASCIIInstance* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
-void                    eMBASCIIStart                   (MBASCIIInstance* inst                                                                       );
-void                    eMBASCIIStop                    (MBASCIIInstance* inst                                                                       );
-eMBErrorCode            eMBASCIIReceive                 (MBASCIIInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength         );
-eMBErrorCode            eMBASCIISend                    (MBASCIIInstance* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength          );
-BOOL                    xMBASCIIReceiveFSM              (MBASCIIInstance* inst                                                                       );
-BOOL                    xMBASCIITransmitFSM             (MBASCIIInstance* inst                                                                       );
-BOOL                    xMBASCIITimerT1SExpired         (MBASCIIInstance* inst                                                                       );
+void                    eMBASCIIStart                   (MBASCIIInstance* inst                                                                      );
+void                    eMBASCIIStop                    (MBASCIIInstance* inst                                                                      );
+eMBErrorCode            eMBASCIIReceive                 (MBASCIIInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength        );
+eMBErrorCode            eMBASCIISend                    (MBASCIIInstance* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength         );
+BOOL                    xMBASCIIReceiveFSM              (MBASCIIInstance* inst                                                                      );
+BOOL                    xMBASCIITransmitFSM             (MBASCIIInstance* inst                                                                      );
+BOOL                    xMBASCIITimerT1SExpired         (MBASCIIInstance* inst                                                                      );
 //master
-void                    vMBASCIIMasterGetPDUSndBuf      (MBASCIIInstance* inst, UCHAR ** pucFrame                                                    );
-USHORT                  usMBASCIIMasterGetPDUSndLength  (MBASCIIInstance* inst                                                                       );
-void                    vMBASCIIMasterSetPDUSndLength   (MBASCIIInstance* inst, USHORT SendPDULength                                                 );
-void                    vMBASCIIMasterSetCurTimerMode   (MBASCIIInstance* inst, eMBMasterTimerMode eMBTimerMode                                      );
-BOOL                    xMBASCIIMasterRequestIsBroadcast(MBASCIIInstance* inst                                                                       );
-eMBMasterErrorEventType eMBASCIIMasterGetErrorType      (MBASCIIInstance* inst                                                                       );
-//eMBMasterReqErrCode     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                        );
+void                    vMBASCIIMasterGetPDUSndBuf      (MBASCIIInstance* inst, UCHAR ** pucFrame                                                   );
+USHORT                  usMBASCIIMasterGetPDUSndLength  (MBASCIIInstance* inst                                                                      );
+void                    vMBASCIIMasterSetPDUSndLength   (MBASCIIInstance* inst, USHORT SendPDULength                                                );
+void                    vMBASCIIMasterSetCurTimerMode   (MBASCIIInstance* inst, eMBMasterTimerMode eMBTimerMode                                     );
+BOOL                    xMBASCIIMasterRequestIsBroadcast(MBASCIIInstance* inst                                                                      );
+//eMBMasterErrorEventType eMBASCIIMasterGetErrorType      (MBASCIIInstance* inst                                                                      );
+//eMBMasterReqErrCode     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                       );
 
 PR_END_EXTERN_C
 #endif

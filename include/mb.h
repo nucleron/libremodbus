@@ -121,7 +121,7 @@ typedef struct
     //master variables
     BOOL master_mode_run;
     UCHAR master_dst_addr;
-    eMBMasterErrorEventType  master_err_cur;
+    //eMBMasterErrorEventType  master_err_cur;
 
 } MBInstance;
 
@@ -145,13 +145,13 @@ typedef struct
  *
  * \code
  * // Initialize protocol stack in RTU mode for a slave with address 10 = 0x0A
- * eMBInit( MB_RTU, 0x0A, 38400, MB_PAR_EVEN );
+ * eMBInit(MB_RTU, 0x0A, 38400, MB_PAR_EVEN);
  * // Enable the Modbus Protocol Stack.
- * eMBEnable(  );
- * for( ;; )
+ * eMBEnable();
+ * for (;;)
  * {
  *     // Call the main polling loop of the Modbus protocol stack.
- *     eMBPoll(  );
+ *     eMBPoll();
  *     ...
  * }
  * \endcode
@@ -172,7 +172,7 @@ typedef struct
  * This functions initializes the ASCII or RTU module and calls the
  * init functions of the porting layer to prepare the hardware. Please
  * note that the receiver is still disabled and no Modbus frames are
- * processed until eMBEnable( ) has been called.
+ * processed until eMBEnable() has been called.
  *
  * \param eMode If ASCII or RTU mode should be used.
  * \param ucSlaveAddress The slave address. Only frames sent to this
@@ -185,44 +185,44 @@ typedef struct
  *
  * \return If no error occurs the function returns eMBErrorCode::MB_ENOERR.
  *   The protocol is then in the disabled state and ready for activation
- *   by calling eMBEnable( ). Otherwise one of the following error codes
+ *   by calling eMBEnable(). Otherwise one of the following error codes
  *   is returned:
  *    - eMBErrorCode::MB_EINVAL If the slave address was not valid. Valid
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode eMBInit(MBInstance* inst, mb_trans_base *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode eMBInit(MBInstance* inst, mb_trans_base *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #if MB_RTU_ENABLED
 eMBErrorCode
-eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
+eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #endif
 
 #if MB_ASCII_ENABLED
-eMBErrorCode eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #endif
 
 #if MB_TCP_ENABLED > 0
-eMBErrorCode eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster  );
+eMBErrorCode eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster );
 #endif
 
 #if MB_MASTER >0
 
 #if MB_RTU_ENABLED > 0
 
-eMBErrorCode eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #endif
 #if MB_ASCII_ENABLED > 0
-eMBErrorCode eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #endif
 #if MB_TCP_ENABLED >0
-eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr );
+eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr);
 #endif
 #endif
 /*! \ingroup modbus
  * \brief Initialize the Modbus protocol stack for Modbus TCP.
  *
  * This function initializes the Modbus TCP Module. Please note that
- * frame processing is still disabled until eMBEnable( ) is called.
+ * frame processing is still disabled until eMBEnable() is called.
  *
  * \param usTCPPort The TCP port to listen on.
  * \return If the protocol stack has been initialized correctly the function
@@ -290,7 +290,7 @@ eMBErrorCode eMBPoll(MBInstance* inst);
  * \brief Configure the slave id of the device.
  *
  * This function should be called when the Modbus function <em>Report Slave ID</em>
- * is enabled ( By defining MB_FUNC_OTHER_REP_SLAVEID_ENABLED in mbconfig.h ).
+ * is enabled (By defining MB_FUNC_OTHER_REP_SLAVEID_ENABLED in mbconfig.h).
  *
  * \param ucSlaveID Values is returned in the <em>Slave ID</em> byte of the
  *   <em>Report Slave ID</em> response.
@@ -304,7 +304,7 @@ eMBErrorCode eMBPoll(MBInstance* inst);
  *   mbconfig.h is to small it returns eMBErrorCode::MB_ENORES. Otherwise
  *   it returns eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning, UCHAR const *pucAdditional, USHORT usAdditionalLen );
+eMBErrorCode eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning, UCHAR const *pucAdditional, USHORT usAdditionalLen);
 
 /*! \ingroup modbus
  * \brief Registers a callback handler for a given function code.
@@ -327,7 +327,7 @@ eMBErrorCode eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning, U
  *   valid it returns eMBErrorCode::MB_EINVAL.
  */
  ///!!! ВЫПИЛИТЬ ЭТОТ КУСОК ГОВНА!!!!!
-eMBErrorCode eMBRegisterCB( MBInstance* inst, UCHAR ucFunctionCode, pxMBFunctionHandler pxHandler );
+eMBErrorCode eMBRegisterCB(MBInstance* inst, UCHAR ucFunctionCode, pxMBFunctionHandler pxHandler);
 
 /* ----------------------- Callback -----------------------------------------*/
 
@@ -412,8 +412,8 @@ eMBErrorCode eMBRegHoldingCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNR
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Coil Register</em> value is
  *   read or written by the protocol stack. If you are going to use
- *   this function you might use the functions xMBUtilSetBits(  ) and
- *   xMBUtilGetBits(  ) for working with bitfields.
+ *   this function you might use the functions xMBUtilSetBits() and
+ *   xMBUtilGetBits() for working with bitfields.
  *
  * \param pucRegBuffer The bits are packed in bytes where the first coil
  *   starting at address \c usAddress is stored in the LSB of the
@@ -448,7 +448,7 @@ eMBErrorCode eMBRegCoilsCB(UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoi
  *   read by the protocol stack.
  *
  * If you are going to use his function you might use the functions
- * xMBUtilSetBits(  ) and xMBUtilGetBits(  ) for working with bitfields.
+ * xMBUtilSetBits() and xMBUtilGetBits() for working with bitfields.
  *
  * \param pucRegBuffer The buffer should be updated with the current
  *   coil values. The first discrete input starting at \c usAddress must be

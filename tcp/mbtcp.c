@@ -99,11 +99,11 @@ const mb_tr_mtab mb_tcp_mtab =
 };
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode
-eMBTCPDoInit(MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster )
+eMBTCPDoInit(MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster)
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
-    if( xMBTCPPortInit(inst->base.port_obj, ucTCPPort,hostaddr, bMaster ) == FALSE )
+    if (xMBTCPPortInit(inst->base.port_obj, ucTCPPort,hostaddr, bMaster) == FALSE)
     {
         eStatus = MB_EPORTERR;
     }
@@ -111,31 +111,31 @@ eMBTCPDoInit(MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL b
 }
 
 void
-eMBTCPStart(MBTCPInstance* inst )
+eMBTCPStart(MBTCPInstance* inst)
 {
 }
 
 void
-eMBTCPStop( MBTCPInstance* inst )
+eMBTCPStop(MBTCPInstance* inst)
 {
     /* Make sure that no more clients are connected. */
-    vMBTCPPortDisable(inst->base.port_obj );
+    vMBTCPPortDisable(inst->base.port_obj);
 }
 
 eMBErrorCode
-eMBTCPReceive(MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLength )
+eMBTCPReceive(MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLength)
 {
     eMBErrorCode    eStatus = MB_EIO;
     UCHAR          *pucMBTCPFrame;
     USHORT          usLength;
     USHORT          usPID;
 
-    if( xMBTCPPortGetRequest(inst->base.port_obj, &pucMBTCPFrame, &usLength ) != FALSE )
+    if (xMBTCPPortGetRequest(inst->base.port_obj, &pucMBTCPFrame, &usLength) != FALSE)
     {
         usPID = pucMBTCPFrame[MB_TCP_PID] << 8U;
         usPID |= pucMBTCPFrame[MB_TCP_PID + 1];
 
-        if( usPID == MB_TCP_PROTOCOL_ID )
+        if (usPID == MB_TCP_PROTOCOL_ID)
         {
             *ppucFrame = &pucMBTCPFrame[MB_TCP_FUNC];
             *pusLength = usLength - MB_TCP_FUNC;
@@ -155,10 +155,10 @@ eMBTCPReceive(MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, US
 }
 
 eMBErrorCode
-eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength )
+eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength)
 {
     eMBErrorCode    eStatus = MB_ENOERR;
-    UCHAR          *pucMBTCPFrame = ( UCHAR * ) pucFrame - MB_TCP_FUNC;
+    UCHAR          *pucMBTCPFrame = (UCHAR *) pucFrame - MB_TCP_FUNC;
     USHORT          usTCPLength = usLength + MB_TCP_FUNC;
 
     /* The MBAP header is already initialized because the caller calls this
@@ -167,9 +167,9 @@ eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT us
      * header includes the size of the Modbus PDU and the UID Byte. Therefore
      * the length is usLength plus one.
      */
-    pucMBTCPFrame[MB_TCP_LEN] = ( usLength + 1 ) >> 8U;
-    pucMBTCPFrame[MB_TCP_LEN + 1] = ( usLength + 1 ) & 0xFF;
-    if( xMBTCPPortSendResponse(inst->base.port_obj, pucMBTCPFrame, usTCPLength ) == FALSE )
+    pucMBTCPFrame[MB_TCP_LEN] = (usLength + 1) >> 8U;
+    pucMBTCPFrame[MB_TCP_LEN + 1] = (usLength + 1) & 0xFF;
+    if (xMBTCPPortSendResponse(inst->base.port_obj, pucMBTCPFrame, usTCPLength) == FALSE)
     {
         eStatus = MB_EIO;
     }
@@ -178,13 +178,13 @@ eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT us
 
 #if MB_MASTER > 0
 
-void vMBTCPMasterSetPDUSndLength(  MBTCPInstance* inst, USHORT SendPDULength )
+void vMBTCPMasterSetPDUSndLength( MBTCPInstance* inst, USHORT SendPDULength)
 {
     usSendPDULength = SendPDULength;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBTCPMasterGetPDUSndLength(  MBTCPInstance* inst )
+USHORT usMBTCPMasterGetPDUSndLength( MBTCPInstance* inst)
 {
     return usSendPDULength;
 }

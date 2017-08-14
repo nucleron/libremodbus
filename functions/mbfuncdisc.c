@@ -18,20 +18,20 @@
   */
 #include <mb.h>
 /* ----------------------- Defines ------------------------------------------*/
-#define MB_PDU_FUNC_READ_ADDR_OFF           ( MB_PDU_DATA_OFF )
-#define MB_PDU_FUNC_READ_DISCCNT_OFF        ( MB_PDU_DATA_OFF + 2 )
-#define MB_PDU_FUNC_READ_SIZE               ( 4 )
-#define MB_PDU_FUNC_READ_DISCCNT_MAX        ( 0x07D0 )
+#define MB_PDU_FUNC_READ_ADDR_OFF           (MB_PDU_DATA_OFF)
+#define MB_PDU_FUNC_READ_DISCCNT_OFF        (MB_PDU_DATA_OFF + 2)
+#define MB_PDU_FUNC_READ_SIZE               (4)
+#define MB_PDU_FUNC_READ_DISCCNT_MAX        (0x07D0)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception( eMBErrorCode eErrorCode );
+eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 eMBException
-eMBFuncReadDiscreteInputs(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
+eMBFuncReadDiscreteInputs(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usDiscreteCnt;
@@ -41,20 +41,20 @@ eMBFuncReadDiscreteInputs(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
     eMBException    eStatus = MB_EX_NONE;
     eMBErrorCode    eRegStatus;
 
-    if( *usLen == ( MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN ) )
+    if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
-        usRegAddress = ( USHORT )( pucFrame[MB_PDU_FUNC_READ_ADDR_OFF] << 8 );
-        usRegAddress |= ( USHORT )( pucFrame[MB_PDU_FUNC_READ_ADDR_OFF + 1] );
+        usRegAddress = (USHORT)(pucFrame[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
+        usRegAddress |= (USHORT)(pucFrame[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
         usRegAddress++;
 
-        usDiscreteCnt = ( USHORT )( pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF] << 8 );
-        usDiscreteCnt |= ( USHORT )( pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF + 1] );
+        usDiscreteCnt = (USHORT)(pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF] << 8);
+        usDiscreteCnt |= (USHORT)(pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF + 1]);
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-        if( ( usDiscreteCnt >= 1 ) &&
-            ( usDiscreteCnt < MB_PDU_FUNC_READ_DISCCNT_MAX ) )
+        if ((usDiscreteCnt >= 1) &&
+            (usDiscreteCnt < MB_PDU_FUNC_READ_DISCCNT_MAX))
         {
             /* Set the current PDU data pointer to the beginning. */
             pucFrameCur = &pucFrame[MB_PDU_FUNC_OFF];
@@ -66,24 +66,24 @@ eMBFuncReadDiscreteInputs(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen )
 
             /* Test if the quantity of coils is a multiple of 8. If not last
              * byte is only partially field with unused coils set to zero. */
-            if( ( usDiscreteCnt & 0x0007 ) != 0 )
+            if ((usDiscreteCnt & 0x0007) != 0)
             {
-                ucNBytes = ( UCHAR ) ( usDiscreteCnt / 8 + 1 );
+                ucNBytes = (UCHAR) (usDiscreteCnt / 8 + 1);
             }
             else
             {
-                ucNBytes = ( UCHAR ) ( usDiscreteCnt / 8 );
+                ucNBytes = (UCHAR) (usDiscreteCnt / 8);
             }
             *pucFrameCur++ = ucNBytes;
             *usLen += 1;
 
             eRegStatus =
-                eMBRegDiscreteCB( pucFrameCur, usRegAddress, usDiscreteCnt );
+                eMBRegDiscreteCB(pucFrameCur, usRegAddress, usDiscreteCnt);
 
             /* If an error occured convert it into a Modbus exception. */
-            if( eRegStatus != MB_ENOERR )
+            if (eRegStatus != MB_ENOERR)
             {
-                eStatus = prveMBError2Exception( eRegStatus );
+                eStatus = prveMBError2Exception(eRegStatus);
             }
             else
             {

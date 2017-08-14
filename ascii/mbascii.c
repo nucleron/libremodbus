@@ -79,8 +79,8 @@ const mb_tr_mtab mb_ascii_mtab =
 };
 
 /* ----------------------- Static functions ---------------------------------*/
-static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter             );
-static UCHAR    prvucMBBIN2CHAR(UCHAR ucByte                  );
+static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter            );
+static UCHAR    prvucMBBIN2CHAR(UCHAR ucByte                 );
 static UCHAR    prvucMBLRC     (UCHAR * pucFrame, USHORT usLen);
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode eMBASCIIInit(MBASCIIInstance* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity)
@@ -101,14 +101,14 @@ eMBErrorCode eMBASCIIInit(MBASCIIInstance* inst, BOOL is_master, UCHAR ucSlaveAd
 
     usSndBufferCount=0;
 
-    ENTER_CRITICAL_SECTION(  );
+    ENTER_CRITICAL_SECTION();
     ucMBLFCharacter = MB_ASCII_DEFAULT_LF;
 
-    if( xMBPortSerialInit((mb_port_ser *)inst->base.port_obj, ulBaudRate, 7, eParity ) != TRUE )
+    if (xMBPortSerialInit((mb_port_ser *)inst->base.port_obj, ulBaudRate, 7, eParity) != TRUE)
     {
         eStatus = MB_EPORTERR;
     }
-    else if( xMBPortTimersInit((mb_port_ser *)inst->base.port_obj, MB_ASCII_TIMEOUT_SEC * 20000UL ) != TRUE )
+    else if (xMBPortTimersInit((mb_port_ser *)inst->base.port_obj, MB_ASCII_TIMEOUT_SEC * 20000UL) != TRUE)
     {
         eStatus = MB_EPORTERR;
     }
@@ -117,40 +117,40 @@ eMBErrorCode eMBASCIIInit(MBASCIIInstance* inst, BOOL is_master, UCHAR ucSlaveAd
     eSndState = MB_ASCII_TX_STATE_IDLE;
     //inst->serial_port.parent = (void*)(inst);
 
-    EXIT_CRITICAL_SECTION(  );
+    EXIT_CRITICAL_SECTION();
 
     return eStatus;
 }
 
 void eMBASCIIStart(MBASCIIInstance* inst)
 {
-    ENTER_CRITICAL_SECTION(  );
-    vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE );
+    ENTER_CRITICAL_SECTION();
+    vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
     eRcvState = MB_ASCII_RX_STATE_IDLE;
-    EXIT_CRITICAL_SECTION(  );
+    EXIT_CRITICAL_SECTION();
 
     /* No special startup required for ASCII. */
-    ( void )xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_READY );
+    (void)xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_READY);
 }
 
 void eMBASCIIStop(MBASCIIInstance* inst)
 {
-    ENTER_CRITICAL_SECTION(  );
-    vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE );
+    ENTER_CRITICAL_SECTION();
+    vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
     vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
-    EXIT_CRITICAL_SECTION(  );
+    EXIT_CRITICAL_SECTION();
 }
 
 eMBErrorCode eMBASCIIReceive(MBASCIIInstance* inst,  UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength)
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
-    ENTER_CRITICAL_SECTION(  );
-    assert( usRcvBufferPos < MB_ASCII_SER_PDU_SIZE_MAX );
+    ENTER_CRITICAL_SECTION();
+    assert(usRcvBufferPos < MB_ASCII_SER_PDU_SIZE_MAX);
 
     /* Length and CRC check */
-    if( ( usRcvBufferPos >= MB_ASCII_SER_PDU_SIZE_MIN )
-            && ( prvucMBLRC( ( UCHAR * ) ucASCIIRcvBuf, usRcvBufferPos ) == 0 ) )
+    if ((usRcvBufferPos >= MB_ASCII_SER_PDU_SIZE_MIN)
+            && (prvucMBLRC((UCHAR *) ucASCIIRcvBuf, usRcvBufferPos) == 0))
     {
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there.
@@ -160,16 +160,16 @@ eMBErrorCode eMBASCIIReceive(MBASCIIInstance* inst,  UCHAR * pucRcvAddress, UCHA
         /* Total length of Modbus-PDU is Modbus-Serial-Line-PDU minus
          * size of address field and CRC checksum.
          */
-        *pusLength = ( USHORT )( usRcvBufferPos - MB_ASCII_SER_PDU_PDU_OFF - MB_ASCII_SER_PDU_SIZE_LRC );
+        *pusLength = (USHORT)(usRcvBufferPos - MB_ASCII_SER_PDU_PDU_OFF - MB_ASCII_SER_PDU_SIZE_LRC);
 
         /* Return the start of the Modbus PDU to the caller. */
-        *pucFrame = ( UCHAR * ) & ucASCIIRcvBuf[MB_ASCII_SER_PDU_PDU_OFF];
+        *pucFrame = (UCHAR *) & ucASCIIRcvBuf[MB_ASCII_SER_PDU_PDU_OFF];
     }
     else
     {
         eStatus = MB_EIO;
     }
-    EXIT_CRITICAL_SECTION(  );
+    EXIT_CRITICAL_SECTION();
     return eStatus;
 }
 
@@ -178,15 +178,15 @@ eMBErrorCode eMBASCIISend(MBASCIIInstance* inst,  UCHAR ucSlaveAddress, const UC
     eMBErrorCode    eStatus = MB_ENOERR;
     UCHAR           usLRC;
 
-    ENTER_CRITICAL_SECTION(  );
+    ENTER_CRITICAL_SECTION();
     /* Check if the receiver is still in idle state. If not we where too
      * slow with processing the received frame and the master sent another
      * frame on the network. We have to abort sending the frame.
      */
-    if( eRcvState == MB_ASCII_RX_STATE_IDLE )
+    if (eRcvState == MB_ASCII_RX_STATE_IDLE)
     {
         /* First byte before the Modbus-PDU is the slave address. */
-        pucSndBufferCur = ( UCHAR * ) pucFrame - 1;
+        pucSndBufferCur = (UCHAR *) pucFrame - 1;
         usSndBufferCount = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
@@ -194,18 +194,18 @@ eMBErrorCode eMBASCIISend(MBASCIIInstance* inst,  UCHAR ucSlaveAddress, const UC
         usSndBufferCount += usLength;
 
         /* Calculate LRC checksum for Modbus-Serial-Line-PDU. */
-        usLRC = prvucMBLRC( ( UCHAR * ) pucSndBufferCur, usSndBufferCount );
+        usLRC = prvucMBLRC((UCHAR *) pucSndBufferCur, usSndBufferCount);
         ucASCIISndBuf[usSndBufferCount++] = usLRC;
 
         /* Activate the transmitter. */
         eSndState = MB_ASCII_TX_STATE_START;
-        vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE );
+        vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE);
     }
     else
     {
         eStatus = MB_EIO;
     }
-    EXIT_CRITICAL_SECTION(  );
+    EXIT_CRITICAL_SECTION();
     return eStatus;
 }
 
@@ -215,10 +215,10 @@ BOOL xMBASCIIReceiveFSM(MBASCIIInstance* inst)
     UCHAR           ucByte;
     UCHAR           ucResult;
 
-    assert(( eSndState == MB_ASCII_TX_STATE_IDLE )|| ( eSndState == MB_ASCII_TX_STATE_XFWR ));
+    assert((eSndState == MB_ASCII_TX_STATE_IDLE)|| (eSndState == MB_ASCII_TX_STATE_XFWR));
 
-    (void)xMBPortSerialGetByte((mb_port_ser *)inst->base.port_obj, ( CHAR * ) & ucByte );
-    switch ( eRcvState )
+    (void)xMBPortSerialGetByte((mb_port_ser *)inst->base.port_obj, (CHAR *) & ucByte);
+    switch (eRcvState)
     {
     /* A new character is received. If the character is a ':' the input
      * buffer is cleared. A CR-character signals the end of the data
@@ -227,28 +227,28 @@ BOOL xMBASCIIReceiveFSM(MBASCIIInstance* inst)
      */
     case MB_ASCII_RX_STATE_RCV:
         /* Enable timer for character timeout. */
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj );
-        if( ucByte == ':' )
+        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
+        if (ucByte == ':')
         {
             /* Empty receive buffer. */
             eBytePos = BYTE_HIGH_NIBBLE;
             usRcvBufferPos = 0;
         }
-        else if( ucByte == MB_ASCII_DEFAULT_CR )
+        else if (ucByte == MB_ASCII_DEFAULT_CR)
         {
             eRcvState = MB_ASCII_RX_STATE_WAIT_EOF;
         }
         else
         {
-            ucResult = prvucMBCHAR2BIN( ucByte );
-            switch ( eBytePos )
+            ucResult = prvucMBCHAR2BIN(ucByte);
+            switch (eBytePos)
             {
             /* High nibble of the byte comes first. We check for
              * a buffer overflow here. */
             case BYTE_HIGH_NIBBLE:
-                if( usRcvBufferPos < MB_ASCII_SER_PDU_SIZE_MAX )
+                if (usRcvBufferPos < MB_ASCII_SER_PDU_SIZE_MAX)
                 {
-                    ucASCIIRcvBuf[usRcvBufferPos] = ( UCHAR )( ucResult << 4 );
+                    ucASCIIRcvBuf[usRcvBufferPos] = (UCHAR)(ucResult << 4);
                     eBytePos = BYTE_LOW_NIBBLE;
                     break;
                 }
@@ -272,19 +272,19 @@ BOOL xMBASCIIReceiveFSM(MBASCIIInstance* inst)
         break;
 
     case MB_ASCII_RX_STATE_WAIT_EOF:
-        if( ucByte == ucMBLFCharacter )
+        if (ucByte == ucMBLFCharacter)
         {
             /* Disable character timeout timer because all characters are
              * received. */
-            vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj  );
+            vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj );
             /* Receiver is again in idle state. */
             eRcvState = MB_ASCII_RX_STATE_IDLE;
 
             /* Notify the caller of eMBASCIIReceive that a new frame
              * was received. */
-            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED );
+            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
         }
-        else if( ucByte == ':' )
+        else if (ucByte == ':')
         {
             /* Empty receive buffer and back to receive state. */
             eBytePos = BYTE_HIGH_NIBBLE;
@@ -292,7 +292,7 @@ BOOL xMBASCIIReceiveFSM(MBASCIIInstance* inst)
             eRcvState = MB_ASCII_RX_STATE_RCV;
 
             /* Enable timer for character timeout. */
-            vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj );
+            vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
         }
         else
         {
@@ -302,17 +302,17 @@ BOOL xMBASCIIReceiveFSM(MBASCIIInstance* inst)
         break;
 
     case MB_ASCII_RX_STATE_IDLE:
-        if( ucByte == ':' )
+        if (ucByte == ':')
         {
 #if MB_MASTER > 0
-            if(asciiMaster == TRUE)
+            if (asciiMaster == TRUE)
             {
-                vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj );
+                vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
                 eSndState = MB_ASCII_TX_STATE_IDLE;
             }
 #endif
             /* Enable timer for character timeout. */
-            vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj );
+            vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
             /* Reset the input buffers to store the frame. */
             usRcvBufferPos = 0;;
             eBytePos = BYTE_HIGH_NIBBLE;
@@ -329,14 +329,14 @@ BOOL xMBASCIITransmitFSM(MBASCIIInstance* inst)
     BOOL            xNeedPoll = FALSE;
     UCHAR           ucByte;
 
-    assert( eRcvState == MB_ASCII_RX_STATE_IDLE );
-    switch ( eSndState )
+    assert(eRcvState == MB_ASCII_RX_STATE_IDLE);
+    switch (eSndState)
     {
     /* Start of transmission. The start of a frame is defined by sending
      * the character ':'. */
     case MB_ASCII_TX_STATE_START:
         ucByte = ':';
-        xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, ( CHAR )ucByte );
+        xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR)ucByte);
         eSndState = MB_ASCII_TX_STATE_DATA;
         eBytePos = BYTE_HIGH_NIBBLE;
         break;
@@ -346,19 +346,19 @@ BOOL xMBASCIITransmitFSM(MBASCIIInstance* inst)
      * last. If all data bytes are exhausted we send a '\r' character
      * to end the transmission. */
     case MB_ASCII_TX_STATE_DATA:
-        if( usSndBufferCount > 0 )
+        if (usSndBufferCount > 0)
         {
-            switch ( eBytePos )
+            switch (eBytePos)
             {
             case BYTE_HIGH_NIBBLE:
-                ucByte = prvucMBBIN2CHAR( ( UCHAR )( *pucSndBufferCur >> 4 ) );
-                xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, ( CHAR ) ucByte );
+                ucByte = prvucMBBIN2CHAR((UCHAR)(*pucSndBufferCur >> 4));
+                xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR) ucByte);
                 eBytePos = BYTE_LOW_NIBBLE;
                 break;
 
             case BYTE_LOW_NIBBLE:
-                ucByte = prvucMBBIN2CHAR( ( UCHAR )( *pucSndBufferCur & 0x0F ) );
-                xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, ( CHAR )ucByte );
+                ucByte = prvucMBBIN2CHAR((UCHAR)(*pucSndBufferCur & 0x0F));
+                xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR)ucByte);
                 pucSndBufferCur++;
                 eBytePos = BYTE_HIGH_NIBBLE;
                 usSndBufferCount--;
@@ -367,14 +367,14 @@ BOOL xMBASCIITransmitFSM(MBASCIIInstance* inst)
         }
         else
         {
-            xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, MB_ASCII_DEFAULT_CR );
+            xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, MB_ASCII_DEFAULT_CR);
             eSndState = MB_ASCII_TX_STATE_END;
         }
         break;
 
     /* Finish the frame by sending a LF character. */
     case MB_ASCII_TX_STATE_END:
-        xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, ( CHAR )ucMBLFCharacter );
+        xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR)ucMBLFCharacter);
         /* We need another state to make sure that the CR character has
          * been sent. */
         eSndState = MB_ASCII_TX_STATE_NOTIFY;
@@ -384,23 +384,23 @@ BOOL xMBASCIITransmitFSM(MBASCIIInstance* inst)
      * been sent. */
     case MB_ASCII_TX_STATE_NOTIFY:
 #if MB_MASTER >0
-        if(asciiMaster==TRUE)
+        if (asciiMaster==TRUE)
         {
 
-            xFrameIsBroadcast = ( ucASCIISndBuf[MB_ASCII_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST ) ? TRUE : FALSE;
+            xFrameIsBroadcast = (ucASCIISndBuf[MB_ASCII_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
-            vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE );
+            vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
             eSndState = MB_ASCII_TX_STATE_XFWR;
             /* If the frame is broadcast ,master will enable timer of convert delay,
              * else master will enable timer of respond timeout. */
-            if ( xFrameIsBroadcast == TRUE )
+            if (xFrameIsBroadcast == TRUE)
             {
-                vMBPortTimersConvertDelayEnable((mb_port_ser *)inst->base.port_obj );
+                vMBPortTimersConvertDelayEnable((mb_port_ser *)inst->base.port_obj);
             }
             else
             {
-                vMBPortTimersRespondTimeoutEnable((mb_port_ser *)inst->base.port_obj );
+                vMBPortTimersRespondTimeoutEnable((mb_port_ser *)inst->base.port_obj);
             }
 
         }
@@ -408,11 +408,11 @@ BOOL xMBASCIITransmitFSM(MBASCIIInstance* inst)
 #endif
         {
             eSndState = MB_ASCII_TX_STATE_IDLE;
-            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT );
+            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
 
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
-            vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE );
+            vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
             eSndState = MB_ASCII_TX_STATE_IDLE;
         }
         break;
@@ -421,7 +421,7 @@ BOOL xMBASCIITransmitFSM(MBASCIIInstance* inst)
      * idle state.  */
     case MB_ASCII_TX_STATE_IDLE:
         /* enable receiver/disable transmitter. */
-        vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE );
+        vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
         break;
     default:
         break;
@@ -432,7 +432,7 @@ BOOL xMBASCIITransmitFSM(MBASCIIInstance* inst)
 
 BOOL xMBASCIITimerT1SExpired(MBASCIIInstance* inst)
 {
-    switch ( eRcvState )
+    switch (eRcvState)
     {
     /* If we have a timeout we go back to the idle state and wait for
      * the next frame.
@@ -443,10 +443,10 @@ BOOL xMBASCIITimerT1SExpired(MBASCIIInstance* inst)
         break;
 
     default:
-        assert( ( eRcvState == MB_ASCII_RX_STATE_RCV ) || ( eRcvState == MB_ASCII_RX_STATE_WAIT_EOF ) );
+        assert((eRcvState == MB_ASCII_RX_STATE_RCV) || (eRcvState == MB_ASCII_RX_STATE_WAIT_EOF));
         break;
     }
-    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj );
+    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
 
     /* no context switch required. */
     return FALSE;
@@ -455,13 +455,13 @@ BOOL xMBASCIITimerT1SExpired(MBASCIIInstance* inst)
 
 static UCHAR prvucMBCHAR2BIN(UCHAR ucCharacter)
 {
-    if( ( ucCharacter >= '0' ) && ( ucCharacter <= '9' ) )
+    if ((ucCharacter >= '0') && (ucCharacter <= '9'))
     {
-        return ( UCHAR )( ucCharacter - '0' );
+        return (UCHAR)(ucCharacter - '0');
     }
-    else if( ( ucCharacter >= 'A' ) && ( ucCharacter <= 'F' ) )
+    else if ((ucCharacter >= 'A') && (ucCharacter <= 'F'))
     {
-        return ( UCHAR )( ucCharacter - 'A' + 0x0A );
+        return (UCHAR)(ucCharacter - 'A' + 0x0A);
     }
     else
     {
@@ -471,71 +471,71 @@ static UCHAR prvucMBCHAR2BIN(UCHAR ucCharacter)
 
 static UCHAR prvucMBBIN2CHAR(UCHAR ucByte)
 {
-    if( ucByte <= 0x09 )
+    if (ucByte <= 0x09)
     {
-        return ( UCHAR )( '0' + ucByte );
+        return (UCHAR)('0' + ucByte);
     }
-    else if( ( ucByte >= 0x0A ) && ( ucByte <= 0x0F ) )
+    else if ((ucByte >= 0x0A) && (ucByte <= 0x0F))
     {
-        return ( UCHAR )( ucByte - 0x0A + 'A' );
+        return (UCHAR)(ucByte - 0x0A + 'A');
     }
     else
     {
         /* Programming error. */
-        assert( 0 );
+        assert(0);
     }
     return '0';
 }
 
 
-static UCHAR prvucMBLRC( UCHAR * pucFrame, USHORT usLen )
+static UCHAR prvucMBLRC(UCHAR * pucFrame, USHORT usLen)
 {
     UCHAR ucLRC = 0;  /* LRC char initialized */
 
-    while( usLen-- )
+    while (usLen--)
     {
         ucLRC += *pucFrame++;   /* Add buffer byte without carry */
     }
 
     /* Return twos complement */
-    ucLRC = ( UCHAR ) ( -( ( CHAR ) ucLRC ) );
+    ucLRC = (UCHAR) (-((CHAR) ucLRC));
     return ucLRC;
 }
 
 /* Get Modbus send PDU's buffer address pointer.*/
-void vMBASCIIMasterGetPDUSndBuf( MBASCIIInstance* inst, UCHAR ** pucFrame )
+void vMBASCIIMasterGetPDUSndBuf(MBASCIIInstance* inst, UCHAR ** pucFrame)
 {
-    *pucFrame = ( UCHAR * ) &ucASCIISndBuf[MB_ASCII_SER_PDU_PDU_OFF];
+    *pucFrame = (UCHAR *) &ucASCIISndBuf[MB_ASCII_SER_PDU_PDU_OFF];
 }
 
 
 
 /* Get Modbus Master send RTU's buffer address pointer.*/
-void vMBASCIIMasterGetRTUSndBuf( MBASCIIInstance* inst, UCHAR ** pucFrame )
+void vMBASCIIMasterGetRTUSndBuf(MBASCIIInstance* inst, UCHAR ** pucFrame)
 {
-    *pucFrame = ( UCHAR * ) ucASCIISndBuf;
+    *pucFrame = (UCHAR *) ucASCIISndBuf;
 }
 
 /* Set Modbus Master send PDU's buffer length.*/
-void vMBASCIIMasterSetPDUSndLength(  MBASCIIInstance* inst, USHORT SendPDULength )
+void vMBASCIIMasterSetPDUSndLength( MBASCIIInstance* inst, USHORT SendPDULength)
 {
     usSendPDULength = SendPDULength;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBASCIIMasterGetPDUSndLength(  MBASCIIInstance* inst )
+USHORT usMBASCIIMasterGetPDUSndLength( MBASCIIInstance* inst)
 {
     return usSendPDULength;
 }
 
 /* Set Modbus Master current timer mode.*/
-void vMBASCIIMasterSetCurTimerMode( MBASCIIInstance* inst, eMBMasterTimerMode eMBTimerMode )
+void vMBASCIIMasterSetCurTimerMode(MBASCIIInstance* inst, eMBMasterTimerMode eMBTimerMode)
 {
     eCurTimerMode = eMBTimerMode;
 }
 
 /* The master request is broadcast? */
-BOOL xMBASCIIMasterRequestIsBroadcast( MBASCIIInstance* inst )
+BOOL xMBASCIIMasterRequestIsBroadcast(MBASCIIInstance* inst)
 {
     return xFrameIsBroadcast;
 }

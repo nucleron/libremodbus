@@ -27,8 +27,8 @@ PR_BEGIN_EXTERN_C
  * registers should be updated and reading means that the modbus protocol
  * stack needs to know the current register values.
  *
- * \see eMBRegHoldingCB( ), eMBRegCoilsCB( ), eMBRegDiscreteCB( ) and
- *   eMBRegInputCB( ).
+ * \see eMBRegHoldingCB(), eMBRegCoilsCB(), eMBRegDiscreteCB() and
+ *   eMBRegInputCB().
  */
 typedef enum
 {
@@ -46,20 +46,22 @@ typedef enum
     EV_EXECUTE,                 /*!< Execute function. */
     EV_FRAME_SENT,               /*!< Frame sent. */
 	/*master events*/
-	EV_ERROR_PROCESS//,
+	//EV_ERROR_PROCESS,
 //	EV_ERROR_RESPOND_TIMEOUT,
 //
-//	EV_MASTER_ERROR_RESPOND_TIMEOUT    = 1<<6,  /*!< Request respond timeout. */
-//	EV_MASTER_ERROR_RECEIVE_DATA       = 1<<7,  /*!< Request receive data error. */
-//	EV_MASTER_ERROR_EXECUTE_FUNCTION   = 1<<8,  /*!< Request execute function error. */
+#if MB_MASTER >0
+    EV_MASTER_ERROR_RESPOND_TIMEOUT,  /*!< Request respond timeout. */
+    EV_MASTER_ERROR_RECEIVE_DATA,     /*!< Request receive data error. */
+    EV_MASTER_ERROR_EXECUTE_FUNCTION, /*!< Request execute function error. */
+#endif
 } eMBEventType;
 
-typedef enum
-{
-    ERR_EV_ERROR_RESPOND_TIMEOUT,         /*!< Slave respond timeout. */
-    ERR_EV_ERROR_RECEIVE_DATA,            /*!< Receive frame data erroe. */
-    ERR_EV_ERROR_EXECUTE_FUNCTION,        /*!< Execute function error. */
-} eMBMasterErrorEventType;
+//typedef enum
+//{
+//    ERR_EV_ERROR_RESPOND_TIMEOUT,         /*!< Slave respond timeout. */
+//    ERR_EV_ERROR_RECEIVE_DATA,            /*!< Receive frame data erroe. */
+//    ERR_EV_ERROR_EXECUTE_FUNCTION,        /*!< Execute function error. */
+//} eMBMasterErrorEventType;
 
 /*! \ingroup modbus
  * \brief Errorcodes used by all function in the protocol stack.
@@ -73,7 +75,8 @@ typedef enum
     MB_ENORES,                  /*!< insufficient resources. */
     MB_EIO,                     /*!< I/O error. */
     MB_EILLSTATE,               /*!< protocol stack in illegal state. */
-    MB_ETIMEDOUT                /*!< timeout error occurred. */
+    MB_ETIMEDOUT,               /*!< timeout error occurred. */
+    MB_EILLFUNC                 /*!< illegal MB function. */
 } eMBErrorCode;
 
 /* master */

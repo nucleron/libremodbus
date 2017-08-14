@@ -70,14 +70,14 @@ typedef void    (*pvMBFrameStart)(mb_trans_base * transport);
 typedef void    (*pvMBFrameStop) (mb_trans_base * transport);
 
 typedef eMBErrorCode (*peMBFrameReceive) (mb_trans_base * transport, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
-typedef eMBErrorCode (*peMBFrameSend)    (mb_trans_base * transport, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength );
-typedef void         (*pvGetRxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                           );
-typedef void         (*pvGetTxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                           );
+typedef eMBErrorCode (*peMBFrameSend)    (mb_trans_base * transport, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength);
+typedef void         (*pvGetRxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                          );
+typedef void         (*pvGetTxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                          );
 
 //Port
-typedef void( *pvMBFrameClose ) (mb_port_base * );
-typedef void( *pvPortEventPost) (mb_port_base *, eMBEventType);
-typedef BOOL ( *pvPortEventGet) (mb_port_base *, void*, eMBEventType*);
+typedef void(*pvMBFrameClose) (mb_port_base *);
+typedef void(*pvPortEventPost) (mb_port_base *, eMBEventType);
+typedef BOOL (*pvPortEventGet) (mb_port_base *, void*, eMBEventType*);
 
 typedef BOOL (*pbMBMasterRequestIsBroadcast)(void*);
 PR_END_EXTERN_C
