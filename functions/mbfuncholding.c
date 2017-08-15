@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbfuncholding.c,v 1.12 2007/02/18 23:48:22 wolti Exp $
+ * File: $Id: mbfuncholding.c, v 1.12 2007/02/18 23:48:22 wolti Exp $
  */
 #include <mb.h>
 /* ----------------------- Defines ------------------------------------------*/
@@ -61,7 +61,7 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
 
 eMBException
-eMBFuncWriteHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBFuncWriteHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     eMBException    eStatus = MB_EX_NONE;
@@ -94,7 +94,7 @@ eMBFuncWriteHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
 
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
 eMBException
-eMBFuncWriteMultipleHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
@@ -154,7 +154,7 @@ eMBFuncWriteMultipleHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT *
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
 
 eMBException
-eMBFuncReadHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
@@ -219,7 +219,7 @@ eMBFuncReadHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
 
 eMBException
-eMBFuncReadWriteMultipleHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegReadAddress;
     USHORT          usRegReadCount;

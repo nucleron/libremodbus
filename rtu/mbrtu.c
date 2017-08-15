@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbrtu.c,v 1.18 2007/09/12 10:15:56 wolti Exp $
+ * File: $Id: mbrtu.c, v 1.18 2007/09/12 10:15:56 wolti Exp $
  */
 #include <mb.h>
 #include <mbcrc.h>
@@ -66,7 +66,7 @@ const mb_tr_mtab mb_rtu_mtab =
 
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode
-eMBRTUInit(MBRTUInstance* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity)
+eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity)
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     ULONG           usTimerT35_50us;
@@ -127,7 +127,7 @@ eMBRTUInit(MBRTUInstance* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBa
 }
 
 void
-eMBRTUStart(MBRTUInstance* inst)
+eMBRTUStart(mb_rtu_tr* inst)
 {
     ENTER_CRITICAL_SECTION();
     /* Initially the receiver is in the state MB_RTU_RX_STATE_INIT. we start
@@ -143,16 +143,16 @@ eMBRTUStart(MBRTUInstance* inst)
 }
 
 void
-eMBRTUStop(MBRTUInstance* inst)
+eMBRTUStop(mb_rtu_tr* inst)
 {
     ENTER_CRITICAL_SECTION();
     vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
-    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj );
+    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
     EXIT_CRITICAL_SECTION();
 }
 
 eMBErrorCode
-eMBRTUReceive(MBRTUInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength)
+eMBRTUReceive(mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength)
 {
     //BOOL            xFrameReceived = FALSE;
     eMBErrorCode    eStatus = MB_ENOERR;
@@ -189,7 +189,7 @@ eMBRTUReceive(MBRTUInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USH
 }
 
 eMBErrorCode
-eMBRTUSend(MBRTUInstance* inst, UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength)
+eMBRTUSend(mb_rtu_tr* inst, UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength)
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     USHORT          usCRC16;
@@ -228,7 +228,7 @@ eMBRTUSend(MBRTUInstance* inst, UCHAR ucSlaveAddress, const UCHAR * pucFrame, US
 }
 
 BOOL
-xMBRTUReceiveFSM(MBRTUInstance* inst)
+xMBRTUReceiveFSM(mb_rtu_tr* inst)
 {
     BOOL            xTaskNeedSwitch = FALSE;
     UCHAR           ucByte;
@@ -244,14 +244,14 @@ xMBRTUReceiveFSM(MBRTUInstance* inst)
      * wait until the frame is finished.
      */
     case MB_RTU_RX_STATE_INIT:
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj );
+        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
         break;
 
     /* In the error state we wait until all characters in the
      * damaged frame are transmitted.
      */
     case MB_RTU_RX_STATE_ERROR:
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj );
+        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
         break;
 
     /* In the idle state we wait for a new character. If a character
@@ -271,7 +271,7 @@ xMBRTUReceiveFSM(MBRTUInstance* inst)
         eRcvState = MB_RTU_RX_STATE_RCV;
 
         /* Enable t3.5 timers. */
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj );
+        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
         break;
 
     /* We are currently receiving a frame. Reset the timer after
@@ -295,7 +295,7 @@ xMBRTUReceiveFSM(MBRTUInstance* inst)
 }
 
 BOOL
-xMBRTUTransmitFSM(MBRTUInstance* inst)
+xMBRTUTransmitFSM(mb_rtu_tr* inst)
 {
     BOOL            xNeedPoll = FALSE;
 
@@ -329,7 +329,7 @@ xMBRTUTransmitFSM(MBRTUInstance* inst)
                  * empty interrupt. */
                 vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
                 eSndState = MB_RTU_TX_STATE_XFWR;
-                /* If the frame is broadcast ,master will enable timer of convert delay,
+                /* If the frame is broadcast , master will enable timer of convert delay,
                  * else master will enable timer of respond timeout. */
                 if (xFrameIsBroadcast == TRUE)
                 {
@@ -362,7 +362,7 @@ xMBRTUTransmitFSM(MBRTUInstance* inst)
 
 
 BOOL
-xMBRTUTimerT35Expired(MBRTUInstance* inst)
+xMBRTUTimerT35Expired(mb_rtu_tr* inst)
 {
     BOOL            xNeedPoll = FALSE;
 
@@ -389,7 +389,7 @@ xMBRTUTimerT35Expired(MBRTUInstance* inst)
                 (eRcvState == MB_RTU_RX_STATE_RCV) || (eRcvState == MB_RTU_RX_STATE_ERROR));
     }
 
-    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj );
+    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
     eRcvState = MB_RTU_RX_STATE_IDLE;
 #if MB_MASTER >0
     if (rtuMaster == TRUE)
@@ -397,12 +397,12 @@ xMBRTUTimerT35Expired(MBRTUInstance* inst)
         switch (eSndState)
         {
         /* A frame was send finish and convert delay or respond timeout expired.
-         * If the frame is broadcast,The master will idle,and if the frame is not
+         * If the frame is broadcast, The master will idle, and if the frame is not
          * broadcast.Notify the listener process error.*/
         case MB_RTU_TX_STATE_XFWR:
             if (xFrameIsBroadcast == FALSE)
             {
-                //((MBInstance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
+                //((mb_instance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
                 //vMBSetErrorType(ERR_EV_ERROR_RESPOND_TIMEOUT); //FIXME pass reference to instance
                 //xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
                 xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
@@ -429,39 +429,39 @@ xMBRTUTimerT35Expired(MBRTUInstance* inst)
 }
 
 /* Get Modbus Master send PDU's buffer address pointer.*/
-void vMBRTUMasterGetPDUSndBuf(MBRTUInstance* inst, UCHAR ** pucFrame)
+void vMBRTUMasterGetPDUSndBuf(mb_rtu_tr* inst, UCHAR ** pucFrame)
 {
     *pucFrame = (UCHAR *) &ucRTUSndBuf[MB_RTU_SER_PDU_PDU_OFF];
 }
 
 #if MB_MASTER > 0
 /* Get Modbus send RTU's buffer address pointer.*/
-void vMBMasterGetRTUSndBuf(MBRTUInstance* inst, UCHAR ** pucFrame)
+void vMBMasterGetRTUSndBuf(mb_rtu_tr* inst, UCHAR ** pucFrame)
 {
     *pucFrame = (UCHAR *) ucRTUSndBuf;
 }
 
 
 /* Set Modbus Master send PDU's buffer length.*/
-void vMBRTUMasterSetPDUSndLength( MBRTUInstance* inst, USHORT SendPDULength)
+void vMBRTUMasterSetPDUSndLength(mb_rtu_tr* inst, USHORT SendPDULength)
 {
     usSendPDULength = SendPDULength;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBRTUMasterGetPDUSndLength( MBRTUInstance* inst)
+USHORT usMBRTUMasterGetPDUSndLength(mb_rtu_tr* inst)
 {
     return usSendPDULength;
 }
 
 /* Set Modbus Master current timer mode.*/
-void vMBRTUMasterSetCurTimerMode(MBRTUInstance* inst, eMBMasterTimerMode eMBTimerMode)
+void vMBRTUMasterSetCurTimerMode(mb_rtu_tr* inst, eMBMasterTimerMode eMBTimerMode)
 {
     eCurTimerMode = eMBTimerMode;
 }
 
 /* The master request is broadcast? */
-BOOL xMBRTUMasterRequestIsBroadcast(MBRTUInstance* inst)
+BOOL xMBRTUMasterRequestIsBroadcast(mb_rtu_tr* inst)
 {
     return xFrameIsBroadcast;
 }

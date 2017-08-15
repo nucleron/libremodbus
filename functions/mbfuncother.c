@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbfuncother.c,v 1.8 2006/12/07 22:10:34 wolti Exp $
+ * File: $Id: mbfuncother.c, v 1.8 2006/12/07 22:10:34 wolti Exp $
  */
 
 #include <mb.h>
@@ -40,7 +40,7 @@
 /* ----------------------- Start implementation -----------------------------*/
 
 eMBErrorCode
-eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning,
+eMBSetSlaveID(mb_instance* inst, UCHAR ucSlaveID, BOOL xIsRunning,
                UCHAR const *pucAdditional, USHORT usAdditionalLen)
 {
     eMBErrorCode    eStatus = MB_ENOERR;
@@ -68,7 +68,7 @@ eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning,
 }
 
 eMBException
-eMBFuncReportSlaveID(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBFuncReportSlaveID(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     memcpy(&pucFrame[MB_PDU_DATA_OFF], &ucMBSlaveID[0], (size_t)usMBSlaveIDLen);
     *usLen = (USHORT)(MB_PDU_DATA_OFF + usMBSlaveIDLen);

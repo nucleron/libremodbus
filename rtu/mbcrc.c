@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbcrc.c,v 1.7 2007/02/18 23:50:27 wolti Exp $
+ * File: $Id: mbcrc.c, v 1.7 2007/02/18 23:50:27 wolti Exp $
  */
 /* ----------------------- Platform includes --------------------------------*/
 #include <mb.h>

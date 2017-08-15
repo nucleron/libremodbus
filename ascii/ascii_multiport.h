@@ -17,13 +17,13 @@
 //
 //
 //
-//#define MBASCIIInstance* inst,      MBASCIIInstance* inst,
-//#define MBASCIIInstance* inst MBASCIIInstance* inst
+//#define mb_ascii_tr* inst,      mb_ascii_tr* inst,
+//#define mb_ascii_tr* inst mb_ascii_tr* inst
 //
 //#else
 //
-//#define MBASCIIInstance* inst,
-//#define MBASCIIInstance* inst void
+//#define mb_ascii_tr* inst,
+//#define mb_ascii_tr* inst void
 //#define SERIAL_ARG
 //#define SERIAL_ARG_VOID
 //

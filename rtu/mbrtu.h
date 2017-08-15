@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbrtu.h,v 1.9 2006/12/07 22:10:34 wolti Exp $
+ * File: $Id: mbrtu.h, v 1.9 2006/12/07 22:10:34 wolti Exp $
  */
 
 #ifndef _MB_RTU_H
@@ -61,7 +61,7 @@ typedef enum
 typedef struct
 {
     mb_trans_base                  base;
-    void                           *parent;
+    //void                           *parent;
     //mb_port_ser               serial_port;
     volatile mb_rtu_snd_state_enum snd_state;
     volatile mb_rtu_rcv_state_enum rcv_state;
@@ -78,27 +78,27 @@ typedef struct
     BOOL                           is_master;
     BOOL                           frame_is_broadcast;
     volatile eMBMasterTimerMode    cur_tmr_mode;
-} MBRTUInstance;
+} mb_rtu_tr;
 
 extern const mb_tr_mtab mb_rtu_mtab;
 
-eMBErrorCode            eMBRTUInit                    (MBRTUInstance* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
-void                    eMBRTUStart                   (MBRTUInstance* inst                                                                      );
-void                    eMBRTUStop                    (MBRTUInstance* inst                                                                      );
-eMBErrorCode            eMBRTUReceive                 (MBRTUInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength        );
-eMBErrorCode            eMBRTUSend                    (MBRTUInstance* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength         );
-BOOL                    xMBRTUReceiveFSM              (MBRTUInstance* inst                                                                      );
-BOOL                    xMBRTUTransmitFSM             (MBRTUInstance* inst                                                                      );
-BOOL                    xMBRTUTimerT15Expired         (MBRTUInstance* inst                                                                      );
-BOOL                    xMBRTUTimerT35Expired         (MBRTUInstance* inst                                                                      );
+eMBErrorCode            eMBRTUInit                    (mb_rtu_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
+void                    eMBRTUStart                   (mb_rtu_tr* inst                                                                     );
+void                    eMBRTUStop                    (mb_rtu_tr* inst                                                                     );
+eMBErrorCode            eMBRTUReceive                 (mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength       );
+eMBErrorCode            eMBRTUSend                    (mb_rtu_tr* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength        );
+BOOL                    xMBRTUReceiveFSM              (mb_rtu_tr* inst                                                                     );
+BOOL                    xMBRTUTransmitFSM             (mb_rtu_tr* inst                                                                     );
+BOOL                    xMBRTUTimerT15Expired         (mb_rtu_tr* inst                                                                     );
+BOOL                    xMBRTUTimerT35Expired         (mb_rtu_tr* inst                                                                     );
 //master
-void                    vMBRTUMasterGetPDUSndBuf      (MBRTUInstance* inst, UCHAR ** pucFrame                                                   );
-USHORT                  usMBRTUMasterGetPDUSndLength  (MBRTUInstance* inst                                                                      );
-void                    vMBRTUMasterSetPDUSndLength   (MBRTUInstance* inst, USHORT SendPDULength                                                );
-void                    vMBRTUMasterSetCurTimerMode   (MBRTUInstance* inst, eMBMasterTimerMode eMBTimerMode                                     );
-BOOL                    xMBRTUMasterRequestIsBroadcast(MBRTUInstance* inst                                                                      );
-//eMBMasterErrorEventType eMBRTUMasterGetErrorType      (MBRTUInstance* inst                                                                      );
-eMBMasterReqErrCode     eMBRTUMasterWaitRequestFinish (void /*Какого ???*/                                                                      );
+void                    vMBRTUMasterGetPDUSndBuf      (mb_rtu_tr* inst, UCHAR ** pucFrame                                                  );
+USHORT                  usMBRTUMasterGetPDUSndLength  (mb_rtu_tr* inst                                                                     );
+void                    vMBRTUMasterSetPDUSndLength   (mb_rtu_tr* inst, USHORT SendPDULength                                               );
+void                    vMBRTUMasterSetCurTimerMode   (mb_rtu_tr* inst, eMBMasterTimerMode eMBTimerMode                                    );
+BOOL                    xMBRTUMasterRequestIsBroadcast(mb_rtu_tr* inst                                                                     );
+//eMBMasterErrorEventType eMBRTUMasterGetErrorType      (mb_rtu_tr* inst                                                                     );
+eMBMasterReqErrCode     eMBRTUMasterWaitRequestFinish (void /*Какого ???*/                                                                     );
 
 #ifdef __cplusplus
 PR_END_EXTERN_C

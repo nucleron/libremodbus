@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbascii.h,v 1.8 2006/12/07 22:10:34 wolti Exp $
+ * File: $Id: mbascii.h, v 1.8 2006/12/07 22:10:34 wolti Exp $
  */
 
 #ifndef _MB_ASCII_H
@@ -77,8 +77,8 @@ typedef struct
 	volatile mb_ascii_tx_state_enum snd_state;
 	volatile mb_ascii_rx_state_enum rcv_state;
 
-	volatile UCHAR                  rcv_buf[128];//[1+2*MB_ASCII_SER_PDU_SIZE_MAX];
-    volatile UCHAR                  snd_buf[128];//[1+2*MB_ASCII_SER_PDU_SIZE_MAX];
+	volatile UCHAR                  rcv_buf[MB_ASCII_SER_PDU_SIZE_MAX];
+    volatile UCHAR                  snd_buf[MB_ASCII_SER_PDU_SIZE_MAX];
     volatile USHORT                 snd_pdu_len;
 
 	volatile UCHAR                  *snd_buf_cur;
@@ -92,26 +92,26 @@ typedef struct
 	BOOL                            is_master;
 	volatile eMBMasterTimerMode     cur_tmr_mode;
 	//volatile UCHAR                  ucLRC;
-}MBASCIIInstance;
+}mb_ascii_tr;
 
 extern const mb_tr_mtab mb_ascii_mtab;
 
-eMBErrorCode            eMBASCIIInit                    (MBASCIIInstance* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
-void                    eMBASCIIStart                   (MBASCIIInstance* inst                                                                      );
-void                    eMBASCIIStop                    (MBASCIIInstance* inst                                                                      );
-eMBErrorCode            eMBASCIIReceive                 (MBASCIIInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength        );
-eMBErrorCode            eMBASCIISend                    (MBASCIIInstance* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength         );
-BOOL                    xMBASCIIReceiveFSM              (MBASCIIInstance* inst                                                                      );
-BOOL                    xMBASCIITransmitFSM             (MBASCIIInstance* inst                                                                      );
-BOOL                    xMBASCIITimerT1SExpired         (MBASCIIInstance* inst                                                                      );
+eMBErrorCode            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
+void                    eMBASCIIStart                   (mb_ascii_tr* inst                                                                     );
+void                    eMBASCIIStop                    (mb_ascii_tr* inst                                                                     );
+eMBErrorCode            eMBASCIIReceive                 (mb_ascii_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength       );
+eMBErrorCode            eMBASCIISend                    (mb_ascii_tr* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength        );
+BOOL                    xMBASCIIReceiveFSM              (mb_ascii_tr* inst                                                                     );
+BOOL                    xMBASCIITransmitFSM             (mb_ascii_tr* inst                                                                     );
+BOOL                    xMBASCIITimerT1SExpired         (mb_ascii_tr* inst                                                                     );
 //master
-void                    vMBASCIIMasterGetPDUSndBuf      (MBASCIIInstance* inst, UCHAR ** pucFrame                                                   );
-USHORT                  usMBASCIIMasterGetPDUSndLength  (MBASCIIInstance* inst                                                                      );
-void                    vMBASCIIMasterSetPDUSndLength   (MBASCIIInstance* inst, USHORT SendPDULength                                                );
-void                    vMBASCIIMasterSetCurTimerMode   (MBASCIIInstance* inst, eMBMasterTimerMode eMBTimerMode                                     );
-BOOL                    xMBASCIIMasterRequestIsBroadcast(MBASCIIInstance* inst                                                                      );
-//eMBMasterErrorEventType eMBASCIIMasterGetErrorType      (MBASCIIInstance* inst                                                                      );
-//eMBMasterReqErrCode     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                       );
+void                    vMBASCIIMasterGetPDUSndBuf      (mb_ascii_tr* inst, UCHAR ** pucFrame                                                  );
+USHORT                  usMBASCIIMasterGetPDUSndLength  (mb_ascii_tr* inst                                                                     );
+void                    vMBASCIIMasterSetPDUSndLength   (mb_ascii_tr* inst, USHORT SendPDULength                                               );
+void                    vMBASCIIMasterSetCurTimerMode   (mb_ascii_tr* inst, eMBMasterTimerMode eMBTimerMode                                    );
+BOOL                    xMBASCIIMasterRequestIsBroadcast(mb_ascii_tr* inst                                                                     );
+//eMBMasterErrorEventType eMBASCIIMasterGetErrorType      (mb_ascii_tr* inst                                                                     );
+//eMBMasterReqErrCode     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                      );
 
 PR_END_EXTERN_C
 #endif

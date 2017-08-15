@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbfunccoils_m.c,v 1.60 2013/10/12 15:10:12 Armink Add Master Functions
+ * File: $Id: mbfunccoils_m.c, v 1.60 2013/10/12 15:10:12 Armink Add Master Functions
  */
 #include <mb.h>
 #include <mb_master.h>
@@ -73,7 +73,7 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
  * @return error code
  */
 eMBMasterReqErrCode
-eMBMasterReqReadCoils(MBInstance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHORT usNCoils ,LONG lTimeOut)
+eMBMasterReqReadCoils(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHORT usNCoils , LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
@@ -93,7 +93,7 @@ eMBMasterReqReadCoils(MBInstance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHO
 		ucMBFrame[MB_PDU_REQ_READ_COILCNT_OFF ]    = usNCoils >> 8;
 		ucMBFrame[MB_PDU_REQ_READ_COILCNT_OFF + 1] = usNCoils;
 		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
-		(void) inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 		//eErrStatus = eMBMasterWaitRequestFinish();
 
     }
@@ -101,7 +101,7 @@ eMBMasterReqReadCoils(MBInstance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHO
 }
 
 eMBException
-eMBMasterFuncReadCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
@@ -182,7 +182,7 @@ eMBMasterFuncReadCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
  * @see eMBMasterReqWriteMultipleCoils
  */
 eMBMasterReqErrCode
-eMBMasterReqWriteCoil(MBInstance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHORT usCoilData, LONG lTimeOut)
+eMBMasterReqWriteCoil(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHORT usCoilData, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
@@ -206,14 +206,14 @@ eMBMasterReqWriteCoil(MBInstance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHO
 		ucMBFrame[MB_PDU_REQ_WRITE_VALUE_OFF ]    = usCoilData >> 8;
 		ucMBFrame[MB_PDU_REQ_WRITE_VALUE_OFF + 1] = usCoilData;
 		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_SIZE);
-		(void) inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 		//eErrStatus = eMBMasterWaitRequestFinish();
     }
     return eErrStatus;
 }
 
 eMBException
-eMBMasterFuncWriteCoil(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     UCHAR           ucBuf[2];
@@ -281,7 +281,7 @@ eMBMasterFuncWriteCoil(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
  * @see eMBMasterReqWriteCoil
  */
 eMBMasterReqErrCode
-eMBMasterReqWriteMultipleCoils(MBInstance* inst, UCHAR ucSndAddr,
+eMBMasterReqWriteMultipleCoils(mb_instance* inst, UCHAR ucSndAddr,
 		USHORT usCoilAddr, USHORT usNCoils, UCHAR * pucDataBuffer, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
@@ -322,14 +322,14 @@ eMBMasterReqWriteMultipleCoils(MBInstance* inst, UCHAR ucSndAddr,
 			*ucMBFrame++ = pucDataBuffer[usRegIndex++];
 		}
 		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_MUL_SIZE_MIN + ucByteCount);
-		(void) inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 		//eErrStatus = eMBMasterWaitRequestFinish();
     }
     return eErrStatus;
 }
 
 eMBException
-eMBMasterFuncWriteMultipleCoils(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usCoilCnt;

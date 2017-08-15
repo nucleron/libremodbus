@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbfuncinput_m.c,v 1.60 2013/10/12 14:23:40 Armink Add Master Functions  Exp $
+ * File: $Id: mbfuncinput_m.c, v 1.60 2013/10/12 14:23:40 Armink Add Master Functions  Exp $
  */
 
 #include <mb.h>
@@ -57,7 +57,7 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
  * @return error code
  */
 eMBMasterReqErrCode
-eMBMasterReqReadInputRegister(MBInstance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut)
+eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
@@ -78,14 +78,14 @@ eMBMasterReqReadInputRegister(MBInstance* inst, UCHAR ucSndAddr, USHORT usRegAdd
 		ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF + 1] = usNRegs;
 		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE); ///WTF?????
 
-		(void) inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 		//eErrStatus = eMBMasterWaitRequestFinish();
     }
     return eErrStatus;
 }
 
 eMBException
-eMBMasterFuncReadInputRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;

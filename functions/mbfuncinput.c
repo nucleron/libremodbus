@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbfuncinput.c,v 1.10 2007/09/12 10:15:56 wolti Exp $
+ * File: $Id: mbfuncinput.c, v 1.10 2007/09/12 10:15:56 wolti Exp $
  */
 #include <mb.h>
 /* ----------------------- Defines ------------------------------------------*/
@@ -43,7 +43,7 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
 #if MB_FUNC_READ_INPUT_ENABLED > 0
 
 eMBException
-eMBFuncReadInputRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;

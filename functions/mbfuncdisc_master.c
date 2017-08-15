@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbfuncdisc_m.c,v 1.60 2013/10/15 8:48:20 Armink Add Master Functions  Exp $
+ * File: $Id: mbfuncdisc_m.c, v 1.60 2013/10/15 8:48:20 Armink Add Master Functions  Exp $
  */
 #include <mb.h>
 /* ----------------------- Defines ------------------------------------------*/
@@ -54,7 +54,7 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
  * @return error code
  */
 eMBMasterReqErrCode
-eMBMasterReqReadDiscreteInputs(MBInstance* inst, UCHAR ucSndAddr, USHORT usDiscreteAddr, USHORT usNDiscreteIn, LONG lTimeOut)
+eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDiscreteAddr, USHORT usNDiscreteIn, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
@@ -82,7 +82,7 @@ eMBMasterReqReadDiscreteInputs(MBInstance* inst, UCHAR ucSndAddr, USHORT usDiscr
 }
 
 eMBException
-eMBMasterFuncReadDiscreteInputs(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usDiscreteCnt;

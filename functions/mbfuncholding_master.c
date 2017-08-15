@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbfuncholding_m.c,v 1.60 2013/09/02 14:13:40 Armink Add Master Functions  Exp $
+ * File: $Id: mbfuncholding_m.c, v 1.60 2013/09/02 14:13:40 Armink Add Master Functions  Exp $
  */
 
 #include <mb.h>
@@ -84,7 +84,7 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
  * @return error code
  */
 eMBMasterReqErrCode
-eMBMasterReqWriteHoldingRegister(MBInstance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usRegData, LONG lTimeOut)
+eMBMasterReqWriteHoldingRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usRegData, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
@@ -104,14 +104,14 @@ eMBMasterReqWriteHoldingRegister(MBInstance* inst, UCHAR ucSndAddr, USHORT usReg
 		ucMBFrame[MB_PDU_REQ_WRITE_VALUE_OFF]     = usRegData >> 8;
 		ucMBFrame[MB_PDU_REQ_WRITE_VALUE_OFF + 1] = usRegData ;
 		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_SIZE);
-		(void) inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 		//eErrStatus = eMBMasterWaitRequestFinish();
     }
     return eErrStatus;
 }
 
 eMBException
-eMBMasterFuncWriteHoldingRegister(MBInstance* inst,  UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncWriteHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     eMBException    eStatus = MB_EX_NONE;
@@ -156,7 +156,7 @@ eMBMasterFuncWriteHoldingRegister(MBInstance* inst,  UCHAR * pucFrame, USHORT * 
  * @return error code
  */
 eMBMasterReqErrCode
-eMBMasterReqWriteMultipleHoldingRegister(MBInstance* inst, UCHAR ucSndAddr,
+eMBMasterReqWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
 		USHORT usRegAddr, USHORT usNRegs, USHORT * pusDataBuffer, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
@@ -185,14 +185,14 @@ eMBMasterReqWriteMultipleHoldingRegister(MBInstance* inst, UCHAR ucSndAddr,
 			*ucMBFrame++ = pusDataBuffer[usRegIndex++] ;
 		}
 		*inst->pdu_snd_len = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_MUL_SIZE_MIN + 2*usNRegs);
-		(void) inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 		//eErrStatus = eMBMasterWaitRequestFinish();
     }
     return eErrStatus;
 }
 
 eMBException
-eMBMasterFuncWriteMultipleHoldingRegister(MBInstance* inst,  UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncWriteMultipleHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, USHORT * usLen)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
@@ -255,7 +255,7 @@ eMBMasterFuncWriteMultipleHoldingRegister(MBInstance* inst,  UCHAR * pucFrame, U
  * @return error code
  */
 eMBMasterReqErrCode
-eMBMasterReqReadHoldingRegister(MBInstance* inst,  UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut)
+eMBMasterReqReadHoldingRegister(mb_instance* inst,  UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
@@ -267,7 +267,7 @@ eMBMasterReqReadHoldingRegister(MBInstance* inst,  UCHAR ucSndAddr, USHORT usReg
     //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
     else
     {
-		inst->trmt->get_tx_frm(inst->transport,&ucMBFrame);
+		inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
 		inst->master_dst_addr = ucSndAddr;
 		ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_HOLDING_REGISTER;
 		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]       = usRegAddr >> 8;
@@ -277,14 +277,14 @@ eMBMasterReqReadHoldingRegister(MBInstance* inst,  UCHAR ucSndAddr, USHORT usReg
 
 		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
 
-		(void) inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 		//eErrStatus = eMBMasterWaitRequestFinish();
     }
     return eErrStatus;
 }
 
 eMBException
-eMBMasterFuncReadHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
@@ -305,7 +305,7 @@ eMBMasterFuncReadHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * us
     else if (inst->cur_mode == MB_ASCII)
 	{
 	    #if MB_ASCII_ENABLED
-    	 isBroadcast = xMBASCIIMasterRequestIsBroadcast((MBASCIIInstance *)inst->transport);
+    	 isBroadcast = xMBASCIIMasterRequestIsBroadcast((mb_ascii_tr *)inst->transport);
         #endif // MB_ASCII_ENABLED
 	}
     else //TCP
@@ -373,7 +373,7 @@ eMBMasterFuncReadHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * us
  * @return error code
  */
 eMBMasterReqErrCode
-eMBMasterReqReadWriteMultipleHoldingRegister(MBInstance* inst, UCHAR ucSndAddr,
+eMBMasterReqReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
 		USHORT usReadRegAddr, USHORT usNReadRegs, USHORT * pusDataBuffer,
 		USHORT usWriteRegAddr, USHORT usNWriteRegs, LONG lTimeOut)
 {
@@ -407,14 +407,14 @@ eMBMasterReqReadWriteMultipleHoldingRegister(MBInstance* inst, UCHAR ucSndAddr,
 			*ucMBFrame++ = pusDataBuffer[usRegIndex++] ;
 		}
 		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READWRITE_SIZE_MIN + 2*usNWriteRegs);
-		(void) inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 		//eErrStatus = eMBMasterWaitRequestFinish();
     }
     return eErrStatus;
 }
 
 eMBException
-eMBMasterFuncReadWriteMultipleHoldingRegister(MBInstance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegReadAddress;
     USHORT          usRegReadCount;

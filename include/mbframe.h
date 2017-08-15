@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbframe.h,v 1.9 2006/12/07 22:10:34 wolti Exp $
+ * File: $Id: mbframe.h, v 1.9 2006/12/07 22:10:34 wolti Exp $
  */
 
 #ifndef _MB_FRAME_H
@@ -71,8 +71,8 @@ typedef void    (*pvMBFrameStop) (mb_trans_base * transport);
 
 typedef eMBErrorCode (*peMBFrameReceive) (mb_trans_base * transport, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
 typedef eMBErrorCode (*peMBFrameSend)    (mb_trans_base * transport, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength);
-typedef void         (*pvGetRxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                          );
-typedef void         (*pvGetTxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                          );
+typedef void         (*pvGetRxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                         );
+typedef void         (*pvGetTxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                         );
 
 //Port
 typedef void(*pvMBFrameClose) (mb_port_base *);

@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mb.h,v 1.17 2006/12/07 22:10:34 wolti Exp $
+ * File: $Id: mb.h, v 1.17 2006/12/07 22:10:34 wolti Exp $
  */
 
 #ifndef _MB_H
@@ -81,6 +81,21 @@ mb_tr_mtab;//!< Transport method tab
 #   include <mbtcp.h>
 #endif
 
+typedef union
+{
+#if MB_RTU_ENABLED == 1
+    mb_rtu_tr   rtu;
+#endif
+
+#if MB_ASCII_ENABLED == 1
+    mb_ascii_tr ascii;
+#endif
+
+#if MB_TCP_ENABLED == 1
+    mb_tcp_tr   tcp;
+#endif
+}mb_trans_union;
+
 typedef enum
 {
     STATE_ENABLED,
@@ -123,7 +138,7 @@ typedef struct
     UCHAR master_dst_addr;
     //eMBMasterErrorEventType  master_err_cur;
 
-} MBInstance;
+} mb_instance;
 
 #include <mbfunc.h>
 
@@ -191,31 +206,31 @@ typedef struct
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode eMBInit(MBInstance* inst, mb_trans_base *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
+eMBErrorCode eMBInit(mb_instance* inst, mb_trans_base *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #if MB_RTU_ENABLED
 eMBErrorCode
-eMBInitRTU(MBInstance* inst, MBRTUInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
+eMBInitRTU(mb_instance* inst, mb_rtu_tr* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #endif
 
 #if MB_ASCII_ENABLED
-eMBErrorCode eMBInitASCII(MBInstance* inst, MBASCIIInstance* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
+eMBErrorCode eMBInitASCII(mb_instance* inst, mb_ascii_tr* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #endif
 
 #if MB_TCP_ENABLED > 0
-eMBErrorCode eMBTCPInit(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster );
+eMBErrorCode eMBTCPInit(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster);
 #endif
 
 #if MB_MASTER >0
 
 #if MB_RTU_ENABLED > 0
 
-eMBErrorCode eMBMasterInitRTU(MBInstance* inst, MBRTUInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
+eMBErrorCode eMBMasterInitRTU(mb_instance* inst, mb_rtu_tr* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #endif
 #if MB_ASCII_ENABLED > 0
-eMBErrorCode eMBMasterInitASCII(MBInstance* inst, MBASCIIInstance* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
+eMBErrorCode eMBMasterInitASCII(mb_instance* inst, mb_ascii_tr* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #endif
 #if MB_TCP_ENABLED >0
-eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr);
+eMBErrorCode eMBMasterInitTCP(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr);
 #endif
 #endif
 /*! \ingroup modbus
@@ -247,7 +262,7 @@ eMBErrorCode eMBMasterInitTCP(MBInstance* inst, MBTCPInstance* transport, USHORT
  *   If the protocol stack is not in the disabled state it returns
  *   eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode eMBClose(MBInstance* inst);
+eMBErrorCode eMBClose(mb_instance* inst);
 
 /*! \ingroup modbus
  * \brief Enable the Modbus protocol stack.
@@ -259,7 +274,7 @@ eMBErrorCode eMBClose(MBInstance* inst);
  *   eMBErrorCode::MB_ENOERR. If it was not in the disabled state it
  *   return eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode eMBEnable(MBInstance* inst);
+eMBErrorCode eMBEnable(mb_instance* inst);
 
 /*! \ingroup modbus
  * \brief Disable the Modbus protocol stack.
@@ -270,7 +285,7 @@ eMBErrorCode eMBEnable(MBInstance* inst);
  *  eMBErrorCode::MB_ENOERR. If it was not in the enabled state it returns
  *  eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode eMBDisable(MBInstance* inst);
+eMBErrorCode eMBDisable(mb_instance* inst);
 
 /*! \ingroup modbus
  * \brief The main pooling loop of the Modbus protocol stack.
@@ -284,7 +299,7 @@ eMBErrorCode eMBDisable(MBInstance* inst);
  *   returns eMBErrorCode::MB_EILLSTATE. Otherwise it returns
  *   eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode eMBPoll(MBInstance* inst);
+eMBErrorCode eMBPoll(mb_instance* inst);
 
 /*! \ingroup modbus
  * \brief Configure the slave id of the device.
@@ -304,30 +319,7 @@ eMBErrorCode eMBPoll(MBInstance* inst);
  *   mbconfig.h is to small it returns eMBErrorCode::MB_ENORES. Otherwise
  *   it returns eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode eMBSetSlaveID(MBInstance* inst, UCHAR ucSlaveID, BOOL xIsRunning, UCHAR const *pucAdditional, USHORT usAdditionalLen);
-
-/*! \ingroup modbus
- * \brief Registers a callback handler for a given function code.
- *
- * This function registers a new callback handler for a given function code.
- * The callback handler supplied is responsible for interpreting the Modbus PDU and
- * the creation of an appropriate response. In case of an error it should return
- * one of the possible Modbus exceptions which results in a Modbus exception frame
- * sent by the protocol stack.
- *
- * \param ucFunctionCode The Modbus function code for which this handler should
- *   be registers. Valid function codes are in the range 1 to 127.
- * \param pxHandler The function handler which should be called in case
- *   such a frame is received. If \c NULL a previously registered function handler
- *   for this function code is removed.
- *
- * \return eMBErrorCode::MB_ENOERR if the handler has been installed. If no
- *   more resources are available it returns eMBErrorCode::MB_ENORES. In this
- *   case the values in mbconfig.h should be adjusted. If the argument was not
- *   valid it returns eMBErrorCode::MB_EINVAL.
- */
- ///!!! ВЫПИЛИТЬ ЭТОТ КУСОК ГОВНА!!!!!
-eMBErrorCode eMBRegisterCB(MBInstance* inst, UCHAR ucFunctionCode, pxMBFunctionHandler pxHandler);
+eMBErrorCode eMBSetSlaveID(mb_instance* inst, UCHAR ucSlaveID, BOOL xIsRunning, UCHAR const *pucAdditional, USHORT usAdditionalLen);
 
 /* ----------------------- Callback -----------------------------------------*/
 

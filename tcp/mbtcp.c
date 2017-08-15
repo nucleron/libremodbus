@@ -99,7 +99,7 @@ const mb_tr_mtab mb_tcp_mtab =
 };
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode
-eMBTCPDoInit(MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster)
+eMBTCPDoInit(mb_tcp_tr* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster)
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
@@ -111,19 +111,19 @@ eMBTCPDoInit(MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL b
 }
 
 void
-eMBTCPStart(MBTCPInstance* inst)
+eMBTCPStart(mb_tcp_tr* inst)
 {
 }
 
 void
-eMBTCPStop(MBTCPInstance* inst)
+eMBTCPStop(mb_tcp_tr* inst)
 {
     /* Make sure that no more clients are connected. */
     vMBTCPPortDisable(inst->base.port_obj);
 }
 
 eMBErrorCode
-eMBTCPReceive(MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLength)
+eMBTCPReceive(mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLength)
 {
     eMBErrorCode    eStatus = MB_EIO;
     UCHAR          *pucMBTCPFrame;
@@ -155,7 +155,7 @@ eMBTCPReceive(MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, US
 }
 
 eMBErrorCode
-eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength)
+eMBTCPSend(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength)
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     UCHAR          *pucMBTCPFrame = (UCHAR *) pucFrame - MB_TCP_FUNC;
@@ -178,28 +178,28 @@ eMBTCPSend(MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT us
 
 #if MB_MASTER > 0
 
-void vMBTCPMasterSetPDUSndLength( MBTCPInstance* inst, USHORT SendPDULength)
+void vMBTCPMasterSetPDUSndLength( mb_tcp_tr* inst, USHORT SendPDULength)
 {
     usSendPDULength = SendPDULength;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBTCPMasterGetPDUSndLength( MBTCPInstance* inst)
+USHORT usMBTCPMasterGetPDUSndLength( mb_tcp_tr* inst)
 {
     return usSendPDULength;
 }
 
-void vMBTCPMasterGetPDUSndBuf(MBTCPInstance* inst, UCHAR ** pucFrame)
+void vMBTCPMasterGetPDUSndBuf(mb_tcp_tr* inst, UCHAR ** pucFrame)
 {
     *pucFrame = inst->tcp_port.aucTCPSndBuf+MB_TCP_FUNC;
 }
 
-void vMBTCPMasterGetPDURcvBuf(MBTCPInstance* inst, UCHAR ** pucFrame)
+void vMBTCPMasterGetPDURcvBuf(mb_tcp_tr* inst, UCHAR ** pucFrame)
 {
     *pucFrame = inst->tcp_port.aucTCPRcvBuf+MB_TCP_FUNC;
 }
 
-BOOL xMBTCPMasterRequestIsBroadcast(MBTCPInstance* inst)
+BOOL xMBTCPMasterRequestIsBroadcast(mb_tcp_tr* inst)
 {
     return FALSE; //no broadcasts on tcp
 }

@@ -44,7 +44,7 @@ typedef struct
     BOOL tcpMaster;
     USHORT usSendPDULength;
     BOOL xFrameIsBroadcast;
-} MBTCPInstance;
+} mb_tcp_tr;
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_TCP_PSEUDO_ADDRESS   255
@@ -52,15 +52,15 @@ typedef struct
 extern const mb_tr_mtab mb_tcp_mtab;
 
 /* ----------------------- Function prototypes ------------------------------*/
-eMBErrorCode	eMBTCPDoInit       (MBTCPInstance* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster        );
-void            eMBTCPStart        (MBTCPInstance* inst                                                              );
-void            eMBTCPStop         (MBTCPInstance* inst                                                              );
-eMBErrorCode    eMBTCPReceive      (MBTCPInstance* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
-eMBErrorCode    eMBTCPSend         (MBTCPInstance* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength      );
+eMBErrorCode	eMBTCPDoInit       (mb_tcp_tr* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster        );
+void            eMBTCPStart        (mb_tcp_tr* inst                                                              );
+void            eMBTCPStop         (mb_tcp_tr* inst                                                              );
+eMBErrorCode    eMBTCPReceive      (mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
+eMBErrorCode    eMBTCPSend         (mb_tcp_tr* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength      );
 #if MB_MASTER > 0
-void vMBTCPMasterGetPDURcvBuf      (MBTCPInstance* inst, UCHAR ** pucFrame                                           );
-void vMBTCPMasterGetPDUSndBuf      (MBTCPInstance* inst, UCHAR ** pucFrame                                           );
-BOOL xMBTCPMasterRequestIsBroadcast(MBTCPInstance* inst                                                              );
+void vMBTCPMasterGetPDURcvBuf      (mb_tcp_tr* inst, UCHAR ** pucFrame                                           );
+void vMBTCPMasterGetPDUSndBuf      (mb_tcp_tr* inst, UCHAR ** pucFrame                                           );
+BOOL xMBTCPMasterRequestIsBroadcast(mb_tcp_tr* inst                                                              );
 #endif
 
 #ifdef __cplusplus
