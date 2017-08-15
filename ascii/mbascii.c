@@ -432,6 +432,7 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
 
 BOOL xMBASCIITimerT1SExpired(mb_ascii_tr* inst)
 {
+    BOOL            xNeedPoll = FALSE;
     switch (eRcvState)
     {
     /* If we have a timeout we go back to the idle state and wait for
@@ -448,8 +449,43 @@ BOOL xMBASCIITimerT1SExpired(mb_ascii_tr* inst)
     }
     vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
 
+
+#if MB_MASTER >0
+    if (asciiMaster == TRUE)
+    {
+        switch (eSndState)
+        {
+        /* A frame was send finish and convert delay or respond timeout expired.
+         * If the frame is broadcast, The master will idle, and if the frame is not
+         * broadcast.Notify the listener process error.*/
+        case MB_ASCII_TX_STATE_XFWR:
+            if (xFrameIsBroadcast == FALSE)
+            {
+                //((mb_instance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
+                //vMBSetErrorType(ERR_EV_ERROR_RESPOND_TIMEOUT); //FIXME pass reference to instance
+                //xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
+                xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
+            }
+            break;
+        /* Function called in an illegal state. */
+        default:
+            assert(
+                (eSndState == MB_ASCII_TX_STATE_XFWR) || (eSndState == MB_ASCII_TX_STATE_IDLE));
+            break;
+        }
+        eSndState = MB_ASCII_TX_STATE_IDLE;
+
+        vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+        /* If timer mode is convert delay, the master event then turns EV_MASTER_EXECUTE status. */
+        if (eCurTimerMode == MB_TMODE_CONVERT_DELAY)
+        {
+            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
+        }
+    }
+#endif
+
     /* no context switch required. */
-    return FALSE;
+    return xNeedPoll;
 }
 
 
