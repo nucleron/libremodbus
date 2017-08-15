@@ -188,14 +188,14 @@ eMBErrorCode eMBMasterInitTCP(mb_instance* inst, mb_tcp_tr* transport, USHORT uc
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
 eMBErrorCode
-eMBInit(mb_instance *inst, mb_trans_base *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
+eMBInit(mb_instance *inst, mb_trans_union *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
 {
     eMBCurrentState = STATE_NOT_INITIALIZED;
     eMBErrorCode    eStatus = MB_ENOERR;
 
-    inst->transport     = transport;
-    inst->port          = port_obj;
-    transport->port_obj = port_obj;
+    inst->transport          = (mb_trans_base *)transport;
+    inst->port               = port_obj;
+    transport->base.port_obj = port_obj;
 
     switch (eMode)
     {
@@ -203,7 +203,7 @@ eMBInit(mb_instance *inst, mb_trans_base *transport, eMBMode eMode, BOOL is_mast
     case MB_RTU:
     {
         inst->trmt = (mb_tr_mtab *)&mb_rtu_mtab;
-        PDUSndLength = &(((mb_rtu_tr*)transport)->snd_pdu_len);
+        PDUSndLength = &(transport->rtu.snd_pdu_len);
         eStatus = eMBRTUInit((mb_rtu_tr*)transport, is_master, ucMBAddress, ulBaudRate, eParity);
         break;
     }
@@ -212,7 +212,7 @@ eMBInit(mb_instance *inst, mb_trans_base *transport, eMBMode eMode, BOOL is_mast
     case MB_ASCII:
     {
         inst->trmt = (mb_tr_mtab *)&mb_ascii_mtab;
-        PDUSndLength = &(((mb_ascii_tr*)transport)->snd_pdu_len);
+        PDUSndLength = &(transport->ascii.snd_pdu_len);
         eStatus = eMBASCIIInit((mb_ascii_tr*)transport, is_master, ucMBAddress, ulBaudRate, eParity);
         break;
     }
@@ -320,7 +320,7 @@ eMBTCPInit(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_I
         inst->ucMBAddress = MB_TCP_PSEUDO_ADDRESS;
         inst->cur_mode = MB_TCP;
         inst->eMBCurrentState = STATE_DISABLED;
-        inst->pdu_snd_len = &(((mb_tcp_tr*)transport)->usSendPDULength);
+        inst->pdu_snd_len = &(transport->tcp.usSendPDULength);
         //inst->port = (void*) &(((mb_tcp_tr*)transport)->tcp_port);
 
         inst->trmt->get_rx_frm(inst->transport, &inst->rxFrame);

@@ -83,6 +83,7 @@ mb_tr_mtab;//!< Transport method tab
 
 typedef union
 {
+    mb_trans_base base;
 #if MB_RTU_ENABLED == 1
     mb_rtu_tr   rtu;
 #endif
@@ -206,7 +207,7 @@ typedef struct
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode eMBInit(mb_instance* inst, mb_trans_base *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
+eMBErrorCode eMBInit(mb_instance* inst, mb_trans_union *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
 #if MB_RTU_ENABLED
 eMBErrorCode
 eMBInitRTU(mb_instance* inst, mb_rtu_tr* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity);
