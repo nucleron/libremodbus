@@ -492,33 +492,21 @@ eMBPoll(mb_instance* inst)
                     else if (xFuncHandlers[i].ucFunctionCode == ucFunctionCode)
                     {
 #if MB_MASTER > 0
-                        if (pbMBMasterRequestIsBroadcastCur(inst->transport) && xMBRunInMasterMode)
+                        if (xMBRunInMasterMode == FALSE)
+#endif// MB_MASTER
                         {
-
-                            for (j = 1; j <= MB_MASTER_TOTAL_SLAVE_NUM; j++)
+                            for (j=0; j<usLength; j++)
                             {
-                                ucMBMasterDestAddress =j;
-                                eException = xFuncHandlers[i].pxHandler(inst, (UCHAR*)(rxFrame), (USHORT*)&usLength);
+                                txFrame[j]=rxFrame[j];
                             }
+                            eException = xFuncHandlers[i].pxHandler(inst, (UCHAR*)(txFrame), (USHORT*)&usLength);
                         }
+#if MB_MASTER > 0
                         else
-#endif
                         {
-#if MB_MASTER > 0
-                            if (xMBRunInMasterMode == FALSE)
-#endif// MB_MASTER
-                            {
-                                for (j=0; j<usLength; j++)
-                                {
-                                    txFrame[j]=rxFrame[j];
-                                }
-                                eException = xFuncHandlers[i].pxHandler(inst, (UCHAR*)(txFrame), (USHORT*)&usLength);
-                            }
-#if MB_MASTER > 0
-                            else
-                                eException = xFuncHandlers[i].pxHandler(inst, (UCHAR*)(rxFrame), (USHORT*)&usLength);
-#endif// MB_MASTER
+                            eException = xFuncHandlers[i].pxHandler(inst, (UCHAR*)(rxFrame), (USHORT*)&usLength);
                         }
+#endif// MB_MASTER
                         break;
                     }
                 }

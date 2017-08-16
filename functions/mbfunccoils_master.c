@@ -144,7 +144,7 @@ eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
             (ucByteCount == pucFrame[MB_PDU_FUNC_READ_COILCNT_OFF]))
         {
         	/* Make callback to fill the buffer. */
-            eRegStatus = eMBMasterRegCoilsCB(inst, &pucFrame[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usCoilCount, MB_REG_READ);
+            eRegStatus = eMBMasterRegCoilsCB(inst, &pucFrame[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usCoilCount);
 
             /* If an error occured convert it into a Modbus exception. */
             if (eRegStatus != MB_ENOERR)
@@ -223,36 +223,37 @@ eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 
     if (*usLen == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
-        usRegAddress = (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_ADDR_OFF] << 8);
-        usRegAddress |= (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_ADDR_OFF + 1]);
-        usRegAddress++;
-
-        if ((pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF + 1] == 0x00) &&
-            ((pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0xFF) ||
-              (pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0x00)))
-        {
-            ucBuf[1] = 0;
-            if (pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0xFF)
-            {
-                ucBuf[0] = 1;
-            }
-            else
-            {
-                ucBuf[0] = 0;
-            }
-            eRegStatus =
-                eMBMasterRegCoilsCB(inst, &ucBuf[0], usRegAddress, 1, MB_REG_WRITE);
-
-            /* If an error occured convert it into a Modbus exception. */
-            if (eRegStatus != MB_ENOERR)
-            {
-                eStatus = prveMBError2Exception(eRegStatus);
-            }
-        }
-        else
-        {
-            eStatus = MB_EX_ILLEGAL_DATA_VALUE;
-        }
+//        usRegAddress = (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_ADDR_OFF] << 8);
+//        usRegAddress |= (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_ADDR_OFF + 1]);
+//        usRegAddress++;
+//
+//        if ((pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF + 1] == 0x00) &&
+//            ((pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0xFF) ||
+//              (pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0x00)))
+//        {
+//            ucBuf[1] = 0;
+//            if (pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0xFF)
+//            {
+//                ucBuf[0] = 1;
+//            }
+//            else
+//            {
+//                ucBuf[0] = 0;
+//            }
+//            eRegStatus =
+//                eMBMasterRegCoilsCB(inst, &ucBuf[0], usRegAddress, 1, MB_REG_WRITE);
+//
+//            /* If an error occured convert it into a Modbus exception. */
+//            if (eRegStatus != MB_ENOERR)
+//            {
+//                eStatus = prveMBError2Exception(eRegStatus);
+//            }
+//        }
+//        else
+//        {
+//            eStatus = MB_EX_ILLEGAL_DATA_VALUE;
+//        }
+        eStatus = MB_EX_NONE;
     }
     else
     {
@@ -343,42 +344,43 @@ eMBMasterFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * us
     /* If this request is broadcast, the *usLen is not need check. */
     if ((*usLen == MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
     {
-    	inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
-        usRegAddress = (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF] << 8);
-        usRegAddress |= (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF + 1]);
-        usRegAddress++;
-
-        usCoilCnt = (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_MUL_COILCNT_OFF] << 8);
-        usCoilCnt |= (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_MUL_COILCNT_OFF + 1]);
-
-        ucByteCount = ucMBFrame[MB_PDU_REQ_WRITE_MUL_BYTECNT_OFF];
-
-        /* Compute the number of expected bytes in the request. */
-        if ((usCoilCnt & 0x0007) != 0)
-        {
-            ucByteCountVerify = (UCHAR)(usCoilCnt / 8 + 1);
-        }
-        else
-        {
-            ucByteCountVerify = (UCHAR)(usCoilCnt / 8);
-        }
-
-        if ((usCoilCnt >= 1) && (ucByteCountVerify == ucByteCount))
-        {
-            eRegStatus =
-                eMBMasterRegCoilsCB(inst, &ucMBFrame[MB_PDU_REQ_WRITE_MUL_VALUES_OFF],
-                               usRegAddress, usCoilCnt, MB_REG_WRITE);
-
-            /* If an error occured convert it into a Modbus exception. */
-            if (eRegStatus != MB_ENOERR)
-            {
-                eStatus = prveMBError2Exception(eRegStatus);
-            }
-        }
-        else
-        {
-            eStatus = MB_EX_ILLEGAL_DATA_VALUE;
-        }
+//    	inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
+//        usRegAddress = (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF] << 8);
+//        usRegAddress |= (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF + 1]);
+//        usRegAddress++;
+//
+//        usCoilCnt = (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_MUL_COILCNT_OFF] << 8);
+//        usCoilCnt |= (USHORT)(pucFrame[MB_PDU_FUNC_WRITE_MUL_COILCNT_OFF + 1]);
+//
+//        ucByteCount = ucMBFrame[MB_PDU_REQ_WRITE_MUL_BYTECNT_OFF];
+//
+//        /* Compute the number of expected bytes in the request. */
+//        if ((usCoilCnt & 0x0007) != 0)
+//        {
+//            ucByteCountVerify = (UCHAR)(usCoilCnt / 8 + 1);
+//        }
+//        else
+//        {
+//            ucByteCountVerify = (UCHAR)(usCoilCnt / 8);
+//        }
+//
+//        if ((usCoilCnt >= 1) && (ucByteCountVerify == ucByteCount))
+//        {
+//            eRegStatus =
+//                eMBMasterRegCoilsCB(inst, &ucMBFrame[MB_PDU_REQ_WRITE_MUL_VALUES_OFF],
+//                               usRegAddress, usCoilCnt, MB_REG_WRITE);
+//
+//            /* If an error occured convert it into a Modbus exception. */
+//            if (eRegStatus != MB_ENOERR)
+//            {
+//                eStatus = prveMBError2Exception(eRegStatus);
+//            }
+//        }
+//        else
+//        {
+//            eStatus = MB_EX_ILLEGAL_DATA_VALUE;
+//        }
+        eStatus = MB_EX_NONE;
     }
     else
     {
