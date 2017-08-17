@@ -66,6 +66,10 @@ eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAd
     {
         return MB_MRE_ILL_ARG;
     }
+    if (inst->master_is_busy)
+    {
+        return MB_MRE_MASTER_BUSY;
+    }
     //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
     inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;

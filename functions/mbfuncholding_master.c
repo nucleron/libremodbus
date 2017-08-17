@@ -88,10 +88,13 @@ eMBMasterReqWriteHoldingRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRe
 {
     UCHAR                 *ucMBFrame;
 //    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
-
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
         return MB_MRE_ILL_ARG;
+    }
+    if (inst->master_is_busy)
+    {
+        return MB_MRE_MASTER_BUSY;
     }
     //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME too
     inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
@@ -164,6 +167,10 @@ eMBMasterReqWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
         return MB_MRE_ILL_ARG;
+    }
+    if (inst->master_is_busy)
+    {
+        return MB_MRE_MASTER_BUSY;
     }
     //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
     inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
@@ -259,6 +266,10 @@ eMBMasterReqReadHoldingRegister(mb_instance* inst,  UCHAR ucSndAddr, USHORT usRe
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
         return MB_MRE_ILL_ARG;
+    }
+    if (inst->master_is_busy)
+    {
+        return MB_MRE_MASTER_BUSY;
     }
     //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
@@ -377,6 +388,10 @@ eMBMasterReqReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
         return MB_MRE_ILL_ARG;
+    }
+    if (inst->master_is_busy)
+    {
+        return MB_MRE_MASTER_BUSY;
     }
     //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
