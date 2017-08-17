@@ -134,11 +134,13 @@ typedef struct
     UCHAR    slave_id[MB_FUNC_OTHER_REP_SLAVEID_BUF];
     USHORT   slave_id_len;
 
+#if MB_MASTER > 0
     //master variables
     BOOL master_mode_run;
+    BOOL master_is_busy;
     UCHAR master_dst_addr;
     //eMBMasterErrorEventType  master_err_cur;
-
+#endif //MB_MASTER
 } mb_instance;
 
 #include <mbfunc.h>

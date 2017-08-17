@@ -57,28 +57,25 @@ eMBMasterReqErrCode
 eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDiscreteAddr, USHORT usNDiscreteIn, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
-    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+    //eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
 
 
-    if (ucSndAddr > MB_MASTER_TOTAL_SLAVE_NUM)
+    if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        eErrStatus = MB_MRE_ILL_ARG;
+        return MB_MRE_ILL_ARG;
     }
-   // else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME: check
-    else
-    {
-    	inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
-		inst->master_dst_addr = ucSndAddr;
-		ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
-		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]        = usDiscreteAddr >> 8;
-		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]    = usDiscreteAddr;
-		ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF ]    = usNDiscreteIn >> 8;
-		ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = usNDiscreteIn;
-		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
-		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-		//eErrStatus = eMBMasterWaitRequestFinish();
-    }
-    return eErrStatus;
+    // else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME: check
+    inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
+    inst->master_dst_addr = ucSndAddr;
+    ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
+    ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]        = usDiscreteAddr >> 8;
+    ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]    = usDiscreteAddr;
+    ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF ]    = usNDiscreteIn >> 8;
+    ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = usNDiscreteIn;
+    *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
+    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+    //eErrStatus = eMBMasterWaitRequestFinish();
+    return MB_MRE_NO_ERR;
 }
 
 eMBException
@@ -95,11 +92,11 @@ eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * us
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
     if (inst->trmt->rq_is_broadcast(inst->transport))
     {
-    	eStatus = MB_EX_NONE;
+        eStatus = MB_EX_NONE;
     }
     else if (*usLen >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
-    	inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
+        inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
         usRegAddress = (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF] << 8);
         usRegAddress |= (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]);
         usRegAddress++;
@@ -111,26 +108,26 @@ eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * us
          * byte is only partially field with unused coils set to zero. */
         if ((usDiscreteCnt & 0x0007) != 0)
         {
-        	ucNBytes = (UCHAR)(usDiscreteCnt / 8 + 1);
+            ucNBytes = (UCHAR)(usDiscreteCnt / 8 + 1);
         }
         else
         {
-        	ucNBytes = (UCHAR)(usDiscreteCnt / 8);
+            ucNBytes = (UCHAR)(usDiscreteCnt / 8);
         }
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-		if ((usDiscreteCnt >= 1) && ucNBytes == pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF])
+        if ((usDiscreteCnt >= 1) && ucNBytes == pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF])
         {
-	       	/* Make callback to fill the buffer. */
-			eRegStatus = eMBMasterRegDiscreteCB(inst, &pucFrame[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usDiscreteCnt);
+            /* Make callback to fill the buffer. */
+            eRegStatus = eMBMasterRegDiscreteCB(inst, &pucFrame[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usDiscreteCnt);
 
-			/* If an error occured convert it into a Modbus exception. */
-			if(eRegStatus != MB_ENOERR)
-			{
-				eStatus = prveMBError2Exception(eRegStatus);
-			}
+            /* If an error occured convert it into a Modbus exception. */
+            if(eRegStatus != MB_ENOERR)
+            {
+                eStatus = prveMBError2Exception(eRegStatus);
+            }
         }
         else
         {

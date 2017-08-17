@@ -60,28 +60,25 @@ eMBMasterReqErrCode
 eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
-    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+//    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
 
-    if (ucSndAddr > MB_MASTER_TOTAL_SLAVE_NUM)
+    if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        eErrStatus = MB_MRE_ILL_ARG;
+        return MB_MRE_ILL_ARG;
     }
     //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
-    else
-    {
-		inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
-		inst->master_dst_addr = ucSndAddr;
-		ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_INPUT_REGISTER;
-		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]       = usRegAddr >> 8;
-		ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]   = usRegAddr;
-		ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF]     = usNRegs >> 8;
-		ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF + 1] = usNRegs;
-		*(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE); ///WTF?????
+    inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
+    inst->master_dst_addr = ucSndAddr;
+    ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_INPUT_REGISTER;
+    ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]       = usRegAddr >> 8;
+    ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]   = usRegAddr;
+    ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF]     = usNRegs >> 8;
+    ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF + 1] = usNRegs;
+    *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE); ///WTF?????
 
-		(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-		//eErrStatus = eMBMasterWaitRequestFinish();
-    }
-    return eErrStatus;
+    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+    //eErrStatus = eMBMasterWaitRequestFinish();
+    return MB_EX_NONE;
 }
 
 eMBException
@@ -95,13 +92,13 @@ eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usL
     eMBErrorCode    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
-	if (inst->trmt->rq_is_broadcast(inst->transport))
-	{
-		eStatus = MB_EX_NONE;
-	}
-	else if (*usLen >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
+    if (inst->trmt->rq_is_broadcast(inst->transport))
     {
-		inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
+        eStatus = MB_EX_NONE;
+    }
+    else if (*usLen >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
+    {
+        inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
         usRegAddress = (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF] << 8);
         usRegAddress |= (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]);
         usRegAddress++;

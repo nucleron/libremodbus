@@ -239,9 +239,9 @@ eMBInit(mb_instance *inst, mb_trans_union *transport, eMBMode eMode, BOOL is_mas
 #if MB_MASTER > 0
     if (is_master == TRUE)
     {
-
-        xMBRunInMasterMode = TRUE;
-        xFuncHandlers = xMasterFuncHandlers;
+        inst->master_is_busy = FALSE;
+        xMBRunInMasterMode   = TRUE;
+        xFuncHandlers        = xMasterFuncHandlers;
     }
     else
 #endif //MB_MASTER
@@ -471,6 +471,7 @@ eMBPoll(mb_instance* inst)
             break;
 
         case EV_EXECUTE:
+        {
             ucFunctionCode = rxFrame[MB_PDU_FUNC_OFF];
             eException = MB_EX_ILLEGAL_FUNCTION;
 
@@ -525,10 +526,8 @@ eMBPoll(mb_instance* inst)
                 }
                 else
                 {
-                    ///WTF???
-                    //vMBMasterCBRequestScuuess(inst->transport);
-                    vMBMasterCBRequestScuuess();
-                    //vMBMasterRunResRelease(inst->transport); //FIXME
+                    vMBMasterCBRequestSuccess(inst);
+                    inst->master_is_busy = FALSE;
                 }
             }
             else
@@ -550,16 +549,26 @@ eMBPoll(mb_instance* inst)
                     eStatus = peMBFrameSendCur(inst->transport, ucMBAddress, (UCHAR*)(txFrame), usLength);///Where eStatus is used?
                 }
             }
-
-            break;
+        }
+        break;
 
         case EV_FRAME_SENT:
-            /* Master is busy now. */
 #if MB_MASTER > 0
             if (xMBRunInMasterMode)
             {
-                pvMBGetTxFrame(inst->transport, (UCHAR**)(&txFrame));
-                eStatus = peMBFrameSendCur(inst->transport, ucMBMasterDestAddress, (UCHAR*)(txFrame), *PDUSndLength);
+                if (FALSE == inst->master_is_busy)
+                {
+                    pvMBGetTxFrame(inst->transport, (UCHAR**)(&txFrame));
+                    eStatus = peMBFrameSendCur(inst->transport, ucMBMasterDestAddress, (UCHAR*)(txFrame), *PDUSndLength);
+                    if (MB_ENOERR == eStatus)
+                    {
+                        inst->master_is_busy = TRUE; /* Master is busy now. */
+                    }
+                    else
+                    {
+                        return MB_EIO;
+                    }
+                }
             }
 #endif
             break;
@@ -568,19 +577,22 @@ eMBPoll(mb_instance* inst)
 #if MB_MASTER > 0
         case EV_MASTER_ERROR_RESPOND_TIMEOUT:
         {
-            vMBMasterErrorCBRespondTimeout(ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
+            vMBMasterErrorCBRespondTimeout(inst, ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
+            inst->master_is_busy = FALSE;
             //eStatus = MB_ETIMEDOUT;
         }
         break;
         case EV_MASTER_ERROR_RECEIVE_DATA:
         {
-            vMBMasterErrorCBReceiveData(ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
+            vMBMasterErrorCBReceiveData(inst, ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
+            inst->master_is_busy = FALSE;
             //eStatus = MB_EIO;
         }
         break;
         case EV_MASTER_ERROR_EXECUTE_FUNCTION:
         {
-            vMBMasterErrorCBExecuteFunction(ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
+            vMBMasterErrorCBExecuteFunction(inst, ucMBMasterDestAddress, (const UCHAR*)txFrame, *PDUSndLength);
+            inst->master_is_busy = FALSE;
             //eStatus = MB_EILLFUNC;
         }
         break;

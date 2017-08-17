@@ -35,10 +35,10 @@ eMBException eMBMasterFuncWriteMultipleCoils               (mb_instance* inst, U
 eMBException eMBMasterFuncReadDiscreteInputs               (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 eMBException eMBMasterFuncReadWriteMultipleHoldingRegister (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 
-void vMBMasterErrorCBExecuteFunction(UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
-void vMBMasterErrorCBReceiveData(UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
-void vMBMasterErrorCBRespondTimeout(UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
-void vMBMasterCBRequestScuuess(void);
+void vMBMasterErrorCBExecuteFunction(mb_instance* inst, UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
+void vMBMasterErrorCBReceiveData(mb_instance* inst, UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
+void vMBMasterErrorCBRespondTimeout(mb_instance* inst, UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
+void vMBMasterCBRequestSuccess(mb_instance* inst);
 
 eMBErrorCode eMBMasterRegInputCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs);
 eMBErrorCode eMBMasterRegHoldingCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs);
