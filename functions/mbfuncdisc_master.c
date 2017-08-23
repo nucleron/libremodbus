@@ -37,7 +37,7 @@
 #define MB_PDU_FUNC_READ_SIZE_MIN           (1)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
+eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_MASTER > 0
@@ -53,20 +53,20 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
  *
  * @return error code
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDiscreteAddr, USHORT usNDiscreteIn, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
-    //eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+    //mb_err_enum    eErrStatus = MB_ENOERR;
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    // else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME: check
+    // else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME: check
     inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
@@ -77,7 +77,7 @@ eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDisc
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
     //eErrStatus = eMBMasterWaitRequestFinish();
-    return MB_MRE_NO_ERR;
+    return MB_ENOERR;
 }
 
 eMBException
@@ -89,7 +89,7 @@ eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * us
     UCHAR          *ucMBFrame;
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
     if (inst->trmt->rq_is_broadcast(inst->transport))

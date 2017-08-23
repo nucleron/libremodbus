@@ -67,7 +67,7 @@
 #define MB_PDU_FUNC_READWRITE_SIZE_MIN          (1)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
+eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_MASTER > 0
@@ -83,20 +83,20 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
  *
  * @return error code
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqWriteHoldingRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usRegData, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
-//    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+//    mb_err_enum    eErrStatus = MB_ENOERR;
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME too
+    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME too
     inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_WRITE_REGISTER;
@@ -115,7 +115,7 @@ eMBMasterFuncWriteHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, USHORT *
 {
 //    USHORT          usRegAddress;
     eMBException    eStatus = MB_EX_NONE;
-//    eMBErrorCode    eRegStatus;
+//    mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_SIZE))
     {
@@ -156,23 +156,23 @@ eMBMasterFuncWriteHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, USHORT *
  *
  * @return error code
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
         USHORT usRegAddr, USHORT usNRegs, USHORT * pusDataBuffer, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     USHORT                 usRegIndex = 0;
-//    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
+    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                     = MB_FUNC_WRITE_MULTIPLE_REGISTERS;
@@ -202,7 +202,7 @@ eMBMasterFuncWriteMultipleHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, 
 //    UCHAR           ucRegByteCount;
 
     eMBException    eStatus = MB_EX_NONE;
-//    eMBErrorCode    eRegStatus;
+//    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, the *usLen is not need check. */
     if ((*usLen == MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
@@ -257,21 +257,21 @@ eMBMasterFuncWriteMultipleHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, 
  *
  * @return error code
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqReadHoldingRegister(mb_instance* inst,  UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
-//    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
+    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_HOLDING_REGISTER;
@@ -295,7 +295,7 @@ eMBMasterFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * u
     USHORT          usRegCount;
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
     BOOL isBroadcast = FALSE;
@@ -376,24 +376,24 @@ eMBMasterFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * u
  *
  * @return error code
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
         USHORT usReadRegAddr, USHORT usNReadRegs, USHORT * pusDataBuffer,
         USHORT usWriteRegAddr, USHORT usNWriteRegs, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     USHORT                 usRegIndex = 0;
-//    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
+    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                           = MB_FUNC_READWRITE_MULTIPLE_REGISTERS;
@@ -428,7 +428,7 @@ eMBMasterFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFram
     UCHAR          *ucMBFrame;
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
     if (inst->trmt->rq_is_broadcast(inst->transport))

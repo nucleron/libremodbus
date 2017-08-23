@@ -104,7 +104,7 @@ xMBUtilGetBits(UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits)
 }
 
 eMBException
-prveMBError2Exception(eMBErrorCode eErrorCode)
+prveMBError2Exception(mb_err_enum eErrorCode)
 {
     eMBException    eStatus;
 

@@ -14,15 +14,15 @@ PR_BEGIN_EXTERN_C
 #include "mb_types.h"
 //void vMBMasterSetErrorType(eMBMasterErrorEventType errorType);
 
-eMBMasterReqErrCode eMBMasterReqReadInputRegister                (mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usNRegs, LONG lTimeOut                                                                       );
-eMBMasterReqErrCode eMBMasterReqWriteHoldingRegister             (mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usRegData, LONG lTimeOut                                                                     );
-eMBMasterReqErrCode eMBMasterReqWriteMultipleHoldingRegister     (mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usNRegs, USHORT * pusDataBuffer, LONG lTimeOut                                               );
-eMBMasterReqErrCode eMBMasterReqReadHoldingRegister              (mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usNRegs, LONG lTimeOut                                                                       );
-eMBMasterReqErrCode eMBMasterReqReadWriteMultipleHoldingRegister (mb_instance* inst, UCHAR ucSndAddr, USHORT usReadRegAddr,  USHORT usNReadRegs, USHORT * pusDataBuffer, USHORT usWriteRegAddr, USHORT usNWriteRegs, LONG lTimeOut);
-eMBMasterReqErrCode eMBMasterReqReadCoils                        (mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr,     USHORT usNCoils, LONG lTimeOut                                                                      );
-eMBMasterReqErrCode eMBMasterReqWriteCoil                        (mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr,     USHORT usCoilData, LONG lTimeOut                                                                    );
-eMBMasterReqErrCode eMBMasterReqWriteMultipleCoils               (mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr,     USHORT usNCoils, UCHAR * pucDataBuffer, LONG lTimeOut                                               );
-eMBMasterReqErrCode eMBMasterReqReadDiscreteInputs               (mb_instance* inst, UCHAR ucSndAddr, USHORT usDiscreteAddr, USHORT usNDiscreteIn, LONG lTimeOut                                                                 );
+mb_err_enum eMBMasterReqReadInputRegister                (mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usNRegs, LONG lTimeOut                                                                       );
+mb_err_enum eMBMasterReqWriteHoldingRegister             (mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usRegData, LONG lTimeOut                                                                     );
+mb_err_enum eMBMasterReqWriteMultipleHoldingRegister     (mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usNRegs, USHORT * pusDataBuffer, LONG lTimeOut                                               );
+mb_err_enum eMBMasterReqReadHoldingRegister              (mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr,      USHORT usNRegs, LONG lTimeOut                                                                       );
+mb_err_enum eMBMasterReqReadWriteMultipleHoldingRegister (mb_instance* inst, UCHAR ucSndAddr, USHORT usReadRegAddr,  USHORT usNReadRegs, USHORT * pusDataBuffer, USHORT usWriteRegAddr, USHORT usNWriteRegs, LONG lTimeOut);
+mb_err_enum eMBMasterReqReadCoils                        (mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr,     USHORT usNCoils, LONG lTimeOut                                                                      );
+mb_err_enum eMBMasterReqWriteCoil                        (mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr,     USHORT usCoilData, LONG lTimeOut                                                                    );
+mb_err_enum eMBMasterReqWriteMultipleCoils               (mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr,     USHORT usNCoils, UCHAR * pucDataBuffer, LONG lTimeOut                                               );
+mb_err_enum eMBMasterReqReadDiscreteInputs               (mb_instance* inst, UCHAR ucSndAddr, USHORT usDiscreteAddr, USHORT usNDiscreteIn, LONG lTimeOut                                                                 );
 
 eMBException eMBMasterFuncReportSlaveID                    (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 eMBException eMBMasterFuncReadInputRegister                (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
@@ -40,10 +40,10 @@ void vMBMasterErrorCBReceiveData(mb_instance* inst, UCHAR ucDestAddress, const U
 void vMBMasterErrorCBRespondTimeout(mb_instance* inst, UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
 void vMBMasterCBRequestSuccess(mb_instance* inst);
 
-eMBErrorCode eMBMasterRegInputCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs);
-eMBErrorCode eMBMasterRegHoldingCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs);
-eMBErrorCode eMBMasterRegDiscreteCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete);
-eMBErrorCode eMBMasterRegCoilsCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils);
+mb_err_enum eMBMasterRegInputCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs);
+mb_err_enum eMBMasterRegHoldingCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs);
+mb_err_enum eMBMasterRegDiscreteCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete);
+mb_err_enum eMBMasterRegCoilsCB(mb_instance* inst, UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils);
 
 PR_END_EXTERN_C
 #endif /* MODBUS_MB_MASTER_H_ */

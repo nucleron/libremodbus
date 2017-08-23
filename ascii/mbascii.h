@@ -90,17 +90,17 @@ typedef struct
 	volatile UCHAR                  mb_lf_char;
 	BOOL                            frame_is_broadcast;
 	BOOL                            is_master;
-	volatile eMBMasterTimerMode     cur_tmr_mode;
+	volatile mb_tmr_mode_enum     cur_tmr_mode;
 	//volatile UCHAR                  ucLRC;
 }mb_ascii_tr;
 
 extern const mb_tr_mtab mb_ascii_mtab;
 
-eMBErrorCode            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
+mb_err_enum            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
 void                    eMBASCIIStart                   (mb_ascii_tr* inst                                                                     );
 void                    eMBASCIIStop                    (mb_ascii_tr* inst                                                                     );
-eMBErrorCode            eMBASCIIReceive                 (mb_ascii_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength       );
-eMBErrorCode            eMBASCIISend                    (mb_ascii_tr* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength        );
+mb_err_enum            eMBASCIIReceive                 (mb_ascii_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength       );
+mb_err_enum            eMBASCIISend                    (mb_ascii_tr* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength        );
 BOOL                    xMBASCIIReceiveFSM              (mb_ascii_tr* inst                                                                     );
 BOOL                    xMBASCIITransmitFSM             (mb_ascii_tr* inst                                                                     );
 BOOL                    xMBASCIITimerT1SExpired         (mb_ascii_tr* inst                                                                     );
@@ -108,10 +108,10 @@ BOOL                    xMBASCIITimerT1SExpired         (mb_ascii_tr* inst      
 void                    vMBASCIIMasterGetPDUSndBuf      (mb_ascii_tr* inst, UCHAR ** pucFrame                                                  );
 USHORT                  usMBASCIIMasterGetPDUSndLength  (mb_ascii_tr* inst                                                                     );
 void                    vMBASCIIMasterSetPDUSndLength   (mb_ascii_tr* inst, USHORT SendPDULength                                               );
-void                    vMBASCIIMasterSetCurTimerMode   (mb_ascii_tr* inst, eMBMasterTimerMode eMBTimerMode                                    );
+void                    vMBASCIIMasterSetCurTimerMode   (mb_ascii_tr* inst, mb_tmr_mode_enum eMBTimerMode                                    );
 BOOL                    xMBASCIIMasterRequestIsBroadcast(mb_ascii_tr* inst                                                                     );
 //eMBMasterErrorEventType eMBASCIIMasterGetErrorType      (mb_ascii_tr* inst                                                                     );
-//eMBMasterReqErrCode     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                      );
+//mb_err_enum     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                      );
 
 PR_END_EXTERN_C
 #endif

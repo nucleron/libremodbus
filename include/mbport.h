@@ -92,13 +92,13 @@ typedef enum
 */
 /* ----------------------- Serial Supporting functions -----------------------------*/
 BOOL xMBPortEventInit(mb_port_ser* inst                                    );
-BOOL xMBPortEventPost(mb_port_ser* inst, eMBEventType eEvent               );
-BOOL xMBPortEventGet (mb_port_ser* inst, void* caller, eMBEventType * eEvent); //FIXME
+BOOL xMBPortEventPost(mb_port_ser* inst, mb_event_enum eEvent               );
+BOOL xMBPortEventGet (mb_port_ser* inst, void* caller, mb_event_enum * eEvent); //FIXME
 /* ----------------------- TCP Supporting functions -----------------------------*/
 #if MB_TCP_ENABLED
 BOOL xMBTCPPortEventInit(MULTIPORT_TCP_ARG_void                              );
-BOOL xMBTCPPortEventPost(MULTIPORT_TCP_ARG eMBEventType eEvent               );
-BOOL xMBTCPPortEventGet (MULTIPORT_TCP_ARG void* caller, eMBEventType * eEvent); //FIXME
+BOOL xMBTCPPortEventPost(MULTIPORT_TCP_ARG mb_event_enum eEvent               );
+BOOL xMBTCPPortEventGet (MULTIPORT_TCP_ARG void* caller, mb_event_enum * eEvent); //FIXME
 #endif
 /* ----------------------- Serial port functions ----------------------------*/
 BOOL xMBPortSerialInit   (mb_port_ser* inst, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity);

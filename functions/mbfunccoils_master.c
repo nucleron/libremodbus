@@ -56,7 +56,7 @@
 #define MB_PDU_FUNC_WRITE_MUL_SIZE          (5)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
+eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_MASTER > 0
@@ -72,21 +72,21 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
  *
  * @return error code
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqReadCoils(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHORT usNCoils , LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
-    //eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+    //mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return  MB_MRE_ILL_ARG;
+        return  MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
+    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_COILS;
@@ -97,7 +97,7 @@ eMBMasterReqReadCoils(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USH
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
     //eErrStatus = eMBMasterWaitRequestFinish();
-    return MB_MRE_NO_ERR;
+    return MB_ENOERR;
 }
 
 eMBException
@@ -109,7 +109,7 @@ eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     UCHAR           ucByteCount;
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
     if (inst->trmt->rq_is_broadcast(inst->transport))
@@ -181,25 +181,25 @@ eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
  *
  * @see eMBMasterReqWriteMultipleCoils
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqWriteCoil(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHORT usCoilData, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
-//    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if ((usCoilData != 0xFF00) && (usCoilData != 0x0000))
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    // else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
+    // else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_WRITE_SINGLE_COIL;
@@ -210,7 +210,7 @@ eMBMasterReqWriteCoil(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USH
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_SIZE);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
     //eErrStatus = eMBMasterWaitRequestFinish();
-    return MB_MRE_NO_ERR;
+    return MB_ENOERR;
 }
 
 eMBException
@@ -220,7 +220,7 @@ eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 //    UCHAR           ucBuf[2];
 
     eMBException    eStatus = MB_EX_NONE;
-//    eMBErrorCode    eRegStatus;
+//    mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
@@ -282,28 +282,28 @@ eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
  *
  * @see eMBMasterReqWriteCoil
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqWriteMultipleCoils(mb_instance* inst, UCHAR ucSndAddr,
                                USHORT usCoilAddr, USHORT usNCoils, UCHAR * pucDataBuffer, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     USHORT                 usRegIndex = 0;
     UCHAR                  ucByteCount;
-//    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (usNCoils > MB_PDU_REQ_WRITE_MUL_COILCNT_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
+    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                      = MB_FUNC_WRITE_MULTIPLE_COILS;
@@ -328,7 +328,7 @@ eMBMasterReqWriteMultipleCoils(mb_instance* inst, UCHAR ucSndAddr,
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_MUL_SIZE_MIN + ucByteCount);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
     //eErrStatus = eMBMasterWaitRequestFinish();
-    return MB_MRE_NO_ERR;
+    return MB_ENOERR;
 }
 
 eMBException
@@ -341,7 +341,7 @@ eMBMasterFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * us
 //    UCHAR          *ucMBFrame;
 
     eMBException    eStatus = MB_EX_NONE;
-//    eMBErrorCode    eRegStatus;
+//    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, the *usLen is not need check. */
     if ((*usLen == MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))

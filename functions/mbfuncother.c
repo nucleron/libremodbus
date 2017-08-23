@@ -39,11 +39,11 @@
 
 /* ----------------------- Start implementation -----------------------------*/
 
-eMBErrorCode
+mb_err_enum
 eMBSetSlaveID(mb_instance* inst, UCHAR ucSlaveID, BOOL xIsRunning,
                UCHAR const *pucAdditional, USHORT usAdditionalLen)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     /* the first byte and second byte in the buffer is reserved for
      * the parameter ucSlaveID and the running flag. The rest of

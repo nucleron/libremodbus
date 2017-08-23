@@ -52,11 +52,11 @@ typedef struct
 extern const mb_tr_mtab mb_tcp_mtab;
 
 /* ----------------------- Function prototypes ------------------------------*/
-eMBErrorCode	eMBTCPDoInit       (mb_tcp_tr* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster        );
+mb_err_enum	eMBTCPDoInit       (mb_tcp_tr* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster        );
 void            eMBTCPStart        (mb_tcp_tr* inst                                                              );
 void            eMBTCPStop         (mb_tcp_tr* inst                                                              );
-eMBErrorCode    eMBTCPReceive      (mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
-eMBErrorCode    eMBTCPSend         (mb_tcp_tr* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength      );
+mb_err_enum    eMBTCPReceive      (mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
+mb_err_enum    eMBTCPSend         (mb_tcp_tr* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength      );
 #if MB_MASTER > 0
 void vMBTCPMasterGetPDURcvBuf      (mb_tcp_tr* inst, UCHAR ** pucFrame                                           );
 void vMBTCPMasterGetPDUSndBuf      (mb_tcp_tr* inst, UCHAR ** pucFrame                                           );

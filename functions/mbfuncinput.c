@@ -37,7 +37,7 @@
 #define MB_PDU_FUNC_READ_RSP_BYTECNT_OFF    (MB_PDU_DATA_OFF)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
+eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_FUNC_READ_INPUT_ENABLED > 0
@@ -50,7 +50,7 @@ eMBFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     UCHAR          *pucFrameCur;
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {

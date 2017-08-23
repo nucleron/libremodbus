@@ -60,7 +60,7 @@
 #define MB_PDU_FUNC_WRITE_MUL_COILCNT_MAX   (0x07B0)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
+eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 
@@ -75,7 +75,7 @@ eMBFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     UCHAR          *pucFrameCur;
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
@@ -152,7 +152,7 @@ eMBFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     UCHAR           ucBuf[2];
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
@@ -208,7 +208,7 @@ eMBFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     UCHAR           ucByteCountVerify;
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     if (*usLen > (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {

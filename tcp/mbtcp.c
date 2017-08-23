@@ -98,10 +98,10 @@ const mb_tr_mtab mb_tcp_mtab =
 #   endif //master
 };
 /* ----------------------- Start implementation -----------------------------*/
-eMBErrorCode
+mb_err_enum
 eMBTCPDoInit(mb_tcp_tr* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     if (xMBTCPPortInit(inst->base.port_obj, ucTCPPort,hostaddr, bMaster) == FALSE)
     {
@@ -122,10 +122,10 @@ eMBTCPStop(mb_tcp_tr* inst)
     vMBTCPPortDisable(inst->base.port_obj);
 }
 
-eMBErrorCode
+mb_err_enum
 eMBTCPReceive(mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLength)
 {
-    eMBErrorCode    eStatus = MB_EIO;
+    mb_err_enum    eStatus = MB_EIO;
     UCHAR          *pucMBTCPFrame;
     USHORT          usLength;
     USHORT          usPID;
@@ -154,10 +154,10 @@ eMBTCPReceive(mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT
     return eStatus;
 }
 
-eMBErrorCode
+mb_err_enum
 eMBTCPSend(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
     UCHAR          *pucMBTCPFrame = (UCHAR *) pucFrame - MB_TCP_FUNC;
     USHORT          usTCPLength = usLength + MB_TCP_FUNC;
 

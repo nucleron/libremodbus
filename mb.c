@@ -139,7 +139,7 @@ static xMBFunctionHandler xMasterFuncHandlers[MB_FUNC_HANDLERS_MAX] =
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_RTU_ENABLED > 0
-eMBErrorCode
+mb_err_enum
 eMBInitRTU(mb_instance* inst, mb_rtu_tr* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
 {
     return eMBInit(inst, (void*)transport, MB_RTU, FALSE, ucSlaveAddress, port_obj, ulBaudRate, eParity);
@@ -147,7 +147,7 @@ eMBInitRTU(mb_instance* inst, mb_rtu_tr* transport, UCHAR ucSlaveAddress, mb_por
 #endif
 
 #if MB_ASCII_ENABLED > 0
-eMBErrorCode
+mb_err_enum
 eMBInitASCII(mb_instance* inst, mb_ascii_tr* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
 {
 
@@ -160,7 +160,7 @@ eMBInitASCII(mb_instance* inst, mb_ascii_tr* transport, UCHAR ucSlaveAddress, mb
 #if MB_MASTER >0
 
 #if MB_RTU_ENABLED > 0
-eMBErrorCode
+mb_err_enum
 eMBMasterInitRTU(mb_instance* inst, mb_rtu_tr* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
 {
     return eMBInit(inst, (void*)transport, MB_RTU, TRUE, 0, port_obj, ulBaudRate, eParity);
@@ -168,7 +168,7 @@ eMBMasterInitRTU(mb_instance* inst, mb_rtu_tr* transport, mb_port_base * port_ob
 #endif
 
 #if MB_ASCII_ENABLED > 0
-eMBErrorCode
+mb_err_enum
 eMBMasterInitASCII(mb_instance* inst, mb_ascii_tr* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
 {
     return eMBInit(inst, (void*)transport, MB_ASCII, TRUE, 0, port_obj, ulBaudRate, eParity);
@@ -177,7 +177,7 @@ eMBMasterInitASCII(mb_instance* inst, mb_ascii_tr* transport, mb_port_base * por
 #endif
 
 #if MB_TCP_ENABLED > 0
-eMBErrorCode eMBMasterInitTCP(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr)
+mb_err_enum eMBMasterInitTCP(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr)
 {
     return eMBTCPInit(inst, transport, ucTCPPort, hostaddr, TRUE);
 }
@@ -187,11 +187,11 @@ eMBErrorCode eMBMasterInitTCP(mb_instance* inst, mb_tcp_tr* transport, USHORT uc
 #endif //MASTER
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
-eMBErrorCode
-eMBInit(mb_instance *inst, mb_trans_union *transport, eMBMode eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
+mb_err_enum
+eMBInit(mb_instance *inst, mb_trans_union *transport, mb_mode_enum eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
 {
     eMBCurrentState = STATE_NOT_INITIALIZED;
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     inst->transport          = (mb_trans_base *)transport;
     inst->port               = port_obj;
@@ -284,10 +284,10 @@ eMBInit(mb_instance *inst, mb_trans_union *transport, eMBMode eMode, BOOL is_mas
 #endif
 
 #if MB_TCP_ENABLED > 0
-eMBErrorCode
+mb_err_enum
 eMBTCPInit(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     inst->transport = transport;
     transport->parent = (void*)(inst);
@@ -343,10 +343,10 @@ eMBTCPInit(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_I
 }
 #endif
 
-eMBErrorCode
+mb_err_enum
 eMBClose(mb_instance* inst)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     if (eMBCurrentState == STATE_DISABLED)
     {
@@ -362,10 +362,10 @@ eMBClose(mb_instance* inst)
     return eStatus;
 }
 
-eMBErrorCode
+mb_err_enum
 eMBEnable(mb_instance* inst)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     if (eMBCurrentState == STATE_DISABLED)
     {
@@ -380,10 +380,10 @@ eMBEnable(mb_instance* inst)
     return eStatus;
 }
 
-eMBErrorCode
+mb_err_enum
 eMBDisable(mb_instance* inst)
 {
-    eMBErrorCode    eStatus;
+    mb_err_enum    eStatus;
 
     if (eMBCurrentState == STATE_ENABLED)
     {
@@ -402,7 +402,7 @@ eMBDisable(mb_instance* inst)
     return eStatus;
 }
 
-eMBErrorCode
+mb_err_enum
 eMBPoll(mb_instance* inst)
 {
     static UCHAR    ucRcvAddress;
@@ -412,8 +412,8 @@ eMBPoll(mb_instance* inst)
     //eMBMasterErrorEventType errorType;
 #endif
     int             i, j;
-    eMBErrorCode    eStatus = MB_ENOERR;
-    eMBEventType    eEvent;
+    mb_err_enum    eStatus = MB_ENOERR;
+    mb_event_enum    eEvent;
 
     /* Check if the protocol stack is ready. */
     if (eMBCurrentState != STATE_ENABLED)

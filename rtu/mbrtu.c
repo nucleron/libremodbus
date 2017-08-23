@@ -65,10 +65,10 @@ const mb_tr_mtab mb_rtu_mtab =
 };
 
 /* ----------------------- Start implementation -----------------------------*/
-eMBErrorCode
+mb_err_enum
 eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
     ULONG           usTimerT35_50us;
 
     static const mb_port_cb mb_rtu_cb =
@@ -151,11 +151,11 @@ eMBRTUStop(mb_rtu_tr* inst)
     EXIT_CRITICAL_SECTION();
 }
 
-eMBErrorCode
+mb_err_enum
 eMBRTUReceive(mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength)
 {
     //BOOL            xFrameReceived = FALSE;
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     ENTER_CRITICAL_SECTION();
     assert(usRcvBufferPos < MB_RTU_SER_PDU_SIZE_MAX);
@@ -188,10 +188,10 @@ eMBRTUReceive(mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT 
     return eStatus;
 }
 
-eMBErrorCode
+mb_err_enum
 eMBRTUSend(mb_rtu_tr* inst, UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
     USHORT          usCRC16;
 
     ENTER_CRITICAL_SECTION();
@@ -455,7 +455,7 @@ USHORT usMBRTUMasterGetPDUSndLength(mb_rtu_tr* inst)
 }
 
 /* Set Modbus Master current timer mode.*/
-void vMBRTUMasterSetCurTimerMode(mb_rtu_tr* inst, eMBMasterTimerMode eMBTimerMode)
+void vMBRTUMasterSetCurTimerMode(mb_rtu_tr* inst, mb_tmr_mode_enum eMBTimerMode)
 {
     eCurTimerMode = eMBTimerMode;
 }

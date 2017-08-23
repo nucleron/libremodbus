@@ -40,7 +40,7 @@
 #define MB_PDU_FUNC_READ_RSP_BYTECNT_OFF    (MB_PDU_DATA_OFF)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
+eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if (MB_RTU_ENABLED > 0 || MB_ASCII_ENABLED > 0) && MB_MASTER >0
@@ -56,21 +56,21 @@ eMBException    prveMBError2Exception(eMBErrorCode eErrorCode);
  *
  * @return error code
  */
-eMBMasterReqErrCode
+mb_err_enum
 eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
-//    eMBMasterReqErrCode    eErrStatus = MB_MRE_NO_ERR;
+//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (ucSndAddr > MB_ADDRESS_MAX)
     {
-        return MB_MRE_ILL_ARG;
+        return MB_EINVAL;
     }
     if (inst->master_is_busy)
     {
-        return MB_MRE_MASTER_BUSY;
+        return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_MRE_MASTER_BUSY; //FIXME
+    //else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
     inst->master_dst_addr = ucSndAddr;
     ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_INPUT_REGISTER;
@@ -93,7 +93,7 @@ eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usL
     USHORT          usRegCount;
 
     eMBException    eStatus = MB_EX_NONE;
-    eMBErrorCode    eRegStatus;
+    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
     if (inst->trmt->rq_is_broadcast(inst->transport))

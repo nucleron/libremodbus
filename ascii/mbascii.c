@@ -83,9 +83,9 @@ static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter           );
 static UCHAR    prvucMBBIN2CHAR(UCHAR ucByte                );
 static UCHAR    prvucMBLRC     (UCHAR * pucFrame, USHORT usLen);
 /* ----------------------- Start implementation -----------------------------*/
-eMBErrorCode eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity)
+mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     static const mb_port_cb mb_ascii_cb =
     {
@@ -141,9 +141,9 @@ void eMBASCIIStop(mb_ascii_tr* inst)
     EXIT_CRITICAL_SECTION();
 }
 
-eMBErrorCode eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength)
+mb_err_enum eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
 
     ENTER_CRITICAL_SECTION();
     assert(usRcvBufferPos < MB_ASCII_SER_PDU_SIZE_MAX);
@@ -173,9 +173,9 @@ eMBErrorCode eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * pucRcvAddress, UCHAR **
     return eStatus;
 }
 
-eMBErrorCode eMBASCIISend(mb_ascii_tr* inst,  UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength)
+mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength)
 {
-    eMBErrorCode    eStatus = MB_ENOERR;
+    mb_err_enum    eStatus = MB_ENOERR;
     UCHAR           usLRC;
 
     ENTER_CRITICAL_SECTION();
@@ -565,7 +565,7 @@ USHORT usMBASCIIMasterGetPDUSndLength(mb_ascii_tr* inst)
 }
 
 /* Set Modbus Master current timer mode.*/
-void vMBASCIIMasterSetCurTimerMode(mb_ascii_tr* inst, eMBMasterTimerMode eMBTimerMode)
+void vMBASCIIMasterSetCurTimerMode(mb_ascii_tr* inst, mb_tmr_mode_enum eMBTimerMode)
 {
     eCurTimerMode = eMBTimerMode;
 }
