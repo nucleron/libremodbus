@@ -83,7 +83,7 @@ static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter           );
 static UCHAR    prvucMBBIN2CHAR(UCHAR ucByte                );
 static UCHAR    prvucMBLRC     (UCHAR * pucFrame, USHORT usLen);
 /* ----------------------- Start implementation -----------------------------*/
-mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity)
+mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
@@ -94,7 +94,7 @@ mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR ucSlaveAddress
         .tmr_expired = (mb_fp_bool)xMBASCIITimerT1SExpired
     };
 
-    (void)ucSlaveAddress;
+    (void)slv_addr;
     inst->base.port_obj->cb  = (mb_port_cb *)&mb_ascii_cb;
     inst->base.port_obj->arg = inst;
     inst->is_master          = is_master;
@@ -104,7 +104,7 @@ mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR ucSlaveAddress
     ENTER_CRITICAL_SECTION();
     ucMBLFCharacter = MB_ASCII_DEFAULT_LF;
 
-    if (xMBPortSerialInit((mb_port_ser *)inst->base.port_obj, ulBaudRate, 7, eParity) != TRUE)
+    if (xMBPortSerialInit((mb_port_ser *)inst->base.port_obj, baud, 7, parity) != TRUE)
     {
         eStatus = MB_EPORTERR;
     }
@@ -173,7 +173,7 @@ mb_err_enum eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * pucRcvAddress, UCHAR ** 
     return eStatus;
 }
 
-mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength)
+mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR slv_addr, const UCHAR * pucFrame, USHORT usLength)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     UCHAR           usLRC;
@@ -190,7 +190,7 @@ mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR ucSlaveAddress, const UCHAR *
         usSndBufferCount = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
-        pucSndBufferCur[MB_ASCII_SER_PDU_ADDR_OFF] = ucSlaveAddress;
+        pucSndBufferCur[MB_ASCII_SER_PDU_ADDR_OFF] = slv_addr;
         usSndBufferCount += usLength;
 
         /* Calculate LRC checksum for Modbus-Serial-Line-PDU. */

@@ -66,7 +66,7 @@ const mb_tr_mtab mb_rtu_mtab =
 
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum
-eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity)
+eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     ULONG           usTimerT35_50us;
@@ -78,7 +78,7 @@ eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRa
         .tmr_expired = (mb_fp_bool)xMBRTUTimerT35Expired
     };
 
-    (void)ucSlaveAddress;
+    (void)slv_addr;
 
     inst->base.port_obj->cb  = (mb_port_cb *)&mb_rtu_cb;
     inst->base.port_obj->arg = inst;
@@ -87,7 +87,7 @@ eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRa
     ENTER_CRITICAL_SECTION();
 
     /* Modbus RTU uses 8 Databits. */
-    if (xMBPortSerialInit((mb_port_ser *)inst->base.port_obj, ulBaudRate, 8, eParity) != TRUE)
+    if (xMBPortSerialInit((mb_port_ser *)inst->base.port_obj, baud, 8, parity) != TRUE)
     {
         eStatus = MB_EPORTERR;
     }
@@ -96,7 +96,7 @@ eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRa
         /* If baudrate > 19200 then we should use the fixed timer values
          * t35 = 1750us. Otherwise t35 must be 3.5 times the character time.
          */
-        if (ulBaudRate > 19200)
+        if (baud > 19200)
         {
             usTimerT35_50us = 35;       /* 1800us. */
         }
@@ -110,7 +110,7 @@ eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR ucSlaveAddress, ULONG ulBaudRa
              * The reload for t3.5 is 1.5 times this value and similary
              * for t3.5.
              */
-            usTimerT35_50us = (7UL * 220000UL) / (2UL * ulBaudRate);
+            usTimerT35_50us = (7UL * 220000UL) / (2UL * baud);
         }
         if (xMBPortTimersInit((mb_port_ser *)inst->base.port_obj,  (USHORT) usTimerT35_50us) != TRUE)
         {
@@ -189,7 +189,7 @@ eMBRTUReceive(mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT 
 }
 
 mb_err_enum
-eMBRTUSend(mb_rtu_tr* inst, UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength)
+eMBRTUSend(mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * pucFrame, USHORT usLength)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     USHORT          usCRC16;
@@ -207,7 +207,7 @@ eMBRTUSend(mb_rtu_tr* inst, UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT
         usSndBufferCount = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
-        pucSndBufferCur[MB_RTU_SER_PDU_ADDR_OFF] = ucSlaveAddress;
+        pucSndBufferCur[MB_RTU_SER_PDU_ADDR_OFF] = slv_addr;
         usSndBufferCount += usLength;
 
         /* Calculate CRC16 checksum for Modbus-Serial-Line-PDU. */

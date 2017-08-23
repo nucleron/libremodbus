@@ -67,13 +67,13 @@ eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
  *
  * @param ucSndAddr salve address
  * @param usCoilAddr coil start address
- * @param usNCoils coil total number
+ * @param coil_num coil total number
  * @param lTimeOut timeout (-1 will waiting forever)
  *
  * @return error code
  */
 mb_err_enum
-eMBMasterReqReadCoils(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHORT usNCoils , LONG lTimeOut)
+eMBMasterReqReadCoils(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USHORT coil_num , LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     //mb_err_enum    eErrStatus = MB_ENOERR;
@@ -92,8 +92,8 @@ eMBMasterReqReadCoils(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USH
     ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_COILS;
     ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]        = usCoilAddr >> 8;
     ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]    = usCoilAddr;
-    ucMBFrame[MB_PDU_REQ_READ_COILCNT_OFF ]    = usNCoils >> 8;
-    ucMBFrame[MB_PDU_REQ_READ_COILCNT_OFF + 1] = usNCoils;
+    ucMBFrame[MB_PDU_REQ_READ_COILCNT_OFF ]    = coil_num >> 8;
+    ucMBFrame[MB_PDU_REQ_READ_COILCNT_OFF + 1] = coil_num;
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
     //eErrStatus = eMBMasterWaitRequestFinish();
@@ -274,7 +274,7 @@ eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
  *
  * @param ucSndAddr salve address
  * @param usCoilAddr coil start address
- * @param usNCoils coil total number
+ * @param coil_num coil total number
  * @param usCoilData data to be written
  * @param lTimeOut timeout (-1 will waiting forever)
  *
@@ -284,7 +284,7 @@ eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
  */
 mb_err_enum
 eMBMasterReqWriteMultipleCoils(mb_instance* inst, UCHAR ucSndAddr,
-                               USHORT usCoilAddr, USHORT usNCoils, UCHAR * pucDataBuffer, LONG lTimeOut)
+                               USHORT usCoilAddr, USHORT coil_num, UCHAR * pucDataBuffer, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
     USHORT                 usRegIndex = 0;
@@ -295,7 +295,7 @@ eMBMasterReqWriteMultipleCoils(mb_instance* inst, UCHAR ucSndAddr,
     {
         return MB_EINVAL;
     }
-    if (usNCoils > MB_PDU_REQ_WRITE_MUL_COILCNT_MAX)
+    if (coil_num > MB_PDU_REQ_WRITE_MUL_COILCNT_MAX)
     {
         return MB_EINVAL;
     }
@@ -309,15 +309,15 @@ eMBMasterReqWriteMultipleCoils(mb_instance* inst, UCHAR ucSndAddr,
     ucMBFrame[MB_PDU_FUNC_OFF]                      = MB_FUNC_WRITE_MULTIPLE_COILS;
     ucMBFrame[MB_PDU_REQ_WRITE_MUL_ADDR_OFF]        = usCoilAddr >> 8;
     ucMBFrame[MB_PDU_REQ_WRITE_MUL_ADDR_OFF + 1]    = usCoilAddr;
-    ucMBFrame[MB_PDU_REQ_WRITE_MUL_COILCNT_OFF]     = usNCoils >> 8;
-    ucMBFrame[MB_PDU_REQ_WRITE_MUL_COILCNT_OFF + 1] = usNCoils ;
-    if((usNCoils & 0x0007) != 0)
+    ucMBFrame[MB_PDU_REQ_WRITE_MUL_COILCNT_OFF]     = coil_num >> 8;
+    ucMBFrame[MB_PDU_REQ_WRITE_MUL_COILCNT_OFF + 1] = coil_num ;
+    if((coil_num & 0x0007) != 0)
     {
-        ucByteCount = (UCHAR)(usNCoils / 8 + 1);
+        ucByteCount = (UCHAR)(coil_num / 8 + 1);
     }
     else
     {
-        ucByteCount = (UCHAR)(usNCoils / 8);
+        ucByteCount = (UCHAR)(coil_num / 8);
     }
     ucMBFrame[MB_PDU_REQ_WRITE_MUL_BYTECNT_OFF]     = ucByteCount;
     ucMBFrame += MB_PDU_REQ_WRITE_MUL_VALUES_OFF;

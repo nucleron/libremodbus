@@ -51,13 +51,13 @@ eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
  *
  * @param ucSndAddr salve address
  * @param usRegAddr register start address
- * @param usNRegs register total number
+ * @param reg_num register total number
  * @param lTimeOut timeout (-1 will waiting forever)
  *
  * @return error code
  */
 mb_err_enum
-eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT usNRegs, LONG lTimeOut)
+eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAddr, USHORT reg_num, LONG lTimeOut)
 {
     UCHAR                 *ucMBFrame;
 //    mb_err_enum    eErrStatus = MB_ENOERR;
@@ -76,8 +76,8 @@ eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAd
     ucMBFrame[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_INPUT_REGISTER;
     ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]       = usRegAddr >> 8;
     ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]   = usRegAddr;
-    ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF]     = usNRegs >> 8;
-    ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF + 1] = usNRegs;
+    ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF]     = reg_num >> 8;
+    ucMBFrame[MB_PDU_REQ_READ_REGCNT_OFF + 1] = reg_num;
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE); ///WTF?????
 
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);

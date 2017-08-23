@@ -79,7 +79,7 @@ typedef enum
     MB_PAR_NONE,                /*!< No parity. */
     MB_PAR_ODD,                 /*!< Odd parity. */
     MB_PAR_EVEN                 /*!< Even parity. */
-} eMBParity;
+} mb_parity_enum;
 
 /* ----------------------- Type definitions ---------------------------------*/
 
@@ -101,7 +101,7 @@ BOOL xMBTCPPortEventPost(MULTIPORT_TCP_ARG mb_event_enum eEvent               );
 BOOL xMBTCPPortEventGet (MULTIPORT_TCP_ARG void* caller, mb_event_enum * eEvent); //FIXME
 #endif
 /* ----------------------- Serial port functions ----------------------------*/
-BOOL xMBPortSerialInit   (mb_port_ser* inst, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity);
+BOOL xMBPortSerialInit   (mb_port_ser* inst, ULONG baud, UCHAR ucDataBits, mb_parity_enum parity);
 void vMBPortClose        (mb_port_ser* inst                                                      );
 void xMBPortSerialClose  (mb_port_ser* inst                                                      );
 void vMBPortSerialEnable (mb_port_ser* inst,  BOOL xRxEnable, BOOL xTxEnable                     );
@@ -141,7 +141,7 @@ void vMBTCPPortTimersDelay  (MULTIPORT_TCP_ARG USHORT usTimeOutMS );
 //extern BOOL(*pxMBPortCBTimerExpired)     (void* transport);
 /* ----------------------- TCP port functions -------------------------------*/
 #if MB_TCP_ENABLED > 0
-BOOL xMBTCPPortInit        (MULTIPORT_TCP_ARG USHORT usTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster);
+BOOL xMBTCPPortInit        (MULTIPORT_TCP_ARG USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master);
 void vMBTCPPortClose       (MULTIPORT_TCP_ARG_VOID                                               );
 void vMBTCPPortDisable     (MULTIPORT_TCP_ARG_VOID                                               );
 BOOL xMBTCPPortGetRequest  (MULTIPORT_TCP_ARG UCHAR **ppucMBTCPFrame, USHORT * usTCPLength       );

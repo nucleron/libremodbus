@@ -47,8 +47,6 @@
 
 #define pbMBMasterRequestIsBroadcastCur inst->trmt->rq_is_broadcast
 
-#define xFuncHandlers inst->xFuncHandlers
-
 #define usLength inst->len
 #define PDUSndLength inst->pdu_snd_len
 #define rxFrame inst->rx_frame
@@ -140,18 +138,18 @@ static xMBFunctionHandler xMasterFuncHandlers[MB_FUNC_HANDLERS_MAX] =
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_RTU_ENABLED > 0
 mb_err_enum
-eMBInitRTU(mb_instance* inst, mb_rtu_tr* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
+mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
 {
-    return eMBInit(inst, (void*)transport, MB_RTU, FALSE, ucSlaveAddress, port_obj, ulBaudRate, eParity);
+    return mb_init(inst, (void*)transport, MB_RTU, FALSE, slv_addr, port_obj, baud, parity);
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
 mb_err_enum
-eMBInitASCII(mb_instance* inst, mb_ascii_tr* transport, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
+mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
 {
 
-    return eMBInit(inst, (void*)transport, MB_ASCII, FALSE, ucSlaveAddress, port_obj, ulBaudRate, eParity);
+    return mb_init(inst, (void*)transport, MB_ASCII, FALSE, slv_addr, port_obj, baud, parity);
 }
 
 #endif
@@ -161,25 +159,25 @@ eMBInitASCII(mb_instance* inst, mb_ascii_tr* transport, UCHAR ucSlaveAddress, mb
 
 #if MB_RTU_ENABLED > 0
 mb_err_enum
-eMBMasterInitRTU(mb_instance* inst, mb_rtu_tr* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
+mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
 {
-    return eMBInit(inst, (void*)transport, MB_RTU, TRUE, 0, port_obj, ulBaudRate, eParity);
+    return mb_init(inst, (void*)transport, MB_RTU, TRUE, 0, port_obj, baud, parity);
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
 mb_err_enum
-eMBMasterInitASCII(mb_instance* inst, mb_ascii_tr* transport, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
+mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr* transport, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
 {
-    return eMBInit(inst, (void*)transport, MB_ASCII, TRUE, 0, port_obj, ulBaudRate, eParity);
+    return mb_init(inst, (void*)transport, MB_ASCII, TRUE, 0, port_obj, baud, parity);
 }
 
 #endif
 
 #if MB_TCP_ENABLED > 0
-mb_err_enum eMBMasterInitTCP(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr)
+mb_err_enum mb_mstr_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr)
 {
-    return eMBTCPInit(inst, transport, ucTCPPort, hostaddr, TRUE);
+    return mb_init_tcp(inst, transport, tcp_port_num, hostaddr, TRUE);
 }
 
 #endif
@@ -188,7 +186,7 @@ mb_err_enum eMBMasterInitTCP(mb_instance* inst, mb_tcp_tr* transport, USHORT ucT
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
 mb_err_enum
-eMBInit(mb_instance *inst, mb_trans_union *transport, mb_mode_enum eMode, BOOL is_master, UCHAR ucSlaveAddress, mb_port_base * port_obj, ULONG ulBaudRate, eMBParity eParity)
+mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
 {
     eMBCurrentState = STATE_NOT_INITIALIZED;
     mb_err_enum    eStatus = MB_ENOERR;
@@ -197,14 +195,14 @@ eMBInit(mb_instance *inst, mb_trans_union *transport, mb_mode_enum eMode, BOOL i
     inst->port               = port_obj;
     transport->base.port_obj = port_obj;
 
-    switch (eMode)
+    switch (mode)
     {
 #if MB_RTU_ENABLED > 0
     case MB_RTU:
     {
         inst->trmt = (mb_tr_mtab *)&mb_rtu_mtab;
         PDUSndLength = &(transport->rtu.snd_pdu_len);
-        eStatus = eMBRTUInit((mb_rtu_tr*)transport, is_master, ucMBAddress, ulBaudRate, eParity);
+        eStatus = eMBRTUInit((mb_rtu_tr*)transport, is_master, ucMBAddress, baud, parity);
         break;
     }
 #endif //RTU
@@ -213,7 +211,7 @@ eMBInit(mb_instance *inst, mb_trans_union *transport, mb_mode_enum eMode, BOOL i
     {
         inst->trmt = (mb_tr_mtab *)&mb_ascii_mtab;
         PDUSndLength = &(transport->ascii.snd_pdu_len);
-        eStatus = eMBASCIIInit((mb_ascii_tr*)transport, is_master, ucMBAddress, ulBaudRate, eParity);
+        eStatus = eMBASCIIInit((mb_ascii_tr*)transport, is_master, ucMBAddress, baud, parity);
         break;
     }
 #endif//ASCII
@@ -241,23 +239,23 @@ eMBInit(mb_instance *inst, mb_trans_union *transport, mb_mode_enum eMode, BOOL i
     {
         inst->master_is_busy = FALSE;
         xMBRunInMasterMode   = TRUE;
-        xFuncHandlers        = xMasterFuncHandlers;
+        inst->func_handlers  = xMasterFuncHandlers;
     }
     else
 #endif //MB_MASTER
     {
-        xFuncHandlers = defaultFuncHandlers;
+        inst->func_handlers = defaultFuncHandlers;
     }
 
     /* check preconditions */
-    if (((ucSlaveAddress == MB_ADDRESS_BROADCAST) ||
-            (ucSlaveAddress < MB_ADDRESS_MIN) || (ucSlaveAddress > MB_ADDRESS_MAX))&& (is_master == FALSE))
+    if (((slv_addr == MB_ADDRESS_BROADCAST) ||
+            (slv_addr < MB_ADDRESS_MIN) || (slv_addr > MB_ADDRESS_MAX))&& (is_master == FALSE))
     {
         eStatus = MB_EINVAL;
     }
     else
     {
-        ucMBAddress = ucSlaveAddress;
+        ucMBAddress = slv_addr;
 
 
 
@@ -270,7 +268,7 @@ eMBInit(mb_instance *inst, mb_trans_union *transport, mb_mode_enum eMode, BOOL i
             }
             else
             {
-                eMBCurrentMode = eMode;
+                eMBCurrentMode = mode;
                 eMBCurrentState = STATE_DISABLED;
             }
         }
@@ -285,7 +283,7 @@ eMBInit(mb_instance *inst, mb_trans_union *transport, mb_mode_enum eMode, BOOL i
 
 #if MB_TCP_ENABLED > 0
 mb_err_enum
-eMBTCPInit(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster)
+mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
@@ -296,14 +294,14 @@ eMBTCPInit(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_I
     if (transport->tcpMaster ==  TRUE)
     {
         inst->xMBRunInMasterMode = TRUE;
-        xFuncHandlers = xMasterFuncHandlers;
+        inst->func_handlers = xMasterFuncHandlers;
     }
     else
     {
-        xFuncHandlers = defaultFuncHandlers;
+        inst->func_handlers = defaultFuncHandlers;
     }
 
-    if ((eStatus = eMBTCPDoInit(transport, ucTCPPort, hostaddr, bMaster)) != MB_ENOERR)
+    if ((eStatus = eMBTCPDoInit(transport, tcp_port_num, hostaddr, is_master)) != MB_ENOERR)
     {
         inst->eMBCurrentState = STATE_DISABLED;
     }
@@ -344,7 +342,7 @@ eMBTCPInit(mb_instance* inst, mb_tcp_tr* transport, USHORT ucTCPPort, SOCKADDR_I
 #endif
 
 mb_err_enum
-eMBClose(mb_instance* inst)
+mb_close(mb_instance* inst)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
@@ -363,7 +361,7 @@ eMBClose(mb_instance* inst)
 }
 
 mb_err_enum
-eMBEnable(mb_instance* inst)
+mb_enable(mb_instance* inst)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
@@ -381,7 +379,7 @@ eMBEnable(mb_instance* inst)
 }
 
 mb_err_enum
-eMBDisable(mb_instance* inst)
+mb_disable(mb_instance* inst)
 {
     mb_err_enum    eStatus;
 
@@ -403,7 +401,7 @@ eMBDisable(mb_instance* inst)
 }
 
 mb_err_enum
-eMBPoll(mb_instance* inst)
+mb_poll(mb_instance* inst)
 {
     static UCHAR    ucRcvAddress;
     static UCHAR    ucFunctionCode;
@@ -486,11 +484,11 @@ eMBPoll(mb_instance* inst)
                 for (i = 0; i < MB_FUNC_HANDLERS_MAX; i++)
                 {
                     /* No more function handlers registered. Abort. */
-                    if (xFuncHandlers[i].ucFunctionCode == 0)
+                    if (inst->func_handlers[i].ucFunctionCode == 0)
                     {
                         break;
                     }
-                    else if (xFuncHandlers[i].ucFunctionCode == ucFunctionCode)
+                    else if (inst->func_handlers[i].ucFunctionCode == ucFunctionCode)
                     {
 #if MB_MASTER > 0
                         if (xMBRunInMasterMode == FALSE)
@@ -500,12 +498,12 @@ eMBPoll(mb_instance* inst)
                             {
                                 txFrame[j]=rxFrame[j];
                             }
-                            eException = xFuncHandlers[i].pxHandler(inst, (UCHAR*)(txFrame), (USHORT*)&usLength);
+                            eException = inst->func_handlers[i].pxHandler(inst, (UCHAR*)(txFrame), (USHORT*)&usLength);
                         }
 #if MB_MASTER > 0
                         else
                         {
-                            eException = xFuncHandlers[i].pxHandler(inst, (UCHAR*)(rxFrame), (USHORT*)&usLength);
+                            eException = inst->func_handlers[i].pxHandler(inst, (UCHAR*)(rxFrame), (USHORT*)&usLength);
                         }
 #endif// MB_MASTER
                         break;

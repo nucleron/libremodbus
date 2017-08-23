@@ -52,7 +52,7 @@ typedef struct
 extern const mb_tr_mtab mb_tcp_mtab;
 
 /* ----------------------- Function prototypes ------------------------------*/
-mb_err_enum	eMBTCPDoInit       (mb_tcp_tr* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster        );
+mb_err_enum	eMBTCPDoInit       (mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL bMaster        );
 void            eMBTCPStart        (mb_tcp_tr* inst                                                              );
 void            eMBTCPStop         (mb_tcp_tr* inst                                                              );
 mb_err_enum    eMBTCPReceive      (mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);

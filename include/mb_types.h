@@ -27,8 +27,8 @@ PR_BEGIN_EXTERN_C
  * registers should be updated and reading means that the modbus protocol
  * stack needs to know the current register values.
  *
- * \see eMBRegHoldingCB(), eMBRegCoilsCB(), eMBRegDiscreteCB() and
- *   eMBRegInputCB().
+ * \see mb_reg_holding_cb(), mb_reg_coils_cb(), mb_reg_discrete_cb() and
+ *   mb_reg_input_cb().
  */
 typedef enum
 {
@@ -45,23 +45,12 @@ typedef enum
     EV_FRAME_RECEIVED,          /*!< Frame received. */
     EV_EXECUTE,                 /*!< Execute function. */
     EV_FRAME_SENT,               /*!< Frame sent. */
-	/*master events*/
-	//EV_ERROR_PROCESS,
-//	EV_ERROR_RESPOND_TIMEOUT,
-//
-#if MB_MASTER >0
+#if MB_MASTER > 0
     EV_MASTER_ERROR_RESPOND_TIMEOUT,  /*!< Request respond timeout. */
     EV_MASTER_ERROR_RECEIVE_DATA,     /*!< Request receive data error. */
     EV_MASTER_ERROR_EXECUTE_FUNCTION, /*!< Request execute function error. */
 #endif
 } mb_event_enum;
-
-//typedef enum
-//{
-//    ERR_EV_ERROR_RESPOND_TIMEOUT,         /*!< Slave respond timeout. */
-//    ERR_EV_ERROR_RECEIVE_DATA,            /*!< Receive frame data erroe. */
-//    ERR_EV_ERROR_EXECUTE_FUNCTION,        /*!< Execute function error. */
-//} eMBMasterErrorEventType;
 
 /*! \ingroup modbus
  * \brief Errorcodes used by all function in the protocol stack.
@@ -80,17 +69,6 @@ typedef enum
     MB_EBUSY                   /*!< master is busy now. */
 } mb_err_enum;
 
-/* master */
-//typedef enum
-//{
-//    MB_ENOERR,                  /*!< no error. */
-//    MB_ENOREG,                  /*!< illegal register address. */
-//    MB_EINVAL,                 /*!< illegal argument. */
-//    MB_ERCV,                /*!< receive data error. */
-//    MB_ETIMEDOUT,                /*!< timeout error occurred. */
-//    MB_EBUSY,             /*!< master is busy now. */
-//    MB_EFNEXEC                  /*!< execute function error. */
-//} mb_err_enum;
 /*! \ingroup modbus
  *  \brief TimerMode is Master 3 kind of Timer modes.
  */

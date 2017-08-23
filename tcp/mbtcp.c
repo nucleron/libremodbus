@@ -99,11 +99,11 @@ const mb_tr_mtab mb_tcp_mtab =
 };
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum
-eMBTCPDoInit(mb_tcp_tr* inst, USHORT ucTCPPort, SOCKADDR_IN hostaddr, BOOL bMaster)
+eMBTCPDoInit(mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL bMaster)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
-    if (xMBTCPPortInit(inst->base.port_obj, ucTCPPort,hostaddr, bMaster) == FALSE)
+    if (xMBTCPPortInit(inst->base.port_obj, tcp_port_num,hostaddr, bMaster) == FALSE)
     {
         eStatus = MB_EPORTERR;
     }

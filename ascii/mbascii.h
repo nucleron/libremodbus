@@ -96,7 +96,7 @@ typedef struct
 
 extern const mb_tr_mtab mb_ascii_mtab;
 
-mb_err_enum            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
+mb_err_enum            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG baud, mb_parity_enum parity);
 void                    eMBASCIIStart                   (mb_ascii_tr* inst                                                                     );
 void                    eMBASCIIStop                    (mb_ascii_tr* inst                                                                     );
 mb_err_enum            eMBASCIIReceive                 (mb_ascii_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength       );

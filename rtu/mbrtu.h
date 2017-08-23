@@ -82,7 +82,7 @@ typedef struct
 
 extern const mb_tr_mtab mb_rtu_mtab;
 
-mb_err_enum            eMBRTUInit                    (mb_rtu_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity);
+mb_err_enum            eMBRTUInit                    (mb_rtu_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG baud, mb_parity_enum parity);
 void                    eMBRTUStart                   (mb_rtu_tr* inst                                                                     );
 void                    eMBRTUStop                    (mb_rtu_tr* inst                                                                     );
 mb_err_enum            eMBRTUReceive                 (mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength       );

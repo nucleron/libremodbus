@@ -40,24 +40,24 @@
 /* ----------------------- Start implementation -----------------------------*/
 
 mb_err_enum
-eMBSetSlaveID(mb_instance* inst, UCHAR ucSlaveID, BOOL xIsRunning,
-               UCHAR const *pucAdditional, USHORT usAdditionalLen)
+mb_set_slv_id(mb_instance* inst, UCHAR slv_id, BOOL is_running,
+               UCHAR const *slv_idstr, USHORT slv_idstr_len)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
     /* the first byte and second byte in the buffer is reserved for
-     * the parameter ucSlaveID and the running flag. The rest of
+     * the parameter slv_id and the running flag. The rest of
      * the buffer is available for additional data. */
-    if (usAdditionalLen + 2 < MB_FUNC_OTHER_REP_SLAVEID_BUF)
+    if (slv_idstr_len + 2 < MB_FUNC_OTHER_REP_SLAVEID_BUF)
     {
         usMBSlaveIDLen = 0;
-        ucMBSlaveID[usMBSlaveIDLen++] = ucSlaveID;
-        ucMBSlaveID[usMBSlaveIDLen++] = (UCHAR)(xIsRunning ? 0xFF : 0x00);
-        if (usAdditionalLen > 0)
+        ucMBSlaveID[usMBSlaveIDLen++] = slv_id;
+        ucMBSlaveID[usMBSlaveIDLen++] = (UCHAR)(is_running ? 0xFF : 0x00);
+        if (slv_idstr_len > 0)
         {
-            memcpy(&ucMBSlaveID[usMBSlaveIDLen], pucAdditional,
-                    (size_t)usAdditionalLen);
-            usMBSlaveIDLen += usAdditionalLen;
+            memcpy(&ucMBSlaveID[usMBSlaveIDLen], slv_idstr,
+                    (size_t)slv_idstr_len);
+            usMBSlaveIDLen += slv_idstr_len;
         }
     }
     else

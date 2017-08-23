@@ -114,7 +114,7 @@ eMBFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
             *usLen += 1;
 
             eRegStatus =
-                eMBRegCoilsCB(pucFrameCur, usRegAddress, usCoilCount,
+                mb_reg_coils_cb(pucFrameCur, usRegAddress, usCoilCount,
                                MB_REG_READ);
 
             /* If an error occured convert it into a Modbus exception. */
@@ -174,7 +174,7 @@ eMBFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
                 ucBuf[0] = 0;
             }
             eRegStatus =
-                eMBRegCoilsCB(&ucBuf[0], usRegAddress, 1, MB_REG_WRITE);
+                mb_reg_coils_cb(&ucBuf[0], usRegAddress, 1, MB_REG_WRITE);
 
             /* If an error occured convert it into a Modbus exception. */
             if (eRegStatus != MB_ENOERR)
@@ -236,7 +236,7 @@ eMBFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
             (ucByteCountVerify == ucByteCount))
         {
             eRegStatus =
-                eMBRegCoilsCB(&pucFrame[MB_PDU_FUNC_WRITE_MUL_VALUES_OFF],
+                mb_reg_coils_cb(&pucFrame[MB_PDU_FUNC_WRITE_MUL_VALUES_OFF],
                                usRegAddress, usCoilCnt, MB_REG_WRITE);
 
             /* If an error occured convert it into a Modbus exception. */
