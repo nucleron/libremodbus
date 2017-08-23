@@ -67,7 +67,7 @@
 #define MB_PDU_FUNC_READWRITE_SIZE_MIN          (1)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_MASTER > 0
@@ -110,11 +110,11 @@ eMBMasterReqWriteHoldingRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRe
     return MB_EX_NONE;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncWriteHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, USHORT * usLen)
 {
 //    USHORT          usRegAddress;
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
 //    mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_SIZE))
@@ -193,7 +193,7 @@ eMBMasterReqWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
     return MB_EX_NONE;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncWriteMultipleHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, USHORT * usLen)
 {
 //    UCHAR          *ucMBFrame;
@@ -201,7 +201,7 @@ eMBMasterFuncWriteMultipleHoldingRegister(mb_instance* inst,  UCHAR * pucFrame, 
 //    USHORT          usRegCount;
 //    UCHAR           ucRegByteCount;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
 //    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, the *usLen is not need check. */
@@ -287,14 +287,14 @@ eMBMasterReqReadHoldingRegister(mb_instance* inst,  UCHAR ucSndAddr, USHORT usRe
     return MB_EX_NONE;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
     USHORT          usRegCount;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
@@ -418,7 +418,7 @@ eMBMasterReqReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
     return MB_EX_NONE;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegReadAddress;
@@ -427,7 +427,7 @@ eMBMasterFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFram
 //    USHORT          usRegWriteCount;
     UCHAR          *ucMBFrame;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */

@@ -24,16 +24,16 @@ mb_err_enum eMBMasterReqWriteCoil                        (mb_instance* inst, UCH
 mb_err_enum eMBMasterReqWriteMultipleCoils               (mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr,     USHORT coil_num, UCHAR * pucDataBuffer, LONG lTimeOut                                               );
 mb_err_enum eMBMasterReqReadDiscreteInputs               (mb_instance* inst, UCHAR ucSndAddr, USHORT usDiscreteAddr, USHORT usNDiscreteIn, LONG lTimeOut                                                                 );
 
-eMBException eMBMasterFuncReportSlaveID                    (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncReadInputRegister                (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncReadHoldingRegister              (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncWriteHoldingRegister             (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncWriteMultipleHoldingRegister     (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncReadCoils                        (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncWriteCoil                        (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncWriteMultipleCoils               (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncReadDiscreteInputs               (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
-eMBException eMBMasterFuncReadWriteMultipleHoldingRegister (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncReportSlaveID                    (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncReadInputRegister                (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncReadHoldingRegister              (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncWriteHoldingRegister             (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncWriteMultipleHoldingRegister     (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncReadCoils                        (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncWriteCoil                        (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncWriteMultipleCoils               (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncReadDiscreteInputs               (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum eMBMasterFuncReadWriteMultipleHoldingRegister (mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 
 void vMBMasterErrorCBExecuteFunction(mb_instance* inst, UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);
 void vMBMasterErrorCBReceiveData(mb_instance* inst, UCHAR ucDestAddress, const UCHAR* pucPDUData, USHORT ucPDULength);

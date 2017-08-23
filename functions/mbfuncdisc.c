@@ -24,13 +24,13 @@
 #define MB_PDU_FUNC_READ_DISCCNT_MAX        (0x07D0)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
-eMBException
+mb_exception_enum
 eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
@@ -38,7 +38,7 @@ eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     UCHAR           ucNBytes;
     UCHAR          *pucFrameCur;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))

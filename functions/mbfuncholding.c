@@ -54,17 +54,17 @@
 #define MB_PDU_FUNC_READWRITE_SIZE_MIN          (9)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
 
-eMBException
+mb_exception_enum
 eMBFuncWriteHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
@@ -93,14 +93,14 @@ eMBFuncWriteHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
-eMBException
+mb_exception_enum
 eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
     UCHAR           ucRegByteCount;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*usLen >= (MB_PDU_FUNC_WRITE_MUL_SIZE_MIN + MB_PDU_SIZE_MIN))
@@ -153,14 +153,14 @@ eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT 
 
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
 
-eMBException
+mb_exception_enum
 eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
     UCHAR          *pucFrameCur;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
@@ -218,7 +218,7 @@ eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
 
-eMBException
+mb_exception_enum
 eMBFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegReadAddress;
@@ -228,7 +228,7 @@ eMBFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USH
     UCHAR           ucRegWriteByteCount;
     UCHAR          *pucFrameCur;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*usLen >= (MB_PDU_FUNC_READWRITE_SIZE_MIN + MB_PDU_SIZE_MIN))

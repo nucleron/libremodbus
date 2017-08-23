@@ -40,7 +40,7 @@
 #define MB_PDU_FUNC_READ_RSP_BYTECNT_OFF    (MB_PDU_DATA_OFF)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if (MB_RTU_ENABLED > 0 || MB_ASCII_ENABLED > 0) && MB_MASTER >0
@@ -85,14 +85,14 @@ eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAd
     return MB_EX_NONE;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
     USHORT          usRegCount;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */

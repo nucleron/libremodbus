@@ -35,43 +35,43 @@
 PR_BEGIN_EXTERN_C
 
 #if MB_FUNC_OTHER_REP_SLAVEID_BUF > 0
-    eMBException eMBFuncReportSlaveID(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+    mb_exception_enum eMBFuncReportSlaveID(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_READ_INPUT_ENABLED > 0
-eMBException    eMBFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
-eMBException    eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
-eMBException    eMBFuncWriteHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncWriteHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
-eMBException    eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_READ_COILS_ENABLED > 0
-eMBException    eMBFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_WRITE_COIL_ENABLED > 0
-eMBException    eMBFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_COILS_ENABLED > 0
-eMBException    eMBFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_READ_DISCRETE_INPUTS_ENABLED > 0
-eMBException    eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
-eMBException    eMBFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
+mb_exception_enum    eMBFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen);
 #endif
 
 PR_END_EXTERN_C

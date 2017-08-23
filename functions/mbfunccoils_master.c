@@ -56,7 +56,7 @@
 #define MB_PDU_FUNC_WRITE_MUL_SIZE          (5)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_MASTER > 0
@@ -100,7 +100,7 @@ eMBMasterReqReadCoils(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USH
     return MB_ENOERR;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     UCHAR          *ucMBFrame;
@@ -108,7 +108,7 @@ eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     USHORT          usCoilCount;
     UCHAR           ucByteCount;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
@@ -213,13 +213,13 @@ eMBMasterReqWriteCoil(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USH
     return MB_ENOERR;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
 //    USHORT          usRegAddress;
 //    UCHAR           ucBuf[2];
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
 //    mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
@@ -331,7 +331,7 @@ eMBMasterReqWriteMultipleCoils(mb_instance* inst, UCHAR ucSndAddr,
     return MB_ENOERR;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
 //    USHORT          usRegAddress;
@@ -340,7 +340,7 @@ eMBMasterFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * us
 //    UCHAR           ucByteCountVerify;
 //    UCHAR          *ucMBFrame;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
 //    mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, the *usLen is not need check. */

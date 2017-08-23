@@ -37,7 +37,7 @@
 #define MB_PDU_FUNC_READ_SIZE_MIN           (1)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_MASTER > 0
@@ -80,7 +80,7 @@ eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDisc
     return MB_ENOERR;
 }
 
-eMBException
+mb_exception_enum
 eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
@@ -88,7 +88,7 @@ eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * us
     UCHAR           ucNBytes;
     UCHAR          *ucMBFrame;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */

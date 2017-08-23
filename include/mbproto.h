@@ -70,15 +70,15 @@ PR_BEGIN_EXTERN_C
     MB_EX_MEMORY_PARITY_ERROR = 0x08,
     MB_EX_GATEWAY_PATH_FAILED = 0x0A,
     MB_EX_GATEWAY_TGT_FAILED = 0x0B
-} eMBException;
+} mb_exception_enum;
 
-typedef eMBException(*pxMBFunctionHandler) (void*, UCHAR * pucFrame, USHORT * pusLength);
+typedef mb_exception_enum(*pxMBFunctionHandler) (void*, UCHAR * pucFrame, USHORT * pusLength);
 
 typedef struct
 {
-    UCHAR           ucFunctionCode;
-    pxMBFunctionHandler pxHandler;
-} xMBFunctionHandler;
+    UCHAR           func_code;
+    pxMBFunctionHandler handler;
+} mb_func_handler_struct;
 
 PR_END_EXTERN_C
 #endif

@@ -128,7 +128,7 @@ typedef struct
     mb_port_mtab * pmt; //!< Port method tab
 
     //Place to const
-    xMBFunctionHandler * func_handlers;//[MB_FUNC_HANDLERS_MAX];
+    mb_func_handler_struct * func_handlers;//[MB_FUNC_HANDLERS_MAX];
 
     //for slave id
     UCHAR    slave_id[MB_FUNC_OTHER_REP_SLAVEID_BUF];

@@ -103,10 +103,10 @@ xMBUtilGetBits(UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits)
     return (UCHAR) usWordBuf;
 }
 
-eMBException
+mb_exception_enum
 prveMBError2Exception(mb_err_enum eErrorCode)
 {
-    eMBException    eStatus;
+    mb_exception_enum    eStatus;
 
     switch (eErrorCode)
     {

@@ -67,7 +67,7 @@ mb_set_slv_id(mb_instance* inst, UCHAR slv_id, BOOL is_running,
     return eStatus;
 }
 
-eMBException
+mb_exception_enum
 eMBFuncReportSlaveID(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     memcpy(&pucFrame[MB_PDU_DATA_OFF], &ucMBSlaveID[0], (size_t)usMBSlaveIDLen);

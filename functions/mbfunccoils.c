@@ -60,13 +60,13 @@
 #define MB_PDU_FUNC_WRITE_MUL_COILCNT_MAX   (0x07B0)
 
 /* ----------------------- Static functions ---------------------------------*/
-eMBException    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 
 /* ----------------------- Start implementation -----------------------------*/
 
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
-eMBException
+mb_exception_enum
 eMBFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
@@ -74,7 +74,7 @@ eMBFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     UCHAR           ucNBytes;
     UCHAR          *pucFrameCur;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
@@ -145,13 +145,13 @@ eMBFuncReadCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 }
 
 #if MB_FUNC_WRITE_COIL_ENABLED > 0
-eMBException
+mb_exception_enum
 eMBFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
     UCHAR           ucBuf[2];
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*usLen == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
@@ -199,7 +199,7 @@ eMBFuncWriteCoil(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_COILS_ENABLED > 0
-eMBException
+mb_exception_enum
 eMBFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 {
     USHORT          usRegAddress;
@@ -207,7 +207,7 @@ eMBFuncWriteMultipleCoils(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
     UCHAR           ucByteCount;
     UCHAR           ucByteCountVerify;
 
-    eMBException    eStatus = MB_EX_NONE;
+    mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*usLen > (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
