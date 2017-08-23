@@ -223,9 +223,9 @@ mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is
 #endif // MB_PORT_HAS_CLOSE
     static const mb_port_mtab mb_serial_mtab =
     {
-        .frm_close = (pvMBFrameClose) MB_SERIAL_CLOSE,
-        .evt_post  = (pvPortEventPost)xMBPortEventPost,
-        .evt_get   = (pvPortEventGet) xMBPortEventGet
+        .frm_close = (mb_frm_close_fp) MB_SERIAL_CLOSE,
+        .evt_post  = (mp_port_evt_post_fp)xMBPortEventPost,
+        .evt_get   = (mb_port_evt_get_fp) xMBPortEventGet
     };
     inst->pmt = (mb_port_mtab *)&mb_serial_mtab;
 
@@ -328,9 +328,9 @@ mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKAD
 #endif // MB_PORT_HAS_CLOSE
         static const mb_port_mtab mb_tcp_mtab =
         {
-            .frm_close = (pvMBFrameClose) MB_TCP_CLOSE,
-            .evt_post  = (pvPortEventPost)xMBPortEventPost,
-            .evt_get   = (pvPortEventGet) xMBPortEventGet
+            .frm_close = (mb_frm_close_fp) MB_TCP_CLOSE,
+            .evt_post  = (mp_port_evt_post_fp)xMBPortEventPost,
+            .evt_get   = (mb_port_evt_get_fp) xMBPortEventGet
         };
         inst->pmt = (mb_port_mtab *)&mb_tcp_mtab;
     }

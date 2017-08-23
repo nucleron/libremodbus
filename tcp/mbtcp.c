@@ -86,15 +86,15 @@
 
 const mb_tr_mtab mb_tcp_mtab =
 {
-    .frm_start   = (pvMBFrameStart)  eMBTCPStart,
-    .frm_stop    = (pvMBFrameStop)   eMBTCPStop,
-    .frm_send    = (peMBFrameSend)   eMBTCPSend,
-    .frm_rcv     = (peMBFrameReceive)eMBTCPReceive,
+    .frm_start   = (mb_frm_start_fp)  eMBTCPStart,
+    .frm_stop    = (mb_frm_stop_fp)   eMBTCPStop,
+    .frm_send    = (mb_frm_snd_fp)   eMBTCPSend,
+    .frm_rcv     = (mb_frm_rcv_fp)eMBTCPReceive,
 
-    .get_rx_frm      = (pvGetRxFrame)vMBTCPMasterGetPDURcvBuf,
-    .get_tx_frm      = (pvGetTxFrame)vMBTCPMasterGetPDUSndBuf
+    .get_rx_frm      = (mb_get_rx_frm_fp)vMBTCPMasterGetPDURcvBuf,
+    .get_tx_frm      = (mb_get_tx_frm_fp)vMBTCPMasterGetPDUSndBuf
 #   if MB_MASTER > 0
-    , .rq_is_broadcast = (pbMBMasterRequestIsBroadcast)xMBTCPMasterRequestIsBroadcast
+    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)xMBTCPMasterRequestIsBroadcast
 #   endif //master
 };
 /* ----------------------- Start implementation -----------------------------*/
@@ -123,28 +123,28 @@ eMBTCPStop(mb_tcp_tr* inst)
 }
 
 mb_err_enum
-eMBTCPReceive(mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT * pusLength)
+eMBTCPReceive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
 {
     mb_err_enum    eStatus = MB_EIO;
     UCHAR          *pucMBTCPFrame;
-    USHORT          usLength;
+    USHORT          len;
     USHORT          usPID;
 
-    if (xMBTCPPortGetRequest(inst->base.port_obj, &pucMBTCPFrame, &usLength) != FALSE)
+    if (xMBTCPPortGetRequest(inst->base.port_obj, &pucMBTCPFrame, &len) != FALSE)
     {
         usPID = pucMBTCPFrame[MB_TCP_PID] << 8U;
         usPID |= pucMBTCPFrame[MB_TCP_PID + 1];
 
         if (usPID == MB_TCP_PROTOCOL_ID)
         {
-            *ppucFrame = &pucMBTCPFrame[MB_TCP_FUNC];
-            *pusLength = usLength - MB_TCP_FUNC;
+            *frame_ptr_buf = &pucMBTCPFrame[MB_TCP_FUNC];
+            *len_buf = len - MB_TCP_FUNC;
             eStatus = MB_ENOERR;
 
             /* Modbus TCP does not use any addresses. Fake the source address such
              * that the processing part deals with this frame.
              */
-            *pucRcvAddress = MB_TCP_PSEUDO_ADDRESS;
+            *rcv_addr_buf = MB_TCP_PSEUDO_ADDRESS;
         }
     }
     else
@@ -155,20 +155,20 @@ eMBTCPReceive(mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** ppucFrame, USHORT
 }
 
 mb_err_enum
-eMBTCPSend(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength)
+eMBTCPSend(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
 {
     mb_err_enum    eStatus = MB_ENOERR;
-    UCHAR          *pucMBTCPFrame = (UCHAR *) pucFrame - MB_TCP_FUNC;
-    USHORT          usTCPLength = usLength + MB_TCP_FUNC;
+    UCHAR          *pucMBTCPFrame = (UCHAR *) frame_ptr - MB_TCP_FUNC;
+    USHORT          usTCPLength = len + MB_TCP_FUNC;
 
     /* The MBAP header is already initialized because the caller calls this
      * function with the buffer returned by the previous call. Therefore we
      * only have to update the length in the header. Note that the length
      * header includes the size of the Modbus PDU and the UID Byte. Therefore
-     * the length is usLength plus one.
+     * the length is len plus one.
      */
-    pucMBTCPFrame[MB_TCP_LEN] = (usLength + 1) >> 8U;
-    pucMBTCPFrame[MB_TCP_LEN + 1] = (usLength + 1) & 0xFF;
+    pucMBTCPFrame[MB_TCP_LEN] = (len + 1) >> 8U;
+    pucMBTCPFrame[MB_TCP_LEN + 1] = (len + 1) & 0xFF;
     if (xMBTCPPortSendResponse(inst->base.port_obj, pucMBTCPFrame, usTCPLength) == FALSE)
     {
         eStatus = MB_EIO;
@@ -189,14 +189,14 @@ USHORT usMBTCPMasterGetPDUSndLength( mb_tcp_tr* inst)
     return usSendPDULength;
 }
 
-void vMBTCPMasterGetPDUSndBuf(mb_tcp_tr* inst, UCHAR ** pucFrame)
+void vMBTCPMasterGetPDUSndBuf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf)
 {
-    *pucFrame = inst->tcp_port.aucTCPSndBuf+MB_TCP_FUNC;
+    *frame_ptr_buf = inst->tcp_port.aucTCPSndBuf+MB_TCP_FUNC;
 }
 
-void vMBTCPMasterGetPDURcvBuf(mb_tcp_tr* inst, UCHAR ** pucFrame)
+void vMBTCPMasterGetPDURcvBuf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf)
 {
-    *pucFrame = inst->tcp_port.aucTCPRcvBuf+MB_TCP_FUNC;
+    *frame_ptr_buf = inst->tcp_port.aucTCPRcvBuf+MB_TCP_FUNC;
 }
 
 BOOL xMBTCPMasterRequestIsBroadcast(mb_tcp_tr* inst)

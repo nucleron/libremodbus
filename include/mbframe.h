@@ -66,19 +66,19 @@ PR_BEGIN_EXTERN_C
 #define MB_PDU_DATA_OFF     1   /*!< Offset for response data in PDU. */
 
 /* ----------------------- Prototypes  0-------------------------------------*/
-typedef void    (*pvMBFrameStart)(mb_trans_base * transport);
-typedef void    (*pvMBFrameStop) (mb_trans_base * transport);
+typedef void         (*mb_frm_start_fp)  (mb_trans_base * transport);
+typedef void         (*mb_frm_stop_fp)   (mb_trans_base * transport);
 
-typedef mb_err_enum (*peMBFrameReceive) (mb_trans_base * transport, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
-typedef mb_err_enum (*peMBFrameSend)    (mb_trans_base * transport, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength);
-typedef void         (*pvGetRxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                         );
-typedef void         (*pvGetTxFrame)     (mb_trans_base * transport, UCHAR ** pucFrame                                         );
+typedef mb_err_enum  (*mb_frm_rcv_fp)    (mb_trans_base * transport, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf);
+typedef mb_err_enum  (*mb_frm_snd_fp)    (mb_trans_base * transport, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len);
+typedef void         (*mb_get_rx_frm_fp) (mb_trans_base * transport, UCHAR ** frame_ptr_buf                                         );
+typedef void         (*mb_get_tx_frm_fp) (mb_trans_base * transport, UCHAR ** frame_ptr_buf                                         );
 
 //Port
-typedef void(*pvMBFrameClose) (mb_port_base *);
-typedef void(*pvPortEventPost) (mb_port_base *, mb_event_enum);
-typedef BOOL (*pvPortEventGet) (mb_port_base *, void*, mb_event_enum*);
+typedef void (*mb_frm_close_fp)     (mb_port_base *);
+typedef void (*mp_port_evt_post_fp) (mb_port_base *, mb_event_enum);
+typedef BOOL (*mb_port_evt_get_fp)  (mb_port_base *, void*, mb_event_enum*);
 
-typedef BOOL (*pbMBMasterRequestIsBroadcast)(void*);
+typedef BOOL (*mb_mstr_rq_is_bcast_fp)(void*);
 PR_END_EXTERN_C
 #endif

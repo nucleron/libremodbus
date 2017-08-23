@@ -96,16 +96,16 @@ typedef struct
 
 extern const mb_tr_mtab mb_ascii_mtab;
 
-mb_err_enum            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG baud, mb_parity_enum parity);
+mb_err_enum            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity);
 void                    eMBASCIIStart                   (mb_ascii_tr* inst                                                                     );
 void                    eMBASCIIStop                    (mb_ascii_tr* inst                                                                     );
-mb_err_enum            eMBASCIIReceive                 (mb_ascii_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength       );
-mb_err_enum            eMBASCIISend                    (mb_ascii_tr* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength        );
+mb_err_enum            eMBASCIIReceive                 (mb_ascii_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf       );
+mb_err_enum            eMBASCIISend                    (mb_ascii_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len        );
 BOOL                    xMBASCIIReceiveFSM              (mb_ascii_tr* inst                                                                     );
 BOOL                    xMBASCIITransmitFSM             (mb_ascii_tr* inst                                                                     );
 BOOL                    xMBASCIITimerT1SExpired         (mb_ascii_tr* inst                                                                     );
 //master
-void                    vMBASCIIMasterGetPDUSndBuf      (mb_ascii_tr* inst, UCHAR ** pucFrame                                                  );
+void                    vMBASCIIMasterGetPDUSndBuf      (mb_ascii_tr* inst, UCHAR ** frame_ptr_buf                                                  );
 USHORT                  usMBASCIIMasterGetPDUSndLength  (mb_ascii_tr* inst                                                                     );
 void                    vMBASCIIMasterSetPDUSndLength   (mb_ascii_tr* inst, USHORT SendPDULength                                               );
 void                    vMBASCIIMasterSetCurTimerMode   (mb_ascii_tr* inst, mb_tmr_mode_enum eMBTimerMode                                    );

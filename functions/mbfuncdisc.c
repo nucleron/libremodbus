@@ -31,7 +31,7 @@ mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 mb_exception_enum
-eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usDiscreteCnt;
@@ -43,12 +43,12 @@ eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 
     if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
-        usRegAddress = (USHORT)(pucFrame[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
-        usRegAddress |= (USHORT)(pucFrame[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
+        usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
+        usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
         usRegAddress++;
 
-        usDiscreteCnt = (USHORT)(pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF] << 8);
-        usDiscreteCnt |= (USHORT)(pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF + 1]);
+        usDiscreteCnt = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF] << 8);
+        usDiscreteCnt |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF + 1]);
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
@@ -57,7 +57,7 @@ eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
             (usDiscreteCnt < MB_PDU_FUNC_READ_DISCCNT_MAX))
         {
             /* Set the current PDU data pointer to the beginning. */
-            pucFrameCur = &pucFrame[MB_PDU_FUNC_OFF];
+            pucFrameCur = &frame_ptr[MB_PDU_FUNC_OFF];
             *usLen = MB_PDU_FUNC_OFF;
 
             /* First byte contains the function code. */

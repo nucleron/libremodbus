@@ -43,7 +43,7 @@ mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 #if MB_FUNC_READ_INPUT_ENABLED > 0
 
 mb_exception_enum
-eMBFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
@@ -54,12 +54,12 @@ eMBFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
 
     if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
-        usRegAddress = (USHORT)(pucFrame[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
-        usRegAddress |= (USHORT)(pucFrame[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
+        usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
+        usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
         usRegAddress++;
 
-        usRegCount = (USHORT)(pucFrame[MB_PDU_FUNC_READ_REGCNT_OFF] << 8);
-        usRegCount |= (USHORT)(pucFrame[MB_PDU_FUNC_READ_REGCNT_OFF + 1]);
+        usRegCount = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_REGCNT_OFF] << 8);
+        usRegCount |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_REGCNT_OFF + 1]);
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
@@ -68,7 +68,7 @@ eMBFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
             && (usRegCount < MB_PDU_FUNC_READ_REGCNT_MAX))
         {
             /* Set the current PDU data pointer to the beginning. */
-            pucFrameCur = &pucFrame[MB_PDU_FUNC_OFF];
+            pucFrameCur = &frame_ptr[MB_PDU_FUNC_OFF];
             *usLen = MB_PDU_FUNC_OFF;
 
             /* First byte contains the function code. */

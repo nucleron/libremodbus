@@ -56,15 +56,15 @@ PR_BEGIN_EXTERN_C
 
 typedef struct
 {
-    peMBFrameSend    frm_send;
-    pvMBFrameStart   frm_start;
-    pvMBFrameStop    frm_stop;
-    peMBFrameReceive frm_rcv;
+    mb_frm_snd_fp    frm_send;
+    mb_frm_start_fp   frm_start;
+    mb_frm_stop_fp    frm_stop;
+    mb_frm_rcv_fp frm_rcv;
 
-    pvGetRxFrame     get_rx_frm;
-    pvGetRxFrame     get_tx_frm;
+    mb_get_rx_frm_fp     get_rx_frm;
+    mb_get_rx_frm_fp     get_tx_frm;
 #if MB_MASTER > 0
-    pbMBMasterRequestIsBroadcast rq_is_broadcast;
+    mb_mstr_rq_is_bcast_fp rq_is_broadcast;
 #endif //MB_MASTER
 }
 mb_tr_mtab;//!< Transport method tab

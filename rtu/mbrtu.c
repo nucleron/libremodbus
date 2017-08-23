@@ -52,15 +52,15 @@
 
 const mb_tr_mtab mb_rtu_mtab =
 {
-    .frm_start   = (pvMBFrameStart)  eMBRTUStart,
-    .frm_stop    = (pvMBFrameStop)   eMBRTUStop,
-    .frm_send    = (peMBFrameSend)   eMBRTUSend,
-    .frm_rcv     = (peMBFrameReceive)eMBRTUReceive,
+    .frm_start   = (mb_frm_start_fp)  eMBRTUStart,
+    .frm_stop    = (mb_frm_stop_fp)   eMBRTUStop,
+    .frm_send    = (mb_frm_snd_fp)   eMBRTUSend,
+    .frm_rcv     = (mb_frm_rcv_fp)eMBRTUReceive,
 
     .get_rx_frm      = NULL,
-    .get_tx_frm      = (pvGetTxFrame)vMBRTUMasterGetPDUSndBuf
+    .get_tx_frm      = (mb_get_tx_frm_fp)vMBRTUMasterGetPDUSndBuf
 #   if MB_MASTER > 0
-    , .rq_is_broadcast = (pbMBMasterRequestIsBroadcast)xMBRTUMasterRequestIsBroadcast
+    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)xMBRTUMasterRequestIsBroadcast
 #   endif //master
 };
 
@@ -152,7 +152,7 @@ eMBRTUStop(mb_rtu_tr* inst)
 }
 
 mb_err_enum
-eMBRTUReceive(mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength)
+eMBRTUReceive(mb_rtu_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
 {
     //BOOL            xFrameReceived = FALSE;
     mb_err_enum    eStatus = MB_ENOERR;
@@ -167,15 +167,15 @@ eMBRTUReceive(mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT 
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there.
          */
-        *pucRcvAddress = ucRTURcvBuf[MB_RTU_SER_PDU_ADDR_OFF];
+        *rcv_addr_buf = ucRTURcvBuf[MB_RTU_SER_PDU_ADDR_OFF];
 
         /* Total length of Modbus-PDU is Modbus-Serial-Line-PDU minus
          * size of address field and CRC checksum.
          */
-        *pusLength = (USHORT)(usRcvBufferPos - MB_RTU_SER_PDU_PDU_OFF - MB_RTU_SER_PDU_SIZE_CRC);
+        *len_buf = (USHORT)(usRcvBufferPos - MB_RTU_SER_PDU_PDU_OFF - MB_RTU_SER_PDU_SIZE_CRC);
 
         /* Return the start of the Modbus PDU to the caller. */
-        *pucFrame = (UCHAR *) & ucRTURcvBuf[MB_RTU_SER_PDU_PDU_OFF];
+        *frame_ptr_buf = (UCHAR *) & ucRTURcvBuf[MB_RTU_SER_PDU_PDU_OFF];
 
         //xFrameReceived = TRUE;
     }
@@ -189,7 +189,7 @@ eMBRTUReceive(mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT 
 }
 
 mb_err_enum
-eMBRTUSend(mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * pucFrame, USHORT usLength)
+eMBRTUSend(mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     USHORT          usCRC16;
@@ -203,12 +203,12 @@ eMBRTUSend(mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * pucFrame, USHORT usLen
     if (eRcvState == MB_RTU_RX_STATE_IDLE)
     {
         /* First byte before the Modbus-PDU is the slave address. */
-        pucSndBufferCur = (UCHAR *) pucFrame - 1;
+        pucSndBufferCur = (UCHAR *) frame_ptr - 1;
         usSndBufferCount = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
         pucSndBufferCur[MB_RTU_SER_PDU_ADDR_OFF] = slv_addr;
-        usSndBufferCount += usLength;
+        usSndBufferCount += len;
 
         /* Calculate CRC16 checksum for Modbus-Serial-Line-PDU. */
         usCRC16 = usMBCRC16((UCHAR *) pucSndBufferCur, usSndBufferCount);
@@ -429,16 +429,16 @@ xMBRTUTimerT35Expired(mb_rtu_tr* inst)
 }
 
 /* Get Modbus Master send PDU's buffer address pointer.*/
-void vMBRTUMasterGetPDUSndBuf(mb_rtu_tr* inst, UCHAR ** pucFrame)
+void vMBRTUMasterGetPDUSndBuf(mb_rtu_tr* inst, UCHAR ** frame_ptr_buf)
 {
-    *pucFrame = (UCHAR *) &ucRTUSndBuf[MB_RTU_SER_PDU_PDU_OFF];
+    *frame_ptr_buf = (UCHAR *) &ucRTUSndBuf[MB_RTU_SER_PDU_PDU_OFF];
 }
 
 #if MB_MASTER > 0
 /* Get Modbus send RTU's buffer address pointer.*/
-void vMBMasterGetRTUSndBuf(mb_rtu_tr* inst, UCHAR ** pucFrame)
+void vMBMasterGetRTUSndBuf(mb_rtu_tr* inst, UCHAR ** frame_ptr_buf)
 {
-    *pucFrame = (UCHAR *) ucRTUSndBuf;
+    *frame_ptr_buf = (UCHAR *) ucRTUSndBuf;
 }
 
 

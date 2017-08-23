@@ -86,7 +86,7 @@ eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAd
 }
 
 mb_exception_enum
-eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
@@ -113,10 +113,10 @@ eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * pucFrame, USHORT * usL
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-        if ((usRegCount >= 1) && (2 * usRegCount == pucFrame[MB_PDU_FUNC_READ_BYTECNT_OFF]))
+        if ((usRegCount >= 1) && (2 * usRegCount == frame_ptr[MB_PDU_FUNC_READ_BYTECNT_OFF]))
         {
             /* Make callback to fill the buffer. */
-            eRegStatus = eMBMasterRegInputCB(inst, &pucFrame[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usRegCount);
+            eRegStatus = eMBMasterRegInputCB(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usRegCount);
             /* If an error occured convert it into a Modbus exception. */
             if (eRegStatus != MB_ENOERR)
             {

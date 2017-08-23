@@ -81,7 +81,7 @@ eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDisc
 }
 
 mb_exception_enum
-eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * usLen)
+eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
 {
     USHORT          usRegAddress;
     USHORT          usDiscreteCnt;
@@ -120,10 +120,10 @@ eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * pucFrame, USHORT * us
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-        if ((usDiscreteCnt >= 1) && ucNBytes == pucFrame[MB_PDU_FUNC_READ_DISCCNT_OFF])
+        if ((usDiscreteCnt >= 1) && ucNBytes == frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF])
         {
             /* Make callback to fill the buffer. */
-            eRegStatus = eMBMasterRegDiscreteCB(inst, &pucFrame[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usDiscreteCnt);
+            eRegStatus = eMBMasterRegDiscreteCB(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usDiscreteCnt);
 
             /* If an error occured convert it into a Modbus exception. */
             if(eRegStatus != MB_ENOERR)

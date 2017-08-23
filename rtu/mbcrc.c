@@ -81,7 +81,7 @@ static const UCHAR aucCRCLo[] = {
 };
 
 USHORT
-usMBCRC16(UCHAR * pucFrame, USHORT usLen)
+usMBCRC16(UCHAR * frame_ptr, USHORT usLen)
 {
     UCHAR           ucCRCHi = 0xFF;
     UCHAR           ucCRCLo = 0xFF;
@@ -89,7 +89,7 @@ usMBCRC16(UCHAR * pucFrame, USHORT usLen)
 
     while (usLen--)
     {
-        iIndex = ucCRCLo ^ *(pucFrame++);
+        iIndex = ucCRCLo ^ *(frame_ptr++);
         ucCRCLo = (UCHAR)(ucCRCHi ^ aucCRCHi[iIndex]);
         ucCRCHi = aucCRCLo[iIndex];
     }

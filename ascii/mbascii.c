@@ -66,22 +66,22 @@
 
 const mb_tr_mtab mb_ascii_mtab =
 {
-    .frm_start   = (pvMBFrameStart)  eMBASCIIStart,
-    .frm_stop    = (pvMBFrameStop)   eMBASCIIStop,
-    .frm_send    = (peMBFrameSend)   eMBASCIISend,
-    .frm_rcv     = (peMBFrameReceive)eMBASCIIReceive,
+    .frm_start   = (mb_frm_start_fp)  eMBASCIIStart,
+    .frm_stop    = (mb_frm_stop_fp)   eMBASCIIStop,
+    .frm_send    = (mb_frm_snd_fp)   eMBASCIISend,
+    .frm_rcv     = (mb_frm_rcv_fp)eMBASCIIReceive,
 
     .get_rx_frm      = NULL,
-    .get_tx_frm      = (pvGetTxFrame)vMBASCIIMasterGetPDUSndBuf
+    .get_tx_frm      = (mb_get_tx_frm_fp)vMBASCIIMasterGetPDUSndBuf
 #   if MB_MASTER > 0
-    , .rq_is_broadcast = (pbMBMasterRequestIsBroadcast)xMBASCIIMasterRequestIsBroadcast
+    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)xMBASCIIMasterRequestIsBroadcast
 #   endif //master
 };
 
 /* ----------------------- Static functions ---------------------------------*/
 static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter           );
 static UCHAR    prvucMBBIN2CHAR(UCHAR ucByte                );
-static UCHAR    prvucMBLRC     (UCHAR * pucFrame, USHORT usLen);
+static UCHAR    prvucMBLRC     (UCHAR * frame_ptr, USHORT usLen);
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity)
 {
@@ -141,7 +141,7 @@ void eMBASCIIStop(mb_ascii_tr* inst)
     EXIT_CRITICAL_SECTION();
 }
 
-mb_err_enum eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength)
+mb_err_enum eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
@@ -155,15 +155,15 @@ mb_err_enum eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * pucRcvAddress, UCHAR ** 
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there.
          */
-        *pucRcvAddress = ucASCIIRcvBuf[MB_ASCII_SER_PDU_ADDR_OFF];
+        *rcv_addr_buf = ucASCIIRcvBuf[MB_ASCII_SER_PDU_ADDR_OFF];
 
         /* Total length of Modbus-PDU is Modbus-Serial-Line-PDU minus
          * size of address field and CRC checksum.
          */
-        *pusLength = (USHORT)(usRcvBufferPos - MB_ASCII_SER_PDU_PDU_OFF - MB_ASCII_SER_PDU_SIZE_LRC);
+        *len_buf = (USHORT)(usRcvBufferPos - MB_ASCII_SER_PDU_PDU_OFF - MB_ASCII_SER_PDU_SIZE_LRC);
 
         /* Return the start of the Modbus PDU to the caller. */
-        *pucFrame = (UCHAR *) & ucASCIIRcvBuf[MB_ASCII_SER_PDU_PDU_OFF];
+        *frame_ptr_buf = (UCHAR *) & ucASCIIRcvBuf[MB_ASCII_SER_PDU_PDU_OFF];
     }
     else
     {
@@ -173,7 +173,7 @@ mb_err_enum eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * pucRcvAddress, UCHAR ** 
     return eStatus;
 }
 
-mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR slv_addr, const UCHAR * pucFrame, USHORT usLength)
+mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     UCHAR           usLRC;
@@ -186,12 +186,12 @@ mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR slv_addr, const UCHAR * pucFr
     if (eRcvState == MB_ASCII_RX_STATE_IDLE)
     {
         /* First byte before the Modbus-PDU is the slave address. */
-        pucSndBufferCur = (UCHAR *) pucFrame - 1;
+        pucSndBufferCur = (UCHAR *) frame_ptr - 1;
         usSndBufferCount = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
         pucSndBufferCur[MB_ASCII_SER_PDU_ADDR_OFF] = slv_addr;
-        usSndBufferCount += usLength;
+        usSndBufferCount += len;
 
         /* Calculate LRC checksum for Modbus-Serial-Line-PDU. */
         usLRC = prvucMBLRC((UCHAR *) pucSndBufferCur, usSndBufferCount);
@@ -524,13 +524,13 @@ static UCHAR prvucMBBIN2CHAR(UCHAR ucByte)
 }
 
 
-static UCHAR prvucMBLRC(UCHAR * pucFrame, USHORT usLen)
+static UCHAR prvucMBLRC(UCHAR * frame_ptr, USHORT usLen)
 {
     UCHAR ucLRC = 0;  /* LRC char initialized */
 
     while (usLen--)
     {
-        ucLRC += *pucFrame++;   /* Add buffer byte without carry */
+        ucLRC += *frame_ptr++;   /* Add buffer byte without carry */
     }
 
     /* Return twos complement */
@@ -539,17 +539,17 @@ static UCHAR prvucMBLRC(UCHAR * pucFrame, USHORT usLen)
 }
 
 /* Get Modbus send PDU's buffer address pointer.*/
-void vMBASCIIMasterGetPDUSndBuf(mb_ascii_tr* inst, UCHAR ** pucFrame)
+void vMBASCIIMasterGetPDUSndBuf(mb_ascii_tr* inst, UCHAR ** frame_ptr_buf)
 {
-    *pucFrame = (UCHAR *) &ucASCIISndBuf[MB_ASCII_SER_PDU_PDU_OFF];
+    *frame_ptr_buf = (UCHAR *) &ucASCIISndBuf[MB_ASCII_SER_PDU_PDU_OFF];
 }
 
 
 
 /* Get Modbus Master send RTU's buffer address pointer.*/
-void vMBASCIIMasterGetRTUSndBuf(mb_ascii_tr* inst, UCHAR ** pucFrame)
+void vMBASCIIMasterGetRTUSndBuf(mb_ascii_tr* inst, UCHAR ** frame_ptr_buf)
 {
-    *pucFrame = (UCHAR *) ucASCIISndBuf;
+    *frame_ptr_buf = (UCHAR *) ucASCIISndBuf;
 }
 
 /* Set Modbus Master send PDU's buffer length.*/

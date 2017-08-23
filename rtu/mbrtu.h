@@ -82,17 +82,17 @@ typedef struct
 
 extern const mb_tr_mtab mb_rtu_mtab;
 
-mb_err_enum            eMBRTUInit                    (mb_rtu_tr* inst, BOOL is_master, UCHAR slaveAddress, ULONG baud, mb_parity_enum parity);
+mb_err_enum            eMBRTUInit                    (mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity);
 void                    eMBRTUStart                   (mb_rtu_tr* inst                                                                     );
 void                    eMBRTUStop                    (mb_rtu_tr* inst                                                                     );
-mb_err_enum            eMBRTUReceive                 (mb_rtu_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength       );
-mb_err_enum            eMBRTUSend                    (mb_rtu_tr* inst, UCHAR slaveAddress, const UCHAR * pucFrame, USHORT usLength        );
+mb_err_enum            eMBRTUReceive                 (mb_rtu_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf       );
+mb_err_enum            eMBRTUSend                    (mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len        );
 BOOL                    xMBRTUReceiveFSM              (mb_rtu_tr* inst                                                                     );
 BOOL                    xMBRTUTransmitFSM             (mb_rtu_tr* inst                                                                     );
 BOOL                    xMBRTUTimerT15Expired         (mb_rtu_tr* inst                                                                     );
 BOOL                    xMBRTUTimerT35Expired         (mb_rtu_tr* inst                                                                     );
 //master
-void                    vMBRTUMasterGetPDUSndBuf      (mb_rtu_tr* inst, UCHAR ** pucFrame                                                  );
+void                    vMBRTUMasterGetPDUSndBuf      (mb_rtu_tr* inst, UCHAR ** frame_ptr_buf                                                  );
 USHORT                  usMBRTUMasterGetPDUSndLength  (mb_rtu_tr* inst                                                                     );
 void                    vMBRTUMasterSetPDUSndLength   (mb_rtu_tr* inst, USHORT SendPDULength                                               );
 void                    vMBRTUMasterSetCurTimerMode   (mb_rtu_tr* inst, mb_tmr_mode_enum eMBTimerMode                                    );

@@ -55,11 +55,11 @@ extern const mb_tr_mtab mb_tcp_mtab;
 mb_err_enum	eMBTCPDoInit       (mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL bMaster        );
 void            eMBTCPStart        (mb_tcp_tr* inst                                                              );
 void            eMBTCPStop         (mb_tcp_tr* inst                                                              );
-mb_err_enum    eMBTCPReceive      (mb_tcp_tr* inst, UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength);
-mb_err_enum    eMBTCPSend         (mb_tcp_tr* inst, UCHAR _unused, const UCHAR * pucFrame, USHORT usLength      );
+mb_err_enum    eMBTCPReceive      (mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf);
+mb_err_enum    eMBTCPSend         (mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len      );
 #if MB_MASTER > 0
-void vMBTCPMasterGetPDURcvBuf      (mb_tcp_tr* inst, UCHAR ** pucFrame                                           );
-void vMBTCPMasterGetPDUSndBuf      (mb_tcp_tr* inst, UCHAR ** pucFrame                                           );
+void vMBTCPMasterGetPDURcvBuf      (mb_tcp_tr* inst, UCHAR ** frame_ptr_buf                                           );
+void vMBTCPMasterGetPDUSndBuf      (mb_tcp_tr* inst, UCHAR ** frame_ptr_buf                                           );
 BOOL xMBTCPMasterRequestIsBroadcast(mb_tcp_tr* inst                                                              );
 #endif
 

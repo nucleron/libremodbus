@@ -68,9 +68,9 @@ typedef struct //_mb_trans_base
 #include <mbframe.h>
 typedef struct
 {
-    pvMBFrameClose  frm_close;//!<pvMBFrameCloseCur;
-    pvPortEventPost evt_post; //!<pvPortEventPostCur;
-    pvPortEventGet  evt_get;  //!<pvPortEventGetCur;
+    mb_frm_close_fp  frm_close;//!<pvMBFrameCloseCur;
+    mp_port_evt_post_fp evt_post; //!<pvPortEventPostCur;
+    mb_port_evt_get_fp  evt_get;  //!<pvPortEventGetCur;
 }
 mb_port_mtab; //!< Port methods tab;
 
