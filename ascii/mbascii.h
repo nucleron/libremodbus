@@ -71,7 +71,7 @@ typedef enum
 
 typedef struct
 {
-    mb_trans_base                   base;
+    mb_trans_base_struct                   base;
 	//void                            *parent;
 	//mb_port_ser                serial_port;
 	volatile mb_ascii_tx_state_enum snd_state;
@@ -96,7 +96,7 @@ typedef struct
 
 extern const mb_tr_mtab mb_ascii_mtab;
 
-mb_err_enum            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity);
+mb_err_enum            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity);
 void                    eMBASCIIStart                   (mb_ascii_tr* inst                                                                     );
 void                    eMBASCIIStop                    (mb_ascii_tr* inst                                                                     );
 mb_err_enum            eMBASCIIReceive                 (mb_ascii_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf       );

@@ -80,22 +80,22 @@ const mb_tr_mtab mb_ascii_mtab =
 
 /* ----------------------- Static functions ---------------------------------*/
 static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter           );
-static UCHAR    prvucMBBIN2CHAR(UCHAR ucByte                );
+static UCHAR    prvucMBBIN2CHAR(UCHAR byte_val                );
 static UCHAR    prvucMBLRC     (UCHAR * frame_ptr, USHORT len_buf);
 /* ----------------------- Start implementation -----------------------------*/
-mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity)
+mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
-    static const mb_port_cb mb_ascii_cb =
+    static const mb_port_cb_struct mb_ascii_cb =
     {
-        .byte_rcvd   = (mb_fp_bool)xMBASCIIReceiveFSM,
-        .tx_empty    = (mb_fp_bool)xMBASCIITransmitFSM,
-        .tmr_expired = (mb_fp_bool)xMBASCIITimerT1SExpired
+        .byte_rcvd   = (mb_port_cb_fp)xMBASCIIReceiveFSM,
+        .tx_empty    = (mb_port_cb_fp)xMBASCIITransmitFSM,
+        .tmr_expired = (mb_port_cb_fp)xMBASCIITimerT1SExpired
     };
 
     (void)slv_addr;
-    inst->base.port_obj->cb  = (mb_port_cb *)&mb_ascii_cb;
+    inst->base.port_obj->cb  = (mb_port_cb_struct *)&mb_ascii_cb;
     inst->base.port_obj->arg = inst;
     inst->is_master          = is_master;
 
@@ -104,11 +104,11 @@ mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULON
     ENTER_CRITICAL_SECTION();
     ucMBLFCharacter = MB_ASCII_DEFAULT_LF;
 
-    if (xMBPortSerialInit((mb_port_ser *)inst->base.port_obj, baud, 7, parity) != TRUE)
+    if (mb_port_ser_init((mb_port_ser *)inst->base.port_obj, baud, 7, parity) != TRUE)
     {
         eStatus = MB_EPORTERR;
     }
-    else if (xMBPortTimersInit((mb_port_ser *)inst->base.port_obj, MB_ASCII_TIMEOUT_SEC * 20000UL) != TRUE)
+    else if (mb_port_ser_tmr_init((mb_port_ser *)inst->base.port_obj, MB_ASCII_TIMEOUT_SEC * 20000UL) != TRUE)
     {
         eStatus = MB_EPORTERR;
     }
@@ -125,19 +125,19 @@ mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULON
 void eMBASCIIStart(mb_ascii_tr* inst)
 {
     ENTER_CRITICAL_SECTION();
-    vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+    mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
     eRcvState = MB_ASCII_RX_STATE_IDLE;
     EXIT_CRITICAL_SECTION();
 
     /* No special startup required for ASCII. */
-    (void)xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_READY);
+    (void)mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_READY);
 }
 
 void eMBASCIIStop(mb_ascii_tr* inst)
 {
     ENTER_CRITICAL_SECTION();
-    vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
-    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
+    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
     EXIT_CRITICAL_SECTION();
 }
 
@@ -199,7 +199,7 @@ mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR slv_addr, const UCHAR * frame
 
         /* Activate the transmitter. */
         eSndState = MB_ASCII_TX_STATE_START;
-        vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE);
+        mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE);
     }
     else
     {
@@ -212,12 +212,12 @@ mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR slv_addr, const UCHAR * frame
 BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
 {
     BOOL            xNeedPoll = FALSE;
-    UCHAR           ucByte;
+    UCHAR           byte_val;
     UCHAR           ucResult;
 
     assert((eSndState == MB_ASCII_TX_STATE_IDLE)|| (eSndState == MB_ASCII_TX_STATE_XFWR));
 
-    (void)xMBPortSerialGetByte((mb_port_ser *)inst->base.port_obj, (CHAR *) & ucByte);
+    (void)mb_port_ser_get_byte((mb_port_ser *)inst->base.port_obj, (CHAR *) & byte_val);
     switch (eRcvState)
     {
     /* A new character is received. If the character is a ':' the input
@@ -227,20 +227,20 @@ BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
      */
     case MB_ASCII_RX_STATE_RCV:
         /* Enable timer for character timeout. */
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
-        if (ucByte == ':')
+        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+        if (byte_val == ':')
         {
             /* Empty receive buffer. */
             eBytePos = BYTE_HIGH_NIBBLE;
             usRcvBufferPos = 0;
         }
-        else if (ucByte == MB_ASCII_DEFAULT_CR)
+        else if (byte_val == MB_ASCII_DEFAULT_CR)
         {
             eRcvState = MB_ASCII_RX_STATE_WAIT_EOF;
         }
         else
         {
-            ucResult = prvucMBCHAR2BIN(ucByte);
+            ucResult = prvucMBCHAR2BIN(byte_val);
             switch (eBytePos)
             {
             /* High nibble of the byte comes first. We check for
@@ -258,7 +258,7 @@ BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
                      * a resonable implementation. */
                     eRcvState = MB_ASCII_RX_STATE_IDLE;
                     /* Disable previously activated timer because of error state. */
-                    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+                    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
                 }
                 break;
 
@@ -272,19 +272,19 @@ BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
         break;
 
     case MB_ASCII_RX_STATE_WAIT_EOF:
-        if (ucByte == ucMBLFCharacter)
+        if (byte_val == ucMBLFCharacter)
         {
             /* Disable character timeout timer because all characters are
              * received. */
-            vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+            mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
             /* Receiver is again in idle state. */
             eRcvState = MB_ASCII_RX_STATE_IDLE;
 
             /* Notify the caller of eMBASCIIReceive that a new frame
              * was received. */
-            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
+            xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
         }
-        else if (ucByte == ':')
+        else if (byte_val == ':')
         {
             /* Empty receive buffer and back to receive state. */
             eBytePos = BYTE_HIGH_NIBBLE;
@@ -292,7 +292,7 @@ BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
             eRcvState = MB_ASCII_RX_STATE_RCV;
 
             /* Enable timer for character timeout. */
-            vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
+            mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
         }
         else
         {
@@ -302,17 +302,17 @@ BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
         break;
 
     case MB_ASCII_RX_STATE_IDLE:
-        if (ucByte == ':')
+        if (byte_val == ':')
         {
 #if MB_MASTER > 0
             if (asciiMaster == TRUE)
             {
-                vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+                mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
                 eSndState = MB_ASCII_TX_STATE_IDLE;
             }
 #endif
             /* Enable timer for character timeout. */
-            vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
+            mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
             /* Reset the input buffers to store the frame. */
             usRcvBufferPos = 0;;
             eBytePos = BYTE_HIGH_NIBBLE;
@@ -327,7 +327,7 @@ BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
 BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
 {
     BOOL            xNeedPoll = FALSE;
-    UCHAR           ucByte;
+    UCHAR           byte_val;
 
     assert(eRcvState == MB_ASCII_RX_STATE_IDLE);
     switch (eSndState)
@@ -335,8 +335,8 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
     /* Start of transmission. The start of a frame is defined by sending
      * the character ':'. */
     case MB_ASCII_TX_STATE_START:
-        ucByte = ':';
-        xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR)ucByte);
+        byte_val = ':';
+        mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)byte_val);
         eSndState = MB_ASCII_TX_STATE_DATA;
         eBytePos = BYTE_HIGH_NIBBLE;
         break;
@@ -351,14 +351,14 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
             switch (eBytePos)
             {
             case BYTE_HIGH_NIBBLE:
-                ucByte = prvucMBBIN2CHAR((UCHAR)(*pucSndBufferCur >> 4));
-                xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR) ucByte);
+                byte_val = prvucMBBIN2CHAR((UCHAR)(*pucSndBufferCur >> 4));
+                mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR) byte_val);
                 eBytePos = BYTE_LOW_NIBBLE;
                 break;
 
             case BYTE_LOW_NIBBLE:
-                ucByte = prvucMBBIN2CHAR((UCHAR)(*pucSndBufferCur & 0x0F));
-                xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR)ucByte);
+                byte_val = prvucMBBIN2CHAR((UCHAR)(*pucSndBufferCur & 0x0F));
+                mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)byte_val);
                 pucSndBufferCur++;
                 eBytePos = BYTE_HIGH_NIBBLE;
                 usSndBufferCount--;
@@ -367,14 +367,14 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
         }
         else
         {
-            xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, MB_ASCII_DEFAULT_CR);
+            mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, MB_ASCII_DEFAULT_CR);
             eSndState = MB_ASCII_TX_STATE_END;
         }
         break;
 
     /* Finish the frame by sending a LF character. */
     case MB_ASCII_TX_STATE_END:
-        xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR)ucMBLFCharacter);
+        mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)ucMBLFCharacter);
         /* We need another state to make sure that the CR character has
          * been sent. */
         eSndState = MB_ASCII_TX_STATE_NOTIFY;
@@ -390,17 +390,17 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
             xFrameIsBroadcast = (ucASCIISndBuf[MB_ASCII_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
-            vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+            mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
             eSndState = MB_ASCII_TX_STATE_XFWR;
             /* If the frame is broadcast , master will enable timer of convert delay,
              * else master will enable timer of respond timeout. */
             if (xFrameIsBroadcast == TRUE)
             {
-                vMBPortTimersConvertDelayEnable((mb_port_ser *)inst->base.port_obj);
+                mb_port_ser_tmr_convert_delay_enable((mb_port_ser *)inst->base.port_obj);
             }
             else
             {
-                vMBPortTimersRespondTimeoutEnable((mb_port_ser *)inst->base.port_obj);
+                mb_port_ser_tmr_respond_timeout_enable((mb_port_ser *)inst->base.port_obj);
             }
 
         }
@@ -408,11 +408,11 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
 #endif
         {
             eSndState = MB_ASCII_TX_STATE_IDLE;
-            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
+            xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
 
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
-            vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+            mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
             eSndState = MB_ASCII_TX_STATE_IDLE;
         }
         break;
@@ -421,7 +421,7 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
      * idle state.  */
     case MB_ASCII_TX_STATE_IDLE:
         /* enable receiver/disable transmitter. */
-        vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+        mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
         break;
     default:
         break;
@@ -447,7 +447,7 @@ BOOL xMBASCIITimerT1SExpired(mb_ascii_tr* inst)
         assert((eRcvState == MB_ASCII_RX_STATE_RCV) || (eRcvState == MB_ASCII_RX_STATE_WAIT_EOF));
         break;
     }
-    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
 
 
 #if MB_MASTER >0
@@ -463,8 +463,8 @@ BOOL xMBASCIITimerT1SExpired(mb_ascii_tr* inst)
             {
                 //((mb_instance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
                 //vMBSetErrorType(ERR_EV_ERROR_RESPOND_TIMEOUT); //FIXME pass reference to instance
-                //xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
-                xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
+                //xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
+                xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
             }
             break;
         /* Function called in an illegal state. */
@@ -475,11 +475,11 @@ BOOL xMBASCIITimerT1SExpired(mb_ascii_tr* inst)
         }
         eSndState = MB_ASCII_TX_STATE_IDLE;
 
-        vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
         /* If timer mode is convert delay, the master event then turns EV_MASTER_EXECUTE status. */
         if (eCurTimerMode == MB_TMODE_CONVERT_DELAY)
         {
-            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
+            xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
         }
     }
 #endif
@@ -505,15 +505,15 @@ static UCHAR prvucMBCHAR2BIN(UCHAR ucCharacter)
     }
 }
 
-static UCHAR prvucMBBIN2CHAR(UCHAR ucByte)
+static UCHAR prvucMBBIN2CHAR(UCHAR byte_val)
 {
-    if (ucByte <= 0x09)
+    if (byte_val <= 0x09)
     {
-        return (UCHAR)('0' + ucByte);
+        return (UCHAR)('0' + byte_val);
     }
-    else if ((ucByte >= 0x0A) && (ucByte <= 0x0F))
+    else if ((byte_val >= 0x0A) && (byte_val <= 0x0F))
     {
-        return (UCHAR)(ucByte - 0x0A + 'A');
+        return (UCHAR)(byte_val - 0x0A + 'A');
     }
     else
     {

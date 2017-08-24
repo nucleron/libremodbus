@@ -61,7 +61,7 @@
 /* An array of Modbus functions handlers which associates Modbus function
  * codes with implementing functions.
  */
-static mb_func_handler_struct slave_handlers[MB_FUNC_HANDLERS_MAX] =
+static mb_fn_handler_struct slave_handlers[MB_FUNC_HANDLERS_MAX] =
 {
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
     {MB_FUNC_OTHER_REPORT_SLAVEID, (void*)mb_fn_report_slv_id},
@@ -96,7 +96,7 @@ static mb_func_handler_struct slave_handlers[MB_FUNC_HANDLERS_MAX] =
 };
 
 #if MB_MASTER >0
-static mb_func_handler_struct master_handlers[MB_FUNC_HANDLERS_MAX] =
+static mb_fn_handler_struct master_handlers[MB_FUNC_HANDLERS_MAX] =
 {
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
     //TODO Add Master function define
@@ -135,7 +135,7 @@ static mb_func_handler_struct master_handlers[MB_FUNC_HANDLERS_MAX] =
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_RTU_ENABLED > 0
 mb_err_enum
-mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
+mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, FALSE, slv_addr, port_obj, baud, parity);
 }
@@ -143,7 +143,7 @@ mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_bas
 
 #if MB_ASCII_ENABLED > 0
 mb_err_enum
-mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
+mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
 
     return mb_init(inst, (void*)transport, MB_ASCII, FALSE, slv_addr, port_obj, baud, parity);
@@ -156,7 +156,7 @@ mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port
 
 #if MB_RTU_ENABLED > 0
 mb_err_enum
-mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
+mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, TRUE, 0, port_obj, baud, parity);
 }
@@ -164,7 +164,7 @@ mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base * port_ob
 
 #if MB_ASCII_ENABLED > 0
 mb_err_enum
-mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr* transport, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
+mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_ASCII, TRUE, 0, port_obj, baud, parity);
 }
@@ -183,12 +183,12 @@ mb_err_enum mb_mstr_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
 mb_err_enum
-mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity)
+mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    status = MB_ENOERR;
 
     _MB_CURR_STATE = STATE_NOT_INITIALIZED;
-    inst->transport          = (mb_trans_base *)transport;
+    inst->transport          = (mb_trans_base_struct *)transport;
     inst->port               = port_obj;
     transport->base.port_obj = port_obj;
 
@@ -217,17 +217,17 @@ mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is
     }
 
 #if (MB_PORT_HAS_CLOSE > 0)
-#   define MB_SERIAL_CLOSE vMBPortClose
+#   define MB_SERIAL_CLOSE mb_port_ser_close
 #else
 #   define MB_SERIAL_CLOSE NULL
 #endif // MB_PORT_HAS_CLOSE
-    static const mb_port_mtab mb_serial_mtab =
+    static const mb_port_mtab_struct mb_serial_mtab =
     {
         .frm_close = (mb_frm_close_fp) MB_SERIAL_CLOSE,
-        .evt_post  = (mp_port_evt_post_fp)xMBPortEventPost,
-        .evt_get   = (mb_port_evt_get_fp) xMBPortEventGet
+        .evt_post  = (mp_port_evt_post_fp)mb_port_ser_evt_post,
+        .evt_get   = (mb_port_evt_get_fp) mb_port_ser_evt_get
     };
-    inst->pmt = (mb_port_mtab *)&mb_serial_mtab;
+    inst->pmt = (mb_port_mtab_struct *)&mb_serial_mtab;
 
     _MB_GET_TX_FRM(inst->transport, (void*)&(_MB_TX_FRAME));      //Можно было прописать сразу.
 
@@ -258,7 +258,7 @@ mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is
 
         if (status == MB_ENOERR)
         {
-            if (!xMBPortEventInit((mb_port_ser*)inst->port))
+            if (!mb_port_ser_evt_init((mb_port_ser*)inst->port))
             {
                 /* port dependent event module initalization failed. */
                 status = MB_EPORTERR;
@@ -302,7 +302,7 @@ mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKAD
     {
         _MB_CURR_STATE = STATE_DISABLED;
     }
-    else if (!xMBPortEventInit(&(transport->tcp_port)))
+    else if (!mb_port_ser_evt_init(&(transport->tcp_port)))
     {
         /* Port dependent event module initalization failed. */
         status = MB_EPORTERR;
@@ -322,17 +322,17 @@ mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKAD
         inst->trmt->get_tx_frm(inst->transport, &_MB_TX_FRAME);//Зачем 2 раза???
 
 #if (MB_PORT_HAS_CLOSE > 0)
-#   define MB_TCP_CLOSE vMBPortClose
+#   define MB_TCP_CLOSE mb_port_ser_close
 #else
 #   define MB_TCP_CLOSE NULL
 #endif // MB_PORT_HAS_CLOSE
-        static const mb_port_mtab mb_tcp_mtab =
+        static const mb_port_mtab_struct mb_tcp_mtab =
         {
             .frm_close = (mb_frm_close_fp) MB_TCP_CLOSE,
-            .evt_post  = (mp_port_evt_post_fp)xMBPortEventPost,
-            .evt_get   = (mb_port_evt_get_fp) xMBPortEventGet
+            .evt_post  = (mp_port_evt_post_fp)mb_port_ser_evt_post,
+            .evt_get   = (mb_port_evt_get_fp) mb_port_ser_evt_get
         };
-        inst->pmt = (mb_port_mtab *)&mb_tcp_mtab;
+        inst->pmt = (mb_port_mtab_struct *)&mb_tcp_mtab;
     }
     return status;
 }
@@ -347,7 +347,7 @@ mb_close(mb_instance* inst)
     {
         if (_MB_FRM_CLOSE_CUR != NULL)
         {
-            _MB_FRM_CLOSE_CUR((mb_port_base *)inst->transport);
+            _MB_FRM_CLOSE_CUR((mb_port_base_struct *)inst->transport);
         }
     }
     else
@@ -537,7 +537,7 @@ mb_err_enum mb_poll(mb_instance* inst)
                     }
                     if ((_MB_CURR_MODE == MB_ASCII) && MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS)
                     {
-                        vMBPortTimersDelay((mb_port_ser *)inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS);///WTF?????????
+                        mb_port_ser_tmr_delay((mb_port_ser *)inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS);///WTF?????????
                     }
                     status = _MB_FRM_SND_CUR(inst->transport, _MB_ADDR, (UCHAR*)(_MB_TX_FRAME), _MB_LEN);///Where status is used?
                 }

@@ -50,16 +50,16 @@ PR_BEGIN_EXTERN_C
  * The array used for storing the bits must always be a multiple of two
  * bytes. Up to eight bits can be set or cleared in one operation.
  *
- * \param ucByteBuf A buffer where the bit values are stored. Must be a
+ * \param byte_buf A buffer where the bit values are stored. Must be a
  *   multiple of 2 bytes. No length checking is performed and if
- *   usBitOffset / 8 is greater than the size of the buffer memory contents
+ *   bit_offset / 8 is greater than the size of the buffer memory contents
  *   is overwritten.
- * \param usBitOffset The starting address of the bits to set. The first
+ * \param bit_offset The starting address of the bits to set. The first
  *   bit has the offset 0.
- * \param ucNBits Number of bits to modify. The value must always be smaller
+ * \param but_num Number of bits to modify. The value must always be smaller
  *   than 8.
  * \param ucValues Thew new values for the bits. The value for the first bit
- *   starting at <code>usBitOffset</code> is the LSB of the value
+ *   starting at <code>bit_offset</code> is the LSB of the value
  *   <code>ucValues</code>
  *
  * \code
@@ -75,17 +75,17 @@ PR_BEGIN_EXTERN_C
  * xMBUtilSetBits(ucBits, 8, 8, 0x5A);
  * \endcode
  */
-void xMBUtilSetBits(UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits, UCHAR ucValues);
+void xMBUtilSetBits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num, UCHAR ucValues);
 
 /*! \brief Function to read bits in a byte buffer.
  *
  * This function is used to extract up bit values from an array. Up to eight
  * bit values can be extracted in one step.
  *
- * \param ucByteBuf A buffer where the bit values are stored.
- * \param usBitOffset The starting address of the bits to set. The first
+ * \param byte_buf A buffer where the bit values are stored.
+ * \param bit_offset The starting address of the bits to set. The first
  *   bit has the offset 0.
- * \param ucNBits Number of bits to modify. The value must always be smaller
+ * \param but_num Number of bits to modify. The value must always be smaller
  *   than 8.
  *
  * \code
@@ -93,10 +93,10 @@ void xMBUtilSetBits(UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits, UCHAR 
  * UCHAR ucResult;
  *
  * // Extract the bits 3 - 10.
- * ucResult = xMBUtilGetBits(ucBits, 3, 8);
+ * ucResult = mb_util_get_bits(ucBits, 3, 8);
  * \endcode
  */
-UCHAR xMBUtilGetBits(UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR ucNBits);
+UCHAR mb_util_get_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num);
 
 /*! @} */
 PR_END_EXTERN_C

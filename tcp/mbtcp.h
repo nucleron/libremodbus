@@ -39,7 +39,7 @@ PR_BEGIN_EXTERN_C
 
 typedef struct
 {
-    mb_trans_base                   base;
+    mb_trans_base_struct                   base;
     //MBTCPPortInstance tcp_port;
     BOOL tcpMaster;
     USHORT usSendPDULength;

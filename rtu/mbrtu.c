@@ -66,28 +66,28 @@ const mb_tr_mtab mb_rtu_mtab =
 
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum
-eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity)
+eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     ULONG           usTimerT35_50us;
 
-    static const mb_port_cb mb_rtu_cb =
+    static const mb_port_cb_struct mb_rtu_cb =
     {
-        .byte_rcvd   = (mb_fp_bool)xMBRTUReceiveFSM,
-        .tx_empty    = (mb_fp_bool)xMBRTUTransmitFSM,
-        .tmr_expired = (mb_fp_bool)xMBRTUTimerT35Expired
+        .byte_rcvd   = (mb_port_cb_fp)xMBRTUReceiveFSM,
+        .tx_empty    = (mb_port_cb_fp)xMBRTUTransmitFSM,
+        .tmr_expired = (mb_port_cb_fp)xMBRTUTimerT35Expired
     };
 
     (void)slv_addr;
 
-    inst->base.port_obj->cb  = (mb_port_cb *)&mb_rtu_cb;
+    inst->base.port_obj->cb  = (mb_port_cb_struct *)&mb_rtu_cb;
     inst->base.port_obj->arg = inst;
     inst->is_master          = is_master;
 
     ENTER_CRITICAL_SECTION();
 
     /* Modbus RTU uses 8 Databits. */
-    if (xMBPortSerialInit((mb_port_ser *)inst->base.port_obj, baud, 8, parity) != TRUE)
+    if (mb_port_ser_init((mb_port_ser *)inst->base.port_obj, baud, 8, parity) != TRUE)
     {
         eStatus = MB_EPORTERR;
     }
@@ -112,7 +112,7 @@ eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parit
              */
             usTimerT35_50us = (7UL * 220000UL) / (2UL * baud);
         }
-        if (xMBPortTimersInit((mb_port_ser *)inst->base.port_obj,  (USHORT) usTimerT35_50us) != TRUE)
+        if (mb_port_ser_tmr_init((mb_port_ser *)inst->base.port_obj,  (USHORT) usTimerT35_50us) != TRUE)
         {
             eStatus = MB_EPORTERR;
         }
@@ -136,8 +136,8 @@ eMBRTUStart(mb_rtu_tr* inst)
      * modbus protocol stack until the bus is free.
      */
     eRcvState = MB_RTU_RX_STATE_INIT;
-    vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
-    vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+    mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
 
     EXIT_CRITICAL_SECTION();
 }
@@ -146,8 +146,8 @@ void
 eMBRTUStop(mb_rtu_tr* inst)
 {
     ENTER_CRITICAL_SECTION();
-    vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
-    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
+    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
     EXIT_CRITICAL_SECTION();
 }
 
@@ -217,7 +217,7 @@ eMBRTUSend(mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
 
         /* Activate the transmitter. */
         eSndState = MB_RTU_TX_STATE_XMIT;
-        vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE);
+        mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE);
     }
     else
     {
@@ -231,12 +231,12 @@ BOOL
 xMBRTUReceiveFSM(mb_rtu_tr* inst)
 {
     BOOL            xTaskNeedSwitch = FALSE;
-    UCHAR           ucByte;
+    UCHAR           byte_val;
 
     assert((eSndState == MB_RTU_TX_STATE_IDLE) || (eSndState == MB_RTU_TX_STATE_XFWR));
 
     /* Always read the character. */
-    (void)xMBPortSerialGetByte((mb_port_ser *)inst->base.port_obj, (CHAR *) & ucByte);
+    (void)mb_port_ser_get_byte((mb_port_ser *)inst->base.port_obj, (CHAR *) & byte_val);
 
     switch (eRcvState)
     {
@@ -244,14 +244,14 @@ xMBRTUReceiveFSM(mb_rtu_tr* inst)
      * wait until the frame is finished.
      */
     case MB_RTU_RX_STATE_INIT:
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
         break;
 
     /* In the error state we wait until all characters in the
      * damaged frame are transmitted.
      */
     case MB_RTU_RX_STATE_ERROR:
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
         break;
 
     /* In the idle state we wait for a new character. If a character
@@ -262,16 +262,16 @@ xMBRTUReceiveFSM(mb_rtu_tr* inst)
 #if MB_MASTER > 0
         if (rtuMaster)
         {
-            vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+            mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
             eSndState = MB_RTU_TX_STATE_IDLE;
         }
 #endif
         usRcvBufferPos = 0;
-        ucRTURcvBuf[usRcvBufferPos++] = ucByte;
+        ucRTURcvBuf[usRcvBufferPos++] = byte_val;
         eRcvState = MB_RTU_RX_STATE_RCV;
 
         /* Enable t3.5 timers. */
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
         break;
 
     /* We are currently receiving a frame. Reset the timer after
@@ -282,13 +282,13 @@ xMBRTUReceiveFSM(mb_rtu_tr* inst)
     case MB_RTU_RX_STATE_RCV:
         if (usRcvBufferPos < MB_RTU_SER_PDU_SIZE_MAX)
         {
-            ucRTURcvBuf[usRcvBufferPos++] = ucByte;
+            ucRTURcvBuf[usRcvBufferPos++] = byte_val;
         }
         else
         {
             eRcvState = MB_RTU_RX_STATE_ERROR;
         }
-        vMBPortTimersEnable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
         break;
     }
     return xTaskNeedSwitch;
@@ -307,14 +307,14 @@ xMBRTUTransmitFSM(mb_rtu_tr* inst)
      * idle state.  */
     case MB_RTU_TX_STATE_IDLE:
         /* enable receiver/disable transmitter. */
-        vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj,  TRUE, FALSE);
+        mb_port_ser_enable((mb_port_ser *)inst->base.port_obj,  TRUE, FALSE);
         break;
 
     case MB_RTU_TX_STATE_XMIT:
         /* check if we are finished. */
         if (usSndBufferCount != 0)
         {
-            xMBPortSerialPutByte((mb_port_ser *)inst->base.port_obj, (CHAR)*pucSndBufferCur);
+            mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)*pucSndBufferCur);
             pucSndBufferCur++;  /* next byte in sendbuffer. */
             usSndBufferCount--;
         }
@@ -327,27 +327,27 @@ xMBRTUTransmitFSM(mb_rtu_tr* inst)
                 xFrameIsBroadcast = (ucRTUSndBuf[MB_RTU_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
                 /* Disable transmitter. This prevents another transmit buffer
                  * empty interrupt. */
-                vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+                mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
                 eSndState = MB_RTU_TX_STATE_XFWR;
                 /* If the frame is broadcast , master will enable timer of convert delay,
                  * else master will enable timer of respond timeout. */
                 if (xFrameIsBroadcast == TRUE)
                 {
-                    vMBPortTimersConvertDelayEnable((mb_port_ser *)inst->base.port_obj);
+                    mb_port_ser_tmr_convert_delay_enable((mb_port_ser *)inst->base.port_obj);
                 }
                 else
                 {
-                    vMBPortTimersRespondTimeoutEnable((mb_port_ser *)inst->base.port_obj);
+                    mb_port_ser_tmr_respond_timeout_enable((mb_port_ser *)inst->base.port_obj);
                 }
 
             }
             else
 #endif
             {
-                xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
+                xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
                 /* Disable transmitter. This prevents another transmit buffer
                  * empty interrupt. */
-                vMBPortSerialEnable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+                mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
                 eSndState = MB_RTU_TX_STATE_IDLE;
             }
         }
@@ -370,13 +370,13 @@ xMBRTUTimerT35Expired(mb_rtu_tr* inst)
     {
     /* Timer t35 expired. Startup phase is finished. */
     case MB_RTU_RX_STATE_INIT:
-        xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_READY);
+        xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_READY);
         break;
 
     /* A frame was received and t35 expired. Notify the listener that
      * a new frame was received. */
     case MB_RTU_RX_STATE_RCV:
-        xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
+        xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
         break;
 
     /* An error occured while receiving the frame. */
@@ -389,7 +389,7 @@ xMBRTUTimerT35Expired(mb_rtu_tr* inst)
                 (eRcvState == MB_RTU_RX_STATE_RCV) || (eRcvState == MB_RTU_RX_STATE_ERROR));
     }
 
-    vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
     eRcvState = MB_RTU_RX_STATE_IDLE;
 #if MB_MASTER >0
     if (rtuMaster == TRUE)
@@ -404,8 +404,8 @@ xMBRTUTimerT35Expired(mb_rtu_tr* inst)
             {
                 //((mb_instance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
                 //vMBSetErrorType(ERR_EV_ERROR_RESPOND_TIMEOUT); //FIXME pass reference to instance
-                //xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
-                xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
+                //xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
+                xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
             }
             break;
         /* Function called in an illegal state. */
@@ -416,11 +416,11 @@ xMBRTUTimerT35Expired(mb_rtu_tr* inst)
         }
         eSndState = MB_RTU_TX_STATE_IDLE;
 
-        vMBPortTimersDisable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
         /* If timer mode is convert delay, the master event then turns EV_MASTER_EXECUTE status. */
         if (eCurTimerMode == MB_TMODE_CONVERT_DELAY)
         {
-            xNeedPoll = xMBPortEventPost((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
+            xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
         }
     }
 #endif

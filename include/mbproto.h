@@ -72,13 +72,13 @@ PR_BEGIN_EXTERN_C
     MB_EX_GATEWAY_TGT_FAILED = 0x0B
 } mb_exception_enum;
 
-typedef mb_exception_enum(*pxMBFunctionHandler) (void*, UCHAR * frame_ptr, USHORT * len_buf);
+typedef mb_exception_enum (*mb_fn_handler_fp) (void*, UCHAR * frame_ptr, USHORT * len_buf);
 
 typedef struct
 {
-    UCHAR           func_code;
-    pxMBFunctionHandler handler;
-} mb_func_handler_struct;
+    UCHAR            func_code;
+    mb_fn_handler_fp handler;
+} mb_fn_handler_struct;
 
 PR_END_EXTERN_C
 #endif

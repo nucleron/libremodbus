@@ -60,7 +60,7 @@ typedef enum
 
 typedef struct
 {
-    mb_trans_base                  base;
+    mb_trans_base_struct                  base;
     //void                           *parent;
     //mb_port_ser               serial_port;
     volatile mb_rtu_snd_state_enum snd_state;
@@ -82,7 +82,7 @@ typedef struct
 
 extern const mb_tr_mtab mb_rtu_mtab;
 
-mb_err_enum            eMBRTUInit                    (mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity);
+mb_err_enum            eMBRTUInit                    (mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity);
 void                    eMBRTUStart                   (mb_rtu_tr* inst                                                                     );
 void                    eMBRTUStop                    (mb_rtu_tr* inst                                                                     );
 mb_err_enum            eMBRTUReceive                 (mb_rtu_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf       );

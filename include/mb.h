@@ -83,7 +83,7 @@ mb_tr_mtab;//!< Transport method tab
 
 typedef union
 {
-    mb_trans_base base;
+    mb_trans_base_struct base;
 #if MB_RTU_ENABLED == 1
     mb_rtu_tr   rtu;
 #endif
@@ -106,8 +106,8 @@ typedef enum
 
 typedef struct
 {
-    mb_trans_base *transport;
-    mb_port_base  *port;
+    mb_trans_base_struct *transport;
+    mb_port_base_struct  *port;
 
     UCHAR         address;
     mb_mode_enum  cur_mode;
@@ -125,10 +125,10 @@ typedef struct
     mb_tr_mtab * trmt;
 
     //Port methods
-    mb_port_mtab * pmt; //!< Port method tab
+    mb_port_mtab_struct * pmt; //!< Port method tab
 
     //Place to const
-    mb_func_handler_struct * func_handlers;//[MB_FUNC_HANDLERS_MAX];
+    mb_fn_handler_struct * func_handlers;//[MB_FUNC_HANDLERS_MAX];
 
     //for slave id
     UCHAR    slave_id[MB_FUNC_OTHER_REP_SLAVEID_BUF];
@@ -209,13 +209,13 @@ typedef struct
  *        slave addresses are in the range 1 - 247.
  *    - mb_err_enum::MB_EPORTERR IF the porting layer returned an error.
  */
-mb_err_enum mb_init(mb_instance* inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity);
+mb_err_enum mb_init(mb_instance* inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #if MB_RTU_ENABLED
-mb_err_enum mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity);
+mb_err_enum mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #endif
 
 #if MB_ASCII_ENABLED
-mb_err_enum mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity);
+mb_err_enum mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #endif
 
 #if MB_TCP_ENABLED > 0
@@ -224,10 +224,10 @@ mb_err_enum mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port
 
 #if MB_MASTER >0
 #   if MB_RTU_ENABLED > 0
-mb_err_enum mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity);
+mb_err_enum mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #   endif
 #   if MB_ASCII_ENABLED > 0
-mb_err_enum mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr* transport, mb_port_base * port_obj, ULONG baud, mb_parity_enum parity);
+mb_err_enum mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #   endif
 #   if MB_TCP_ENABLED >0
 mb_err_enum mb_mstr_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr);
@@ -292,7 +292,7 @@ mb_err_enum mb_disable(mb_instance* inst);
  *
  * This function must be called periodically. The timer interval required
  * is given by the application dependent Modbus slave timeout. Internally the
- * function calls xMBPortEventGet() and waits for an event from the receiver or
+ * function calls mb_port_ser_evt_get() and waits for an event from the receiver or
  * transmitter state machines.
  *
  * \return If the protocol stack is not in the enabled state the function
@@ -405,7 +405,7 @@ mb_err_enum mb_reg_holding_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT reg_num,
  * \brief Callback function used if a <em>Coil Register</em> value is
  *   read or written by the protocol stack. If you are going to use
  *   this function you might use the functions xMBUtilSetBits() and
- *   xMBUtilGetBits() for working with bitfields.
+ *   mb_util_get_bits() for working with bitfields.
  *
  * \param reg_buff The bits are packed in bytes where the first coil
  *   starting at address \c reg_addr is stored in the LSB of the
@@ -440,7 +440,7 @@ mb_err_enum mb_reg_coils_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT coil_num, 
  *   read by the protocol stack.
  *
  * If you are going to use his function you might use the functions
- * xMBUtilSetBits() and xMBUtilGetBits() for working with bitfields.
+ * xMBUtilSetBits() and mb_util_get_bits() for working with bitfields.
  *
  * \param reg_buff The buffer should be updated with the current
  *   coil values. The first discrete input starting at \c reg_addr must be
