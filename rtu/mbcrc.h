@@ -31,6 +31,6 @@
 #ifndef _MB_CRC_H
 #define _MB_CRC_H
 
-USHORT          usMBCRC16(UCHAR * frame_ptr, USHORT usLen);
+USHORT          usMBCRC16(UCHAR * frame_ptr, USHORT len_buf);
 
 #endif

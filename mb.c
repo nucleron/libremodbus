@@ -64,34 +64,34 @@
 static mb_func_handler_struct slave_handlers[MB_FUNC_HANDLERS_MAX] =
 {
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
-    {MB_FUNC_OTHER_REPORT_SLAVEID, (void*)eMBFuncReportSlaveID},
+    {MB_FUNC_OTHER_REPORT_SLAVEID, (void*)mb_fn_report_slv_id},
 #endif
 #if MB_FUNC_READ_INPUT_ENABLED > 0
-    {MB_FUNC_READ_INPUT_REGISTER, (void*)eMBFuncReadInputRegister},
+    {MB_FUNC_READ_INPUT_REGISTER, (void*)mb_fn_read_input_reg},
 #endif
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
-    {MB_FUNC_READ_HOLDING_REGISTER, (void*)eMBFuncReadHoldingRegister},
+    {MB_FUNC_READ_HOLDING_REGISTER, (void*)mb_fn_read_holding_reg},
 #endif
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
-    {MB_FUNC_WRITE_MULTIPLE_REGISTERS, (void*)eMBFuncWriteMultipleHoldingRegister},
+    {MB_FUNC_WRITE_MULTIPLE_REGISTERS, (void*)mb_fn_write_multi_holding_reg},
 #endif
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
-    {MB_FUNC_WRITE_REGISTER, (void*)eMBFuncWriteHoldingRegister},
+    {MB_FUNC_WRITE_REGISTER, (void*)mb_fn_write_holding_reg},
 #endif
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
-    {MB_FUNC_READWRITE_MULTIPLE_REGISTERS, (void*)eMBFuncReadWriteMultipleHoldingRegister},
+    {MB_FUNC_READWRITE_MULTIPLE_REGISTERS, (void*)mb_fn_rw_multi_holding_reg},
 #endif
 #if MB_FUNC_READ_COILS_ENABLED > 0
-    {MB_FUNC_READ_COILS, (void*)eMBFuncReadCoils},
+    {MB_FUNC_READ_COILS, (void*)mb_fn_read_coils},
 #endif
 #if MB_FUNC_WRITE_COIL_ENABLED > 0
-    {MB_FUNC_WRITE_SINGLE_COIL, (void*)eMBFuncWriteCoil},
+    {MB_FUNC_WRITE_SINGLE_COIL, (void*)mb_fn_write_coil},
 #endif
 #if MB_FUNC_WRITE_MULTIPLE_COILS_ENABLED > 0
-    {MB_FUNC_WRITE_MULTIPLE_COILS, (void*)eMBFuncWriteMultipleCoils},
+    {MB_FUNC_WRITE_MULTIPLE_COILS, (void*)mb_fn_write_multi_coils},
 #endif
 #if MB_FUNC_READ_DISCRETE_INPUTS_ENABLED > 0
-    {MB_FUNC_READ_DISCRETE_INPUTS, (void*)eMBFuncReadDiscreteInputs},
+    {MB_FUNC_READ_DISCRETE_INPUTS, (void*)mb_fn_read_discrete_inp},
 #endif
 };
 
@@ -100,7 +100,7 @@ static mb_func_handler_struct master_handlers[MB_FUNC_HANDLERS_MAX] =
 {
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
     //TODO Add Master function define
-    {MB_FUNC_OTHER_REPORT_SLAVEID, (void*)eMBFuncReportSlaveID},
+    {MB_FUNC_OTHER_REPORT_SLAVEID, (void*)mb_fn_report_slv_id},
 #endif
 #if MB_FUNC_READ_INPUT_ENABLED > 0
     {MB_FUNC_READ_INPUT_REGISTER, (void*)eMBMasterFuncReadInputRegister},
@@ -397,8 +397,7 @@ mb_disable(mb_instance* inst)
     return status;
 }
 
-mb_err_enum
-mb_poll(mb_instance* inst)
+mb_err_enum mb_poll(mb_instance* inst)
 {
     static UCHAR             rcv_addr;
     static UCHAR             func_code;

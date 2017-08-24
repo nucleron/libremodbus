@@ -43,7 +43,7 @@ mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 #if MB_FUNC_READ_INPUT_ENABLED > 0
 
 mb_exception_enum
-eMBFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+mb_fn_read_input_reg(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
@@ -52,7 +52,7 @@ eMBFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
     mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
-    if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
+    if (*len_buf == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
         usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
         usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
@@ -69,15 +69,15 @@ eMBFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
         {
             /* Set the current PDU data pointer to the beginning. */
             pucFrameCur = &frame_ptr[MB_PDU_FUNC_OFF];
-            *usLen = MB_PDU_FUNC_OFF;
+            *len_buf = MB_PDU_FUNC_OFF;
 
             /* First byte contains the function code. */
             *pucFrameCur++ = MB_FUNC_READ_INPUT_REGISTER;
-            *usLen += 1;
+            *len_buf += 1;
 
             /* Second byte in the response contain the number of bytes. */
             *pucFrameCur++ = (UCHAR)(usRegCount * 2);
-            *usLen += 1;
+            *len_buf += 1;
 
             eRegStatus =
                 mb_reg_input_cb(pucFrameCur, usRegAddress, usRegCount);
@@ -89,7 +89,7 @@ eMBFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
             }
             else
             {
-                *usLen += usRegCount * 2;
+                *len_buf += usRegCount * 2;
             }
         }
         else

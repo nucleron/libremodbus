@@ -81,7 +81,7 @@ const mb_tr_mtab mb_ascii_mtab =
 /* ----------------------- Static functions ---------------------------------*/
 static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter           );
 static UCHAR    prvucMBBIN2CHAR(UCHAR ucByte                );
-static UCHAR    prvucMBLRC     (UCHAR * frame_ptr, USHORT usLen);
+static UCHAR    prvucMBLRC     (UCHAR * frame_ptr, USHORT len_buf);
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_parity_enum parity)
 {
@@ -524,11 +524,11 @@ static UCHAR prvucMBBIN2CHAR(UCHAR ucByte)
 }
 
 
-static UCHAR prvucMBLRC(UCHAR * frame_ptr, USHORT usLen)
+static UCHAR prvucMBLRC(UCHAR * frame_ptr, USHORT len_buf)
 {
     UCHAR ucLRC = 0;  /* LRC char initialized */
 
-    while (usLen--)
+    while (len_buf--)
     {
         ucLRC += *frame_ptr++;   /* Add buffer byte without carry */
     }

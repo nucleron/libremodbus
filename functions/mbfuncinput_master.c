@@ -86,7 +86,7 @@ eMBMasterReqReadInputRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRegAd
 }
 
 mb_exception_enum
-eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
@@ -100,7 +100,7 @@ eMBMasterFuncReadInputRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * us
     {
         eStatus = MB_EX_NONE;
     }
-    else if (*usLen >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
+    else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
         inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
         usRegAddress = (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF] << 8);

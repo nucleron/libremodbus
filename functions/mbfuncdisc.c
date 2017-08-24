@@ -31,7 +31,7 @@ mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 mb_exception_enum
-eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+mb_fn_read_discrete_inp(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     USHORT          usRegAddress;
     USHORT          usDiscreteCnt;
@@ -41,7 +41,7 @@ eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
     mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
-    if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
+    if (*len_buf == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
         usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
         usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
@@ -58,11 +58,11 @@ eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
         {
             /* Set the current PDU data pointer to the beginning. */
             pucFrameCur = &frame_ptr[MB_PDU_FUNC_OFF];
-            *usLen = MB_PDU_FUNC_OFF;
+            *len_buf = MB_PDU_FUNC_OFF;
 
             /* First byte contains the function code. */
             *pucFrameCur++ = MB_FUNC_READ_DISCRETE_INPUTS;
-            *usLen += 1;
+            *len_buf += 1;
 
             /* Test if the quantity of coils is a multiple of 8. If not last
              * byte is only partially field with unused coils set to zero. */
@@ -75,7 +75,7 @@ eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
                 ucNBytes = (UCHAR) (usDiscreteCnt / 8);
             }
             *pucFrameCur++ = ucNBytes;
-            *usLen += 1;
+            *len_buf += 1;
 
             eRegStatus =
                 mb_reg_discrete_cb(pucFrameCur, usRegAddress, usDiscreteCnt);
@@ -90,7 +90,7 @@ eMBFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
                 /* The response contains the function code, the starting address
                  * and the quantity of registers. We reuse the old values in the
                  * buffer because they are still valid. */
-                *usLen += ucNBytes;;
+                *len_buf += ucNBytes;;
             }
         }
         else

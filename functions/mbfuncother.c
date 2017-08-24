@@ -68,10 +68,10 @@ mb_set_slv_id(mb_instance* inst, UCHAR slv_id, BOOL is_running,
 }
 
 mb_exception_enum
-eMBFuncReportSlaveID(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+mb_fn_report_slv_id(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     memcpy(&frame_ptr[MB_PDU_DATA_OFF], &ucMBSlaveID[0], (size_t)usMBSlaveIDLen);
-    *usLen = (USHORT)(MB_PDU_DATA_OFF + usMBSlaveIDLen);
+    *len_buf = (USHORT)(MB_PDU_DATA_OFF + usMBSlaveIDLen);
     return MB_EX_NONE;
 }
 

@@ -111,13 +111,13 @@ eMBMasterReqWriteHoldingRegister(mb_instance* inst, UCHAR ucSndAddr, USHORT usRe
 }
 
 mb_exception_enum
-eMBMasterFuncWriteHoldingRegister(mb_instance* inst,  UCHAR * frame_ptr, USHORT * usLen)
+eMBMasterFuncWriteHoldingRegister(mb_instance* inst,  UCHAR * frame_ptr, USHORT * len_buf)
 {
 //    USHORT          usRegAddress;
     mb_exception_enum    eStatus = MB_EX_NONE;
 //    mb_err_enum    eRegStatus;
 
-    if (*usLen == (MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_SIZE))
+    if (*len_buf == (MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_SIZE))
     {
 //        usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_ADDR_OFF] << 8);
 //        usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_ADDR_OFF + 1]);
@@ -194,7 +194,7 @@ eMBMasterReqWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
 }
 
 mb_exception_enum
-eMBMasterFuncWriteMultipleHoldingRegister(mb_instance* inst,  UCHAR * frame_ptr, USHORT * usLen)
+eMBMasterFuncWriteMultipleHoldingRegister(mb_instance* inst,  UCHAR * frame_ptr, USHORT * len_buf)
 {
 //    UCHAR          *ucMBFrame;
 //    USHORT          usRegAddress;
@@ -204,8 +204,8 @@ eMBMasterFuncWriteMultipleHoldingRegister(mb_instance* inst,  UCHAR * frame_ptr,
     mb_exception_enum    eStatus = MB_EX_NONE;
 //    mb_err_enum    eRegStatus;
 
-    /* If this request is broadcast, the *usLen is not need check. */
-    if ((*usLen == MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
+    /* If this request is broadcast, the *len_buf is not need check. */
+    if ((*len_buf == MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
     {
 //		  inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
 //        usRegAddress = (USHORT)(ucMBFrame[MB_PDU_REQ_WRITE_MUL_ADDR_OFF] << 8);
@@ -288,7 +288,7 @@ eMBMasterReqReadHoldingRegister(mb_instance* inst,  UCHAR ucSndAddr, USHORT usRe
 }
 
 mb_exception_enum
-eMBMasterFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+eMBMasterFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
@@ -321,7 +321,7 @@ eMBMasterFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * 
     {
         eStatus = MB_EX_NONE;
     }
-    else if (*usLen >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
+    else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
         inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
 
@@ -419,7 +419,7 @@ eMBMasterReqReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR ucSndAddr,
 }
 
 mb_exception_enum
-eMBMasterFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+eMBMasterFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     USHORT          usRegReadAddress;
     USHORT          usRegReadCount;
@@ -435,7 +435,7 @@ eMBMasterFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_p
     {
         eStatus = MB_EX_NONE;
     }
-    else if (*usLen >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READWRITE_SIZE_MIN)
+    else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READWRITE_SIZE_MIN)
     {
         inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
         usRegReadAddress = (USHORT)(ucMBFrame[MB_PDU_REQ_READWRITE_READ_ADDR_OFF] << 8U);

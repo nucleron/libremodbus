@@ -61,13 +61,13 @@ mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
 
 mb_exception_enum
-eMBFuncWriteHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+mb_fn_write_holding_reg(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     USHORT          usRegAddress;
     mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
-    if (*usLen == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
+    if (*len_buf == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
         usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_ADDR_OFF] << 8);
         usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_ADDR_OFF + 1]);
@@ -94,7 +94,7 @@ eMBFuncWriteHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen
 
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
 mb_exception_enum
-eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+mb_fn_write_multi_holding_reg(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
@@ -103,7 +103,7 @@ eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT
     mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
-    if (*usLen >= (MB_PDU_FUNC_WRITE_MUL_SIZE_MIN + MB_PDU_SIZE_MIN))
+    if (*len_buf >= (MB_PDU_FUNC_WRITE_MUL_SIZE_MIN + MB_PDU_SIZE_MIN))
     {
         usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF] << 8);
         usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF + 1]);
@@ -134,7 +134,7 @@ eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT
                  * address and the quantity of registers. We reuse the
                  * old values in the buffer because they are still valid.
                  */
-                *usLen = MB_PDU_FUNC_WRITE_MUL_BYTECNT_OFF;
+                *len_buf = MB_PDU_FUNC_WRITE_MUL_BYTECNT_OFF;
             }
         }
         else
@@ -154,7 +154,7 @@ eMBFuncWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
 
 mb_exception_enum
-eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+mb_fn_read_holding_reg(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
@@ -163,7 +163,7 @@ eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
     mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
-    if (*usLen == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
+    if (*len_buf == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
         usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
         usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
@@ -179,15 +179,15 @@ eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
         {
             /* Set the current PDU data pointer to the beginning. */
             pucFrameCur = &frame_ptr[MB_PDU_FUNC_OFF];
-            *usLen = MB_PDU_FUNC_OFF;
+            *len_buf = MB_PDU_FUNC_OFF;
 
             /* First byte contains the function code. */
             *pucFrameCur++ = MB_FUNC_READ_HOLDING_REGISTER;
-            *usLen += 1;
+            *len_buf += 1;
 
             /* Second byte in the response contain the number of bytes. */
             *pucFrameCur++ = (UCHAR) (usRegCount * 2);
-            *usLen += 1;
+            *len_buf += 1;
 
             /* Make callback to fill the buffer. */
             eRegStatus = mb_reg_holding_cb(pucFrameCur, usRegAddress, usRegCount, MB_REG_READ);
@@ -198,7 +198,7 @@ eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
             }
             else
             {
-                *usLen += usRegCount * 2;
+                *len_buf += usRegCount * 2;
             }
         }
         else
@@ -219,7 +219,7 @@ eMBFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
 
 mb_exception_enum
-eMBFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+mb_fn_rw_multi_holding_reg(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     USHORT          usRegReadAddress;
     USHORT          usRegReadCount;
@@ -231,7 +231,7 @@ eMBFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, US
     mb_exception_enum    eStatus = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
-    if (*usLen >= (MB_PDU_FUNC_READWRITE_SIZE_MIN + MB_PDU_SIZE_MIN))
+    if (*len_buf >= (MB_PDU_FUNC_READWRITE_SIZE_MIN + MB_PDU_SIZE_MIN))
     {
         usRegReadAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_READWRITE_READ_ADDR_OFF] << 8U);
         usRegReadAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_READWRITE_READ_ADDR_OFF + 1]);
@@ -261,22 +261,22 @@ eMBFuncReadWriteMultipleHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, US
             {
                 /* Set the current PDU data pointer to the beginning. */
                 pucFrameCur = &frame_ptr[MB_PDU_FUNC_OFF];
-                *usLen = MB_PDU_FUNC_OFF;
+                *len_buf = MB_PDU_FUNC_OFF;
 
                 /* First byte contains the function code. */
                 *pucFrameCur++ = MB_FUNC_READWRITE_MULTIPLE_REGISTERS;
-                *usLen += 1;
+                *len_buf += 1;
 
                 /* Second byte in the response contain the number of bytes. */
                 *pucFrameCur++ = (UCHAR) (usRegReadCount * 2);
-                *usLen += 1;
+                *len_buf += 1;
 
                 /* Make the read callback. */
                 eRegStatus =
                     mb_reg_holding_cb(pucFrameCur, usRegReadAddress, usRegReadCount, MB_REG_READ);
                 if (eRegStatus == MB_ENOERR)
                 {
-                    *usLen += 2 * usRegReadCount;
+                    *len_buf += 2 * usRegReadCount;
                 }
             }
             if (eRegStatus != MB_ENOERR)

@@ -101,7 +101,7 @@ eMBMasterReqReadCoils(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USH
 }
 
 mb_exception_enum
-eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
     UCHAR          *ucMBFrame;
     USHORT          usRegAddress;
@@ -116,7 +116,7 @@ eMBMasterFuncReadCoils(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
     {
         eStatus = MB_EX_NONE;
     }
-    else if (*usLen >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
+    else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
         inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
         usRegAddress = (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF] << 8);
@@ -214,7 +214,7 @@ eMBMasterReqWriteCoil(mb_instance* inst, UCHAR ucSndAddr, USHORT usCoilAddr, USH
 }
 
 mb_exception_enum
-eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
 //    USHORT          usRegAddress;
 //    UCHAR           ucBuf[2];
@@ -222,7 +222,7 @@ eMBMasterFuncWriteCoil(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
     mb_exception_enum    eStatus = MB_EX_NONE;
 //    mb_err_enum    eRegStatus;
 
-    if (*usLen == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
+    if (*len_buf == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
 //        usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_ADDR_OFF] << 8);
 //        usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_ADDR_OFF + 1]);
@@ -332,7 +332,7 @@ eMBMasterReqWriteMultipleCoils(mb_instance* inst, UCHAR ucSndAddr,
 }
 
 mb_exception_enum
-eMBMasterFuncWriteMultipleCoils(mb_instance* inst, UCHAR * frame_ptr, USHORT * usLen)
+eMBMasterFuncWriteMultipleCoils(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
 {
 //    USHORT          usRegAddress;
 //    USHORT          usCoilCnt;
@@ -343,8 +343,8 @@ eMBMasterFuncWriteMultipleCoils(mb_instance* inst, UCHAR * frame_ptr, USHORT * u
     mb_exception_enum    eStatus = MB_EX_NONE;
 //    mb_err_enum    eRegStatus;
 
-    /* If this request is broadcast, the *usLen is not need check. */
-    if ((*usLen == MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
+    /* If this request is broadcast, the *len_buf is not need check. */
+    if ((*len_buf == MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
     {
 //    	inst->trmt->get_tx_frm(inst->transport, &ucMBFrame);
 //        usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF] << 8);
