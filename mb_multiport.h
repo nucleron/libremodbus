@@ -31,10 +31,10 @@
 //
 //
 //
-//#define mb_instance* inst, mb_instance* inst,
+//#define mb_instance *inst, mb_instance *inst,
 //#else
 //
-//#define mb_instance* inst,
+//#define mb_instance *inst,
 //
 //#endif // MB_MULTIPORT
 

@@ -69,8 +69,8 @@ PR_BEGIN_EXTERN_C
 typedef void         (*mb_frm_start_fp)  (mb_trans_base_struct * transport);
 typedef void         (*mb_frm_stop_fp)   (mb_trans_base_struct * transport);
 
-typedef mb_err_enum  (*mb_frm_rcv_fp)    (mb_trans_base_struct * transport, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf);
-typedef mb_err_enum  (*mb_frm_snd_fp)    (mb_trans_base_struct * transport, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len);
+typedef mb_err_enum  (*mb_frm_rcv_fp)    (mb_trans_base_struct * transport, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT *len_buf);
+typedef mb_err_enum  (*mb_frm_snd_fp)    (mb_trans_base_struct * transport, UCHAR slv_addr, const UCHAR *frame_ptr, USHORT len);
 typedef void         (*mb_get_rx_frm_fp) (mb_trans_base_struct * transport, UCHAR ** frame_ptr_buf                                         );
 typedef void         (*mb_get_tx_frm_fp) (mb_trans_base_struct * transport, UCHAR ** frame_ptr_buf                                         );
 

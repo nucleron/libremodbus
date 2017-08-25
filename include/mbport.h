@@ -96,9 +96,9 @@ BOOL mb_port_ser_evt_post(mb_port_ser* inst, mb_event_enum event                
 BOOL mb_port_ser_evt_get (mb_port_ser* inst, void* caller, mb_event_enum * event); //FIXME
 /* ----------------------- TCP Supporting functions -----------------------------*/
 #if MB_TCP_ENABLED
-BOOL mb_port_tcp_evt_init(mb_port_tcp * inst                                     );
-BOOL mb_port_tcp_evt_post(mb_port_tcp * inst, mb_event_enum event                );
-BOOL mb_port_tcp_evt_get (mb_port_tcp * inst, void* caller, mb_event_enum * event); //FIXME
+BOOL mb_port_tcp_evt_init(mb_port_tcp *inst                                     );
+BOOL mb_port_tcp_evt_post(mb_port_tcp *inst, mb_event_enum event                );
+BOOL mb_port_tcp_evt_get (mb_port_tcp *inst, void* caller, mb_event_enum * event); //FIXME
 #endif
 /* ----------------------- Serial port functions ----------------------------*/
 BOOL mb_port_ser_init    (mb_port_ser* inst, ULONG baud, UCHAR data_bits, mb_port_ser_parity_enum parity);
@@ -115,11 +115,11 @@ void mb_port_ser_tmr_delay  (mb_port_ser* inst, USHORT timeout_ms  );
 
 /*-------------------------TCP Timers functions ---------------------------------*/
 #if MB_TCP_ENABLED > 0
-BOOL mb_port_tcp_tmr_init   (mb_port_tcp * inst, USHORT timeout_50us);
-void mb_port_tcp_tmr_close  (mb_port_tcp * inst                     );
-void mb_port_tcp_tmr_enable (mb_port_tcp * inst                     );
-void mb_port_tcp_tmr_disable(mb_port_tcp * inst                     );
-void mb_port_tcp_tmr_delay  (mb_port_tcp * inst, USHORT timeout_ms  );
+BOOL mb_port_tcp_tmr_init   (mb_port_tcp *inst, USHORT timeout_50us);
+void mb_port_tcp_tmr_close  (mb_port_tcp *inst                     );
+void mb_port_tcp_tmr_enable (mb_port_tcp *inst                     );
+void mb_port_tcp_tmr_disable(mb_port_tcp *inst                     );
+void mb_port_tcp_tmr_delay  (mb_port_tcp *inst, USHORT timeout_ms  );
 #endif
 /* ----------------------- Callback for the protocol stack ------------------*/
 
@@ -137,11 +137,11 @@ void mb_port_tcp_tmr_delay  (mb_port_tcp * inst, USHORT timeout_ms  );
  */
 /* ----------------------- TCP port functions -------------------------------*/
 #if MB_TCP_ENABLED > 0
-BOOL xMBTCPPortInit        (mb_port_tcp * inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master);
-void vMBTCPPortClose       (mb_port_tcp * inst                                                           );
-void vMBTCPPortDisable     (mb_port_tcp * inst                                                           );
-BOOL xMBTCPPortGetRequest  (mb_port_tcp * inst, UCHAR **ppucMBTCPFrame, USHORT * usTCPLength             );
-BOOL xMBTCPPortSendResponse(mb_port_tcp * inst, const UCHAR *pucMBTCPFrame, USHORT usTCPLength           );
+BOOL mb_port_tcp_init        (mb_port_tcp *inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master);
+void mb_port_tcp_close       (mb_port_tcp *inst                                                           );
+void mb_port_tcp_disable     (mb_port_tcp *inst                                                           );
+BOOL mb_port_tcp_get_rq      (mb_port_tcp *inst, UCHAR **frame_ptr_buf, USHORT *len_buf                  );
+BOOL mb_port_tcp_snd_response(mb_port_tcp *inst, const UCHAR *frame_ptr, USHORT len                       );
 #endif
 #if MB_MASTER >0
 INLINE void mb_port_ser_tmr_convert_delay_enable  (mb_port_ser* inst);

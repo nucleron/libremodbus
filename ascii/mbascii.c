@@ -81,7 +81,7 @@ const mb_tr_mtab mb_ascii_mtab =
 /* ----------------------- Static functions ---------------------------------*/
 static UCHAR    mb_char2bin(UCHAR char_val                );
 static UCHAR    mb_bin2char(UCHAR byte_val                   );
-static UCHAR    mb_lrc     (UCHAR * frame_ptr, USHORT len_buf);
+static UCHAR    mb_lrc     (UCHAR *frame_ptr, USHORT len_buf);
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
 {
@@ -141,7 +141,7 @@ void mb_ascii_stop(mb_ascii_tr_struct* inst)
     EXIT_CRITICAL_SECTION();
 }
 
-mb_err_enum mb_ascii_receive(mb_ascii_tr_struct* inst,  UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
+mb_err_enum mb_ascii_receive(mb_ascii_tr_struct* inst,  UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT *len_buf)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -173,7 +173,7 @@ mb_err_enum mb_ascii_receive(mb_ascii_tr_struct* inst,  UCHAR * rcv_addr_buf, UC
     return status;
 }
 
-mb_err_enum mb_ascii_send(mb_ascii_tr_struct* inst,  UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
+mb_err_enum mb_ascii_send(mb_ascii_tr_struct* inst,  UCHAR slv_addr, const UCHAR *frame_ptr, USHORT len)
 {
     mb_err_enum    status = MB_ENOERR;
     UCHAR           lrc;
@@ -524,7 +524,7 @@ static UCHAR mb_bin2char(UCHAR byte_val)
 }
 
 
-static UCHAR mb_lrc(UCHAR * frame_ptr, USHORT len_buf)
+static UCHAR mb_lrc(UCHAR *frame_ptr, USHORT len_buf)
 {
     UCHAR lrc = 0;  /* LRC char initialized */
 

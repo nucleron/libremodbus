@@ -37,7 +37,7 @@
 #define MB_PDU_FUNC_READ_SIZE_MIN           (1)
 
 /* ----------------------- Static functions ---------------------------------*/
-mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_MASTER > 0
@@ -46,19 +46,19 @@ mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
 /**
  * This function will request read discrete inputs.
  *
- * @param ucSndAddr salve address
- * @param usDiscreteAddr discrete start address
- * @param usNDiscreteIn discrete total number
- * @param lTimeOut timeout (-1 will waiting forever)
+ * @param snd_addr salve address
+ * @param discrete_addr discrete start address
+ * @param discrete_num discrete total number
+ * @param timeout timeout (-1 will waiting forever)
  *
  * @return error code
  */
 mb_err_enum
-eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDiscreteAddr, USHORT usNDiscreteIn, LONG lTimeOut)
+mb_mstr_rq_read_discrete_inputs(mb_instance *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num, LONG timeout)
 {
     UCHAR                 *ucMBFrame;
     //mb_err_enum    eErrStatus = MB_ENOERR;
-    if (ucSndAddr > MB_ADDRESS_MAX)
+    if (snd_addr > MB_ADDRESS_MAX)
     {
         return MB_EINVAL;
     }
@@ -66,14 +66,14 @@ eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDisc
     {
         return MB_EBUSY;
     }
-    // else if (xMBMasterRunResTake(lTimeOut) == FALSE) eErrStatus = MB_EBUSY; //FIXME: check
+    // else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME: check
     inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
-    inst->master_dst_addr = ucSndAddr;
+    inst->master_dst_addr = snd_addr;
     ucMBFrame[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
-    ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]        = usDiscreteAddr >> 8;
-    ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]    = usDiscreteAddr;
-    ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF ]    = usNDiscreteIn >> 8;
-    ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = usNDiscreteIn;
+    ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF]        = discrete_addr >> 8;
+    ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]    = discrete_addr;
+    ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF ]    = discrete_num >> 8;
+    ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = discrete_num;
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
     //eErrStatus = eMBMasterWaitRequestFinish();
@@ -81,15 +81,15 @@ eMBMasterReqReadDiscreteInputs(mb_instance* inst, UCHAR ucSndAddr, USHORT usDisc
 }
 
 mb_exception_enum
-eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
+mb_mstr_fn_read_discrete_inputs(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    USHORT          usRegAddress;
+    USHORT          reg_addr;
     USHORT          usDiscreteCnt;
-    UCHAR           ucNBytes;
+    UCHAR           byte_num;
     UCHAR          *ucMBFrame;
 
     mb_exception_enum    status = MB_EX_NONE;
-    mb_err_enum    eRegStatus;
+    mb_err_enum    reg_status;
 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
     if (inst->trmt->rq_is_broadcast(inst->transport))
@@ -99,9 +99,9 @@ eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * l
     else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
         inst->trmt->get_tx_frm(inst-> transport, &ucMBFrame);
-        usRegAddress = (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-        usRegAddress |= (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-        usRegAddress++;
+        reg_addr = (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF] << 8);
+        reg_addr |= (USHORT)(ucMBFrame[MB_PDU_REQ_READ_ADDR_OFF + 1]);
+        reg_addr++;
 
         usDiscreteCnt = (USHORT)(ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF] << 8);
         usDiscreteCnt |= (USHORT)(ucMBFrame[MB_PDU_REQ_READ_DISCCNT_OFF + 1]);
@@ -110,25 +110,25 @@ eMBMasterFuncReadDiscreteInputs(mb_instance* inst, UCHAR * frame_ptr, USHORT * l
          * byte is only partially field with unused coils set to zero. */
         if ((usDiscreteCnt & 0x0007) != 0)
         {
-            ucNBytes = (UCHAR)(usDiscreteCnt / 8 + 1);
+            byte_num = (UCHAR)(usDiscreteCnt / 8 + 1);
         }
         else
         {
-            ucNBytes = (UCHAR)(usDiscreteCnt / 8);
+            byte_num = (UCHAR)(usDiscreteCnt / 8);
         }
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-        if ((usDiscreteCnt >= 1) && ucNBytes == frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF])
+        if ((usDiscreteCnt >= 1) && byte_num == frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF])
         {
             /* Make callback to fill the buffer. */
-            eRegStatus = eMBMasterRegDiscreteCB(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], usRegAddress, usDiscreteCnt);
+            reg_status = mb_mstr_reg_discrete_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], reg_addr, usDiscreteCnt);
 
             /* If an error occured convert it into a Modbus exception. */
-            if(eRegStatus != MB_ENOERR)
+            if(reg_status != MB_ENOERR)
             {
-                status = prveMBError2Exception(eRegStatus);
+                status = mb_error_to_exception(reg_status);
             }
         }
         else

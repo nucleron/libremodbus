@@ -79,33 +79,33 @@
 
 #define MB_TCP_PROTOCOL_ID  0   /* 0 = Modbus Protocol */
 
-#if MB_MULTIPORT > 0
-#define usSendPDULength inst->usSendPDULength
-#else
+//#if MB_MULTIPORT > 0
+//#define inst->snd_pdu_len inst->snd_pdu_len
+//#else
 
 #endif
 
 
 const mb_tr_mtab mb_tcp_mtab =
 {
-    .frm_start   = (mb_frm_start_fp)  mb_tcp_start,
-    .frm_stop    = (mb_frm_stop_fp)   mb_tcp_stop,
-    .frm_send    = (mb_frm_snd_fp)   mb_tcp_send,
-    .frm_rcv     = (mb_frm_rcv_fp)mb_tcp_receive,
+    .frm_start   = (mb_frm_start_fp)mb_tcp_start,
+    .frm_stop    = (mb_frm_stop_fp) mb_tcp_stop,
+    .frm_send    = (mb_frm_snd_fp)  mb_tcp_send,
+    .frm_rcv     = (mb_frm_rcv_fp)  mb_tcp_receive,
 
-    .get_rx_frm      = (mb_get_rx_frm_fp)mb_tcp_get_rcv_buf,
-    .get_tx_frm      = (mb_get_tx_frm_fp)mb_tcp_get_snd_buf
+    .get_rx_frm  = (mb_get_rx_frm_fp)mb_tcp_get_rcv_buf,
+    .get_tx_frm  = (mb_get_tx_frm_fp)mb_tcp_get_snd_buf
 #   if MB_MASTER > 0
     , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)mb_tcp_rq_is_bcast
 #   endif //master
 };
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum
-mb_tcp_init(mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
+mb_tcp_init(mb_tcp_tr *inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
 {
     mb_err_enum    status = MB_ENOERR;
 
-    if (xMBTCPPortInit(inst->base.port_obj, tcp_port_num,hostaddr, is_master) == FALSE)
+    if (mb_port_tcp_init(inst->base.port_obj, tcp_port_num,hostaddr, is_master) == FALSE)
     {
         status = MB_EPORTERR;
     }
@@ -113,33 +113,33 @@ mb_tcp_init(mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_
 }
 
 void
-mb_tcp_start(mb_tcp_tr* inst)
+mb_tcp_start(mb_tcp_tr *inst)
 {
 }
 
 void
-mb_tcp_stop(mb_tcp_tr* inst)
+mb_tcp_stop(mb_tcp_tr *inst)
 {
     /* Make sure that no more clients are connected. */
-    vMBTCPPortDisable(inst->base.port_obj);
+    mb_port_tcp_disable(inst->base.port_obj);
 }
 
 mb_err_enum
-mb_tcp_receive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
+mb_tcp_receive(mb_tcp_tr *inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT *len_buf)
 {
     mb_err_enum    status = MB_EIO;
-    UCHAR          *pucMBTCPFrame;
+    UCHAR          *frame_ptr;
     USHORT          len;
-    USHORT          usPID;
+    USHORT          pid;
 
-    if (xMBTCPPortGetRequest(inst->base.port_obj, &pucMBTCPFrame, &len) != FALSE)
+    if (mb_port_tcp_get_rq(inst->base.port_obj, &frame_ptr, &len) != FALSE)
     {
-        usPID = pucMBTCPFrame[MB_TCP_PID] << 8U;
-        usPID |= pucMBTCPFrame[MB_TCP_PID + 1];
+        pid = frame_ptr[MB_TCP_PID] << 8U;
+        pid |= frame_ptr[MB_TCP_PID + 1];
 
-        if (usPID == MB_TCP_PROTOCOL_ID)
+        if (pid == MB_TCP_PROTOCOL_ID)
         {
-            *frame_ptr_buf = &pucMBTCPFrame[MB_TCP_FUNC];
+            *frame_ptr_buf = &frame_ptr[MB_TCP_FUNC];
             *len_buf = len - MB_TCP_FUNC;
             status = MB_ENOERR;
 
@@ -157,11 +157,11 @@ mb_tcp_receive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, US
 }
 
 mb_err_enum
-mb_tcp_send(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
+mb_tcp_send(mb_tcp_tr *inst, UCHAR _unused, const UCHAR *frame_ptr, USHORT len)
 {
     mb_err_enum    status = MB_ENOERR;
-    UCHAR          *pucMBTCPFrame = (UCHAR *) frame_ptr - MB_TCP_FUNC;
-    USHORT          usTCPLength = len + MB_TCP_FUNC;
+    UCHAR          *frame_ptr = (UCHAR *)frame_ptr - MB_TCP_FUNC;
+    USHORT          len = len + MB_TCP_FUNC;
 
     /* The MBAP header is already initialized because the caller calls this
      * function with the buffer returned by the previous call. Therefore we
@@ -169,9 +169,9 @@ mb_tcp_send(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
      * header includes the size of the Modbus PDU and the UID Byte. Therefore
      * the length is len plus one.
      */
-    pucMBTCPFrame[MB_TCP_LEN] = (len + 1) >> 8U;
-    pucMBTCPFrame[MB_TCP_LEN + 1] = (len + 1) & 0xFF;
-    if (xMBTCPPortSendResponse(inst->base.port_obj, pucMBTCPFrame, usTCPLength) == FALSE)
+    frame_ptr[MB_TCP_LEN] = (len + 1) >> 8U;
+    frame_ptr[MB_TCP_LEN + 1] = (len + 1) & 0xFF;
+    if (mb_port_tcp_snd_response(inst->base.port_obj, frame_ptr, len) == FALSE)
     {
         status = MB_EIO;
     }
@@ -179,29 +179,29 @@ mb_tcp_send(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
 }
 
 #if MB_MASTER > 0
-
-void vMBTCPMasterSetPDUSndLength( mb_tcp_tr* inst, USHORT snd_pdu_len)
-{
-    usSendPDULength = snd_pdu_len;
-}
-
+/// Don't delete these functions!!!
+//void vMBTCPMasterSetPDUSndLength( mb_tcp_tr *inst, USHORT snd_pdu_len)
+//{
+//    inst->snd_pdu_len = snd_pdu_len;
+//}
+//
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBTCPMasterGetPDUSndLength( mb_tcp_tr* inst)
-{
-    return usSendPDULength;
-}
+//USHORT usMBTCPMasterGetPDUSndLength( mb_tcp_tr *inst)
+//{
+//    return inst->snd_pdu_len;
+//}
 
-void mb_tcp_get_snd_buf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf)
+void mb_tcp_get_snd_buf(mb_tcp_tr *inst, UCHAR ** frame_ptr_buf)
 {
     *frame_ptr_buf = inst->tcp_port.aucTCPSndBuf+MB_TCP_FUNC;
 }
 
-void mb_tcp_get_rcv_buf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf)
+void mb_tcp_get_rcv_buf(mb_tcp_tr *inst, UCHAR ** frame_ptr_buf)
 {
     *frame_ptr_buf = inst->tcp_port.aucTCPRcvBuf+MB_TCP_FUNC;
 }
 
-BOOL mb_tcp_rq_is_bcast(mb_tcp_tr* inst)
+BOOL mb_tcp_rq_is_bcast(mb_tcp_tr *inst)
 {
     return FALSE; //no broadcasts on tcp
 }

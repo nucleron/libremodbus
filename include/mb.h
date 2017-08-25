@@ -209,28 +209,28 @@ typedef struct
  *        slave addresses are in the range 1 - 247.
  *    - mb_err_enum::MB_EPORTERR IF the porting layer returned an error.
  */
-mb_err_enum mb_init(mb_instance* inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #if MB_RTU_ENABLED
-mb_err_enum mb_init_rtu(mb_instance* inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #endif
 
 #if MB_ASCII_ENABLED
-mb_err_enum mb_init_ascii(mb_instance* inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #endif
 
 #if MB_TCP_ENABLED > 0
-mb_err_enum mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master);
+mb_err_enum mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master);
 #endif
 
 #if MB_MASTER >0
 #   if MB_RTU_ENABLED > 0
-mb_err_enum mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_mstr_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #   endif
 #   if MB_ASCII_ENABLED > 0
-mb_err_enum mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_mstr_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #   endif
 #   if MB_TCP_ENABLED >0
-mb_err_enum mb_mstr_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr);
+mb_err_enum mb_mstr_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr);
 #   endif
 #endif
 /*! \ingroup modbus
@@ -262,7 +262,7 @@ mb_err_enum mb_mstr_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp
  *   If the protocol stack is not in the disabled state it returns
  *   mb_err_enum::MB_EILLSTATE.
  */
-mb_err_enum mb_close(mb_instance* inst);
+mb_err_enum mb_close(mb_instance *inst);
 
 /*! \ingroup modbus
  * \brief Enable the Modbus protocol stack.
@@ -274,7 +274,7 @@ mb_err_enum mb_close(mb_instance* inst);
  *   mb_err_enum::MB_ENOERR. If it was not in the disabled state it
  *   return mb_err_enum::MB_EILLSTATE.
  */
-mb_err_enum mb_enable(mb_instance* inst);
+mb_err_enum mb_enable(mb_instance *inst);
 
 /*! \ingroup modbus
  * \brief Disable the Modbus protocol stack.
@@ -285,7 +285,7 @@ mb_err_enum mb_enable(mb_instance* inst);
  *  mb_err_enum::MB_ENOERR. If it was not in the enabled state it returns
  *  mb_err_enum::MB_EILLSTATE.
  */
-mb_err_enum mb_disable(mb_instance* inst);
+mb_err_enum mb_disable(mb_instance *inst);
 
 /*! \ingroup modbus
  * \brief The main pooling loop of the Modbus protocol stack.
@@ -299,7 +299,7 @@ mb_err_enum mb_disable(mb_instance* inst);
  *   returns mb_err_enum::MB_EILLSTATE. Otherwise it returns
  *   mb_err_enum::MB_ENOERR.
  */
-mb_err_enum mb_poll(mb_instance* inst);
+mb_err_enum mb_poll(mb_instance *inst);
 
 /*! \ingroup modbus
  * \brief Configure the slave id of the device.
@@ -319,7 +319,7 @@ mb_err_enum mb_poll(mb_instance* inst);
  *   mbconfig.h is to small it returns mb_err_enum::MB_ENORES. Otherwise
  *   it returns mb_err_enum::MB_ENOERR.
  */
-mb_err_enum mb_set_slv_id(mb_instance* inst, UCHAR slv_id, BOOL is_running, UCHAR const *slv_idstr, USHORT slv_idstr_len);
+mb_err_enum mb_set_slv_id(mb_instance *inst, UCHAR slv_id, BOOL is_running, UCHAR const *slv_idstr, USHORT slv_idstr_len);
 
 /* ----------------------- Callback -----------------------------------------*/
 
@@ -365,7 +365,7 @@ mb_err_enum mb_set_slv_id(mb_instance* inst, UCHAR slv_id, BOOL is_running, UCHA
  *   - mb_err_enum::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-mb_err_enum mb_reg_input_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT reg_num);
+mb_err_enum mb_reg_input_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Holding Register</em> value is
@@ -399,7 +399,7 @@ mb_err_enum mb_reg_input_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT reg_num);
  *   - mb_err_enum::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-mb_err_enum mb_reg_holding_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT reg_num, mb_reg_mode_enum mode);
+mb_err_enum mb_reg_holding_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num, mb_reg_mode_enum mode);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Coil Register</em> value is
@@ -433,7 +433,7 @@ mb_err_enum mb_reg_holding_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT reg_num,
  *   - mb_err_enum::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-mb_err_enum mb_reg_coils_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT coil_num, mb_reg_mode_enum mode);
+mb_err_enum mb_reg_coils_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT coil_num, mb_reg_mode_enum mode);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Input Discrete Register</em> value is
@@ -461,7 +461,7 @@ mb_err_enum mb_reg_coils_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT coil_num, 
  *   - mb_err_enum::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-mb_err_enum mb_reg_discrete_cb(UCHAR * reg_buff, USHORT reg_addr, USHORT disc_num);
+mb_err_enum mb_reg_discrete_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT disc_num);
 
 PR_END_EXTERN_C
 #endif

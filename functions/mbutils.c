@@ -104,11 +104,11 @@ mb_util_get_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num)
 }
 
 mb_exception_enum
-prveMBError2Exception(mb_err_enum eErrorCode)
+mb_error_to_exception(mb_err_enum error_code)
 {
     mb_exception_enum    status;
 
-    switch (eErrorCode)
+    switch (error_code)
     {
         case MB_ENOERR:
             status = MB_EX_NONE;

@@ -37,26 +37,26 @@
 #define MB_PDU_FUNC_READ_RSP_BYTECNT_OFF    (MB_PDU_DATA_OFF)
 
 /* ----------------------- Static functions ---------------------------------*/
-mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_FUNC_READ_INPUT_ENABLED > 0
 
 mb_exception_enum
-mb_fn_read_input_reg(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
+mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    USHORT          usRegAddress;
+    USHORT          reg_addr;
     USHORT          usRegCount;
-    UCHAR          *pucFrameCur;
+    UCHAR          *frame_cur;
 
     mb_exception_enum    status = MB_EX_NONE;
-    mb_err_enum    eRegStatus;
+    mb_err_enum    reg_status;
 
     if (*len_buf == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
-        usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
-        usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
-        usRegAddress++;
+        reg_addr = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
+        reg_addr |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
+        reg_addr++;
 
         usRegCount = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_REGCNT_OFF] << 8);
         usRegCount |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_REGCNT_OFF + 1]);
@@ -68,24 +68,24 @@ mb_fn_read_input_reg(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
             && (usRegCount < MB_PDU_FUNC_READ_REGCNT_MAX))
         {
             /* Set the current PDU data pointer to the beginning. */
-            pucFrameCur = &frame_ptr[MB_PDU_FUNC_OFF];
+            frame_cur = &frame_ptr[MB_PDU_FUNC_OFF];
             *len_buf = MB_PDU_FUNC_OFF;
 
             /* First byte contains the function code. */
-            *pucFrameCur++ = MB_FUNC_READ_INPUT_REGISTER;
+            *frame_cur++ = MB_FUNC_READ_INPUT_REGISTER;
             *len_buf += 1;
 
             /* Second byte in the response contain the number of bytes. */
-            *pucFrameCur++ = (UCHAR)(usRegCount * 2);
+            *frame_cur++ = (UCHAR)(usRegCount * 2);
             *len_buf += 1;
 
-            eRegStatus =
-                mb_reg_input_cb(pucFrameCur, usRegAddress, usRegCount);
+            reg_status =
+                mb_reg_input_cb(frame_cur, reg_addr, usRegCount);
 
             /* If an error occured convert it into a Modbus exception. */
-            if (eRegStatus != MB_ENOERR)
+            if (reg_status != MB_ENOERR)
             {
-                status = prveMBError2Exception(eRegStatus);
+                status = mb_error_to_exception(reg_status);
             }
             else
             {

@@ -24,28 +24,28 @@
 #define MB_PDU_FUNC_READ_DISCCNT_MAX        (0x07D0)
 
 /* ----------------------- Static functions ---------------------------------*/
-mb_exception_enum    prveMBError2Exception(mb_err_enum eErrorCode);
+mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 
 /* ----------------------- Start implementation -----------------------------*/
 
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 mb_exception_enum
-mb_fn_read_discrete_inp(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
+mb_fn_read_discrete_inp(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    USHORT          usRegAddress;
+    USHORT          reg_addr;
     USHORT          usDiscreteCnt;
-    UCHAR           ucNBytes;
-    UCHAR          *pucFrameCur;
+    UCHAR           byte_num;
+    UCHAR          *frame_cur;
 
     mb_exception_enum    status = MB_EX_NONE;
-    mb_err_enum    eRegStatus;
+    mb_err_enum    reg_status;
 
     if (*len_buf == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
-        usRegAddress = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
-        usRegAddress |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
-        usRegAddress++;
+        reg_addr = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
+        reg_addr |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
+        reg_addr++;
 
         usDiscreteCnt = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF] << 8);
         usDiscreteCnt |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF + 1]);
@@ -57,40 +57,40 @@ mb_fn_read_discrete_inp(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
             (usDiscreteCnt < MB_PDU_FUNC_READ_DISCCNT_MAX))
         {
             /* Set the current PDU data pointer to the beginning. */
-            pucFrameCur = &frame_ptr[MB_PDU_FUNC_OFF];
+            frame_cur = &frame_ptr[MB_PDU_FUNC_OFF];
             *len_buf = MB_PDU_FUNC_OFF;
 
             /* First byte contains the function code. */
-            *pucFrameCur++ = MB_FUNC_READ_DISCRETE_INPUTS;
+            *frame_cur++ = MB_FUNC_READ_DISCRETE_INPUTS;
             *len_buf += 1;
 
             /* Test if the quantity of coils is a multiple of 8. If not last
              * byte is only partially field with unused coils set to zero. */
             if ((usDiscreteCnt & 0x0007) != 0)
             {
-                ucNBytes = (UCHAR) (usDiscreteCnt / 8 + 1);
+                byte_num = (UCHAR) (usDiscreteCnt / 8 + 1);
             }
             else
             {
-                ucNBytes = (UCHAR) (usDiscreteCnt / 8);
+                byte_num = (UCHAR) (usDiscreteCnt / 8);
             }
-            *pucFrameCur++ = ucNBytes;
+            *frame_cur++ = byte_num;
             *len_buf += 1;
 
-            eRegStatus =
-                mb_reg_discrete_cb(pucFrameCur, usRegAddress, usDiscreteCnt);
+            reg_status =
+                mb_reg_discrete_cb(frame_cur, reg_addr, usDiscreteCnt);
 
             /* If an error occured convert it into a Modbus exception. */
-            if (eRegStatus != MB_ENOERR)
+            if (reg_status != MB_ENOERR)
             {
-                status = prveMBError2Exception(eRegStatus);
+                status = mb_error_to_exception(reg_status);
             }
             else
             {
                 /* The response contains the function code, the starting address
                  * and the quantity of registers. We reuse the old values in the
                  * buffer because they are still valid. */
-                *len_buf += ucNBytes;;
+                *len_buf += byte_num;;
             }
         }
         else

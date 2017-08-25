@@ -81,7 +81,7 @@ static const UCHAR crc_lo_tab[] = {
 };
 
 USHORT
-mb_crc16(UCHAR * frame_ptr, USHORT len_buf)
+mb_crc16(UCHAR *frame_ptr, USHORT len_buf)
 {
     UCHAR           crc_hi = 0xFF;
     UCHAR           crc_lo = 0xFF;

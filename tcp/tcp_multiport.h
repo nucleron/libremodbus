@@ -16,16 +16,16 @@
 //	/* ----------------------- Type definitions ---------------------------------*/
 //
 //
-//	#define mb_tcp_tr* inst, mb_tcp_tr* inst,
-//	#define mb_tcp_tr* inst mb_tcp_tr* inst
+//	#define mb_tcp_tr *inst, mb_tcp_tr *inst,
+//	#define mb_tcp_tr *inst mb_tcp_tr *inst
 //
 //	#define &(inst->tcp_port), &(inst->tcp_port),
 //	#define &(inst->tcp_port) &(inst->tcp_port)
 //
 //#else
 //
-//	#define mb_tcp_tr* inst,
-//	#define mb_tcp_tr* inst void
+//	#define mb_tcp_tr *inst,
+//	#define mb_tcp_tr *inst void
 //	//#define SERIAL_ARG
 //
 //#endif  /*MB_MULTIPORT*/

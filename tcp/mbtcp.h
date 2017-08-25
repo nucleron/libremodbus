@@ -47,14 +47,14 @@ typedef struct
 #define MB_TCP_PSEUDO_ADDRESS   255
 extern const mb_tr_mtab mb_tcp_mtab;
 /* ----------------------- Function prototypes ------------------------------*/
-mb_err_enum	mb_tcp_init       (mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master     );
-void        mb_tcp_start      (mb_tcp_tr* inst                                                                );
-void        mb_tcp_stop       (mb_tcp_tr* inst                                                                );
-mb_err_enum mb_tcp_receive    (mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf);
-mb_err_enum mb_tcp_send       (mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len            );
-void        mb_tcp_get_rcv_buf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf                                        );
-void        mb_tcp_get_snd_buf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf                                        );
-BOOL        mb_tcp_rq_is_bcast(mb_tcp_tr* inst                                                                );
+mb_err_enum	mb_tcp_init       (mb_tcp_tr *inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master     );
+void        mb_tcp_start      (mb_tcp_tr *inst                                                                );
+void        mb_tcp_stop       (mb_tcp_tr *inst                                                                );
+mb_err_enum mb_tcp_receive    (mb_tcp_tr *inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT *len_buf);
+mb_err_enum mb_tcp_send       (mb_tcp_tr *inst, UCHAR _unused, const UCHAR *frame_ptr, USHORT len            );
+void        mb_tcp_get_rcv_buf(mb_tcp_tr *inst, UCHAR ** frame_ptr_buf                                        );
+void        mb_tcp_get_snd_buf(mb_tcp_tr *inst, UCHAR ** frame_ptr_buf                                        );
+BOOL        mb_tcp_rq_is_bcast(mb_tcp_tr *inst                                                                );
 #ifdef __cplusplus
 PR_END_EXTERN_C
 #endif

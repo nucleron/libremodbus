@@ -152,7 +152,7 @@ mb_rtu_stop(mb_rtu_tr_struct* inst)
 }
 
 mb_err_enum
-mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
+mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT *len_buf)
 {
     //BOOL            xFrameReceived = FALSE;
     mb_err_enum    status = MB_ENOERR;
@@ -189,7 +189,7 @@ mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_
 }
 
 mb_err_enum
-mb_rtu_send(mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
+mb_rtu_send(mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR *frame_ptr, USHORT len)
 {
     mb_err_enum    status = MB_ENOERR;
     USHORT          crc16;
