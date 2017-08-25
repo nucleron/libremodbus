@@ -38,7 +38,7 @@ mb_fn_read_discrete_inp(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
     UCHAR           ucNBytes;
     UCHAR          *pucFrameCur;
 
-    mb_exception_enum    eStatus = MB_EX_NONE;
+    mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    eRegStatus;
 
     if (*len_buf == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
@@ -83,7 +83,7 @@ mb_fn_read_discrete_inp(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
             /* If an error occured convert it into a Modbus exception. */
             if (eRegStatus != MB_ENOERR)
             {
-                eStatus = prveMBError2Exception(eRegStatus);
+                status = prveMBError2Exception(eRegStatus);
             }
             else
             {
@@ -95,16 +95,16 @@ mb_fn_read_discrete_inp(mb_instance* inst, UCHAR * frame_ptr, USHORT * len_buf)
         }
         else
         {
-            eStatus = MB_EX_ILLEGAL_DATA_VALUE;
+            status = MB_EX_ILLEGAL_DATA_VALUE;
         }
     }
     else
     {
         /* Can't be a valid read coil register request because the length
          * is incorrect. */
-        eStatus = MB_EX_ILLEGAL_DATA_VALUE;
+        status = MB_EX_ILLEGAL_DATA_VALUE;
     }
-    return eStatus;
+    return status;
 }
 
 #endif

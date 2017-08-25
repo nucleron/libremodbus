@@ -103,13 +103,13 @@ const mb_tr_mtab mb_tcp_mtab =
 mb_err_enum
 mb_tcp_init(mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
 {
-    mb_err_enum    eStatus = MB_ENOERR;
+    mb_err_enum    status = MB_ENOERR;
 
     if (xMBTCPPortInit(inst->base.port_obj, tcp_port_num,hostaddr, is_master) == FALSE)
     {
-        eStatus = MB_EPORTERR;
+        status = MB_EPORTERR;
     }
-    return eStatus;
+    return status;
 }
 
 void
@@ -127,7 +127,7 @@ mb_tcp_stop(mb_tcp_tr* inst)
 mb_err_enum
 mb_tcp_receive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
 {
-    mb_err_enum    eStatus = MB_EIO;
+    mb_err_enum    status = MB_EIO;
     UCHAR          *pucMBTCPFrame;
     USHORT          len;
     USHORT          usPID;
@@ -141,7 +141,7 @@ mb_tcp_receive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, US
         {
             *frame_ptr_buf = &pucMBTCPFrame[MB_TCP_FUNC];
             *len_buf = len - MB_TCP_FUNC;
-            eStatus = MB_ENOERR;
+            status = MB_ENOERR;
 
             /* Modbus TCP does not use any addresses. Fake the source address such
              * that the processing part deals with this frame.
@@ -151,15 +151,15 @@ mb_tcp_receive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, US
     }
     else
     {
-        eStatus = MB_EIO;
+        status = MB_EIO;
     }
-    return eStatus;
+    return status;
 }
 
 mb_err_enum
 mb_tcp_send(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
 {
-    mb_err_enum    eStatus = MB_ENOERR;
+    mb_err_enum    status = MB_ENOERR;
     UCHAR          *pucMBTCPFrame = (UCHAR *) frame_ptr - MB_TCP_FUNC;
     USHORT          usTCPLength = len + MB_TCP_FUNC;
 
@@ -173,9 +173,9 @@ mb_tcp_send(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
     pucMBTCPFrame[MB_TCP_LEN + 1] = (len + 1) & 0xFF;
     if (xMBTCPPortSendResponse(inst->base.port_obj, pucMBTCPFrame, usTCPLength) == FALSE)
     {
-        eStatus = MB_EIO;
+        status = MB_EIO;
     }
-    return eStatus;
+    return status;
 }
 
 #if MB_MASTER > 0

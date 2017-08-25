@@ -43,7 +43,7 @@ mb_err_enum
 mb_set_slv_id(mb_instance* inst, UCHAR slv_id, BOOL is_running,
                UCHAR const *slv_idstr, USHORT slv_idstr_len)
 {
-    mb_err_enum    eStatus = MB_ENOERR;
+    mb_err_enum    status = MB_ENOERR;
 
     /* the first byte and second byte in the buffer is reserved for
      * the parameter slv_id and the running flag. The rest of
@@ -62,9 +62,9 @@ mb_set_slv_id(mb_instance* inst, UCHAR slv_id, BOOL is_running,
     }
     else
     {
-        eStatus = MB_ENORES;
+        status = MB_ENORES;
     }
-    return eStatus;
+    return status;
 }
 
 mb_exception_enum

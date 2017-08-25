@@ -106,26 +106,26 @@ mb_util_get_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num)
 mb_exception_enum
 prveMBError2Exception(mb_err_enum eErrorCode)
 {
-    mb_exception_enum    eStatus;
+    mb_exception_enum    status;
 
     switch (eErrorCode)
     {
         case MB_ENOERR:
-            eStatus = MB_EX_NONE;
+            status = MB_EX_NONE;
             break;
 
         case MB_ENOREG:
-            eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
+            status = MB_EX_ILLEGAL_DATA_ADDRESS;
             break;
 
         case MB_ETIMEDOUT:
-            eStatus = MB_EX_SLAVE_BUSY;
+            status = MB_EX_SLAVE_BUSY;
             break;
 
         default:
-            eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
+            status = MB_EX_SLAVE_DEVICE_FAILURE;
             break;
     }
 
-    return eStatus;
+    return status;
 }

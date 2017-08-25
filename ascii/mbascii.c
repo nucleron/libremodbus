@@ -47,45 +47,45 @@
 
 #if MB_ASCII_ENABLED > 0
 
-#define eSndState         inst->snd_state
-#define eRcvState         inst->rcv_state
-
-#define ucASCIIRcvBuf     inst->rcv_buf
-#define ucASCIISndBuf     inst->snd_buf
-
-#define usRcvBufferPos    inst->rcv_buf_pos
-#define eBytePos          inst->byte_pos
-#define xFrameIsBroadcast inst->frame_is_broadcast
-#define eCurTimerMode     inst->cur_tmr_mode
-#define usSendPDULength   inst->snd_pdu_len
-#define pucSndBufferCur   inst->snd_buf_cur
-#define usSndBufferCount  inst->snd_buf_cnt
-
-#define asciiMaster       inst->is_master
-#define ucMBLFCharacter   inst->mb_lf_char
+//#define inst->snd_state         inst->snd_state
+//#define inst->rcv_state         inst->rcv_state
+//
+//#define inst->rcv_buf     inst->rcv_buf
+//#define inst->snd_buf     inst->snd_buf
+//
+//#define inst->rcv_buf_pos    inst->rcv_buf_pos
+//#define inst->byte_pos          inst->byte_pos
+//#define inst->frame_is_broadcast inst->frame_is_broadcast
+//#define inst->cur_tmr_mode     inst->cur_tmr_mode
+//#define inst->snd_pdu_len   inst->snd_pdu_len
+//#define inst->snd_buf_cur   inst->snd_buf_cur
+//#define inst->snd_buf_cnt  inst->snd_buf_cnt
+//
+//#define inst->is_master       inst->is_master
+//#define inst->mb_lf_char   inst->mb_lf_char
 
 const mb_tr_mtab mb_ascii_mtab =
 {
     .frm_start   = (mb_frm_start_fp)  mb_ascii_start,
     .frm_stop    = (mb_frm_stop_fp)   mb_ascii_stop,
-    .frm_send    = (mb_frm_snd_fp)   mb_ascii_send,
-    .frm_rcv     = (mb_frm_rcv_fp)mb_ascii_receive,
+    .frm_send    = (mb_frm_snd_fp)    mb_ascii_send,
+    .frm_rcv     = (mb_frm_rcv_fp)    mb_ascii_receive,
 
-    .get_rx_frm      = NULL,
-    .get_tx_frm      = (mb_get_tx_frm_fp)mb_ascii_get_snd_buf
+    .get_rx_frm  = NULL,
+    .get_tx_frm  = (mb_get_tx_frm_fp)mb_ascii_get_snd_buf
 #   if MB_MASTER > 0
     , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)mb_ascii_rq_is_bcast
 #   endif //master
 };
 
 /* ----------------------- Static functions ---------------------------------*/
-static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter           );
-static UCHAR    prvucMBBIN2CHAR(UCHAR byte_val                );
-static UCHAR    prvucMBLRC     (UCHAR * frame_ptr, USHORT len_buf);
+static UCHAR    mb_char2bin(UCHAR char_val                );
+static UCHAR    mb_bin2char(UCHAR byte_val                   );
+static UCHAR    mb_lrc     (UCHAR * frame_ptr, USHORT len_buf);
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
 {
-    mb_err_enum    eStatus = MB_ENOERR;
+    mb_err_enum    status = MB_ENOERR;
 
     static const mb_port_cb_struct mb_ascii_cb =
     {
@@ -99,34 +99,34 @@ mb_err_enum mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_ad
     inst->base.port_obj->arg = inst;
     inst->is_master          = is_master;
 
-    usSndBufferCount=0;
+    inst->snd_buf_cnt=0;
 
     ENTER_CRITICAL_SECTION();
-    ucMBLFCharacter = MB_ASCII_DEFAULT_LF;
+    inst->mb_lf_char = MB_ASCII_DEFAULT_LF;
 
     if (mb_port_ser_init((mb_port_ser *)inst->base.port_obj, baud, 7, parity) != TRUE)
     {
-        eStatus = MB_EPORTERR;
+        status = MB_EPORTERR;
     }
     else if (mb_port_ser_tmr_init((mb_port_ser *)inst->base.port_obj, MB_ASCII_TIMEOUT_SEC * 20000UL) != TRUE)
     {
-        eStatus = MB_EPORTERR;
+        status = MB_EPORTERR;
     }
 
-    eRcvState =  MB_ASCII_RX_STATE_IDLE;
-    eSndState = MB_ASCII_TX_STATE_IDLE;
+    inst->rcv_state =  MB_ASCII_RX_STATE_IDLE;
+    inst->snd_state = MB_ASCII_TX_STATE_IDLE;
     //inst->serial_port.parent = (void*)(inst);
 
     EXIT_CRITICAL_SECTION();
 
-    return eStatus;
+    return status;
 }
 
 void mb_ascii_start(mb_ascii_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
     mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
-    eRcvState = MB_ASCII_RX_STATE_IDLE;
+    inst->rcv_state = MB_ASCII_RX_STATE_IDLE;
     EXIT_CRITICAL_SECTION();
 
     /* No special startup required for ASCII. */
@@ -143,82 +143,82 @@ void mb_ascii_stop(mb_ascii_tr_struct* inst)
 
 mb_err_enum mb_ascii_receive(mb_ascii_tr_struct* inst,  UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
 {
-    mb_err_enum    eStatus = MB_ENOERR;
+    mb_err_enum    status = MB_ENOERR;
 
     ENTER_CRITICAL_SECTION();
-    assert(usRcvBufferPos < MB_ASCII_SER_PDU_SIZE_MAX);
+    assert(inst->rcv_buf_pos < MB_ASCII_SER_PDU_SIZE_MAX);
 
     /* Length and CRC check */
-    if ((usRcvBufferPos >= MB_ASCII_SER_PDU_SIZE_MIN)
-            && (prvucMBLRC((UCHAR *) ucASCIIRcvBuf, usRcvBufferPos) == 0))
+    if ((inst->rcv_buf_pos >= MB_ASCII_SER_PDU_SIZE_MIN)
+            && (mb_lrc((UCHAR *) inst->rcv_buf, inst->rcv_buf_pos) == 0))
     {
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there.
          */
-        *rcv_addr_buf = ucASCIIRcvBuf[MB_ASCII_SER_PDU_ADDR_OFF];
+        *rcv_addr_buf = inst->rcv_buf[MB_ASCII_SER_PDU_ADDR_OFF];
 
         /* Total length of Modbus-PDU is Modbus-Serial-Line-PDU minus
          * size of address field and CRC checksum.
          */
-        *len_buf = (USHORT)(usRcvBufferPos - MB_ASCII_SER_PDU_PDU_OFF - MB_ASCII_SER_PDU_SIZE_LRC);
+        *len_buf = (USHORT)(inst->rcv_buf_pos - MB_ASCII_SER_PDU_PDU_OFF - MB_ASCII_SER_PDU_SIZE_LRC);
 
         /* Return the start of the Modbus PDU to the caller. */
-        *frame_ptr_buf = (UCHAR *) & ucASCIIRcvBuf[MB_ASCII_SER_PDU_PDU_OFF];
+        *frame_ptr_buf = (UCHAR *) & inst->rcv_buf[MB_ASCII_SER_PDU_PDU_OFF];
     }
     else
     {
-        eStatus = MB_EIO;
+        status = MB_EIO;
     }
     EXIT_CRITICAL_SECTION();
-    return eStatus;
+    return status;
 }
 
 mb_err_enum mb_ascii_send(mb_ascii_tr_struct* inst,  UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
 {
-    mb_err_enum    eStatus = MB_ENOERR;
-    UCHAR           usLRC;
+    mb_err_enum    status = MB_ENOERR;
+    UCHAR           lrc;
 
     ENTER_CRITICAL_SECTION();
     /* Check if the receiver is still in idle state. If not we where too
      * slow with processing the received frame and the master sent another
      * frame on the network. We have to abort sending the frame.
      */
-    if (eRcvState == MB_ASCII_RX_STATE_IDLE)
+    if (inst->rcv_state == MB_ASCII_RX_STATE_IDLE)
     {
         /* First byte before the Modbus-PDU is the slave address. */
-        pucSndBufferCur = (UCHAR *) frame_ptr - 1;
-        usSndBufferCount = 1;
+        inst->snd_buf_cur = (UCHAR *) frame_ptr - 1;
+        inst->snd_buf_cnt = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
-        pucSndBufferCur[MB_ASCII_SER_PDU_ADDR_OFF] = slv_addr;
-        usSndBufferCount += len;
+        inst->snd_buf_cur[MB_ASCII_SER_PDU_ADDR_OFF] = slv_addr;
+        inst->snd_buf_cnt += len;
 
         /* Calculate LRC checksum for Modbus-Serial-Line-PDU. */
-        usLRC = prvucMBLRC((UCHAR *) pucSndBufferCur, usSndBufferCount);
-        ucASCIISndBuf[usSndBufferCount++] = usLRC;
+        lrc = mb_lrc((UCHAR *) inst->snd_buf_cur, inst->snd_buf_cnt);
+        inst->snd_buf[inst->snd_buf_cnt++] = lrc;
 
         /* Activate the transmitter. */
-        eSndState = MB_ASCII_TX_STATE_START;
+        inst->snd_state = MB_ASCII_TX_STATE_START;
         mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE);
     }
     else
     {
-        eStatus = MB_EIO;
+        status = MB_EIO;
     }
     EXIT_CRITICAL_SECTION();
-    return eStatus;
+    return status;
 }
 
 BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
 {
-    BOOL            xNeedPoll = FALSE;
+    BOOL            need_poll = FALSE;
     UCHAR           byte_val;
     UCHAR           ucResult;
 
-    assert((eSndState == MB_ASCII_TX_STATE_IDLE)|| (eSndState == MB_ASCII_TX_STATE_XFWR));
+    assert((inst->snd_state == MB_ASCII_TX_STATE_IDLE)|| (inst->snd_state == MB_ASCII_TX_STATE_XFWR));
 
-    (void)mb_port_ser_get_byte((mb_port_ser *)inst->base.port_obj, (CHAR *) & byte_val);
-    switch (eRcvState)
+    (void)mb_port_ser_get_byte((mb_port_ser *)inst->base.port_obj, (CHAR *)&byte_val);
+    switch (inst->rcv_state)
     {
     /* A new character is received. If the character is a ':' the input
      * buffer is cleared. A CR-character signals the end of the data
@@ -231,65 +231,65 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
         if (byte_val == ':')
         {
             /* Empty receive buffer. */
-            eBytePos = BYTE_HIGH_NIBBLE;
-            usRcvBufferPos = 0;
+            inst->byte_pos = BYTE_HIGH_NIBBLE;
+            inst->rcv_buf_pos = 0;
         }
         else if (byte_val == MB_ASCII_DEFAULT_CR)
         {
-            eRcvState = MB_ASCII_RX_STATE_WAIT_EOF;
+            inst->rcv_state = MB_ASCII_RX_STATE_WAIT_EOF;
         }
         else
         {
-            ucResult = prvucMBCHAR2BIN(byte_val);
-            switch (eBytePos)
+            ucResult = mb_char2bin(byte_val);
+            switch (inst->byte_pos)
             {
             /* High nibble of the byte comes first. We check for
              * a buffer overflow here. */
             case BYTE_HIGH_NIBBLE:
-                if (usRcvBufferPos < MB_ASCII_SER_PDU_SIZE_MAX)
+                if (inst->rcv_buf_pos < MB_ASCII_SER_PDU_SIZE_MAX)
                 {
-                    ucASCIIRcvBuf[usRcvBufferPos] = (UCHAR)(ucResult << 4);
-                    eBytePos = BYTE_LOW_NIBBLE;
+                    inst->rcv_buf[inst->rcv_buf_pos] = (UCHAR)(ucResult << 4);
+                    inst->byte_pos = BYTE_LOW_NIBBLE;
                     break;
                 }
                 else
                 {
                     /* not handled in Modbus specification but seems
                      * a resonable implementation. */
-                    eRcvState = MB_ASCII_RX_STATE_IDLE;
+                    inst->rcv_state = MB_ASCII_RX_STATE_IDLE;
                     /* Disable previously activated timer because of error state. */
                     mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
                 }
                 break;
 
             case BYTE_LOW_NIBBLE:
-                ucASCIIRcvBuf[usRcvBufferPos] |= ucResult;
-                usRcvBufferPos++;
-                eBytePos = BYTE_HIGH_NIBBLE;
+                inst->rcv_buf[inst->rcv_buf_pos] |= ucResult;
+                inst->rcv_buf_pos++;
+                inst->byte_pos = BYTE_HIGH_NIBBLE;
                 break;
             }
         }
         break;
 
     case MB_ASCII_RX_STATE_WAIT_EOF:
-        if (byte_val == ucMBLFCharacter)
+        if (byte_val == inst->mb_lf_char)
         {
             /* Disable character timeout timer because all characters are
              * received. */
             mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
             /* Receiver is again in idle state. */
-            eRcvState = MB_ASCII_RX_STATE_IDLE;
+            inst->rcv_state = MB_ASCII_RX_STATE_IDLE;
 
             /* Notify the caller of mb_ascii_receive that a new frame
              * was received. */
-            xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
+            need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
         }
         else if (byte_val == ':')
         {
             /* Empty receive buffer and back to receive state. */
-            eBytePos = BYTE_HIGH_NIBBLE;
-            usRcvBufferPos = 0;
-            eRcvState = MB_ASCII_RX_STATE_RCV;
+            inst->byte_pos = BYTE_HIGH_NIBBLE;
+            inst->rcv_buf_pos = 0;
+            inst->rcv_state = MB_ASCII_RX_STATE_RCV;
 
             /* Enable timer for character timeout. */
             mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
@@ -297,7 +297,7 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
         else
         {
             /* Frame is not okay. Delete entire frame. */
-            eRcvState = MB_ASCII_RX_STATE_IDLE;
+            inst->rcv_state = MB_ASCII_RX_STATE_IDLE;
         }
         break;
 
@@ -305,40 +305,40 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
         if (byte_val == ':')
         {
 #if MB_MASTER > 0
-            if (asciiMaster == TRUE)
+            if (inst->is_master == TRUE)
             {
                 mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
-                eSndState = MB_ASCII_TX_STATE_IDLE;
+                inst->snd_state = MB_ASCII_TX_STATE_IDLE;
             }
 #endif
             /* Enable timer for character timeout. */
             mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
             /* Reset the input buffers to store the frame. */
-            usRcvBufferPos = 0;;
-            eBytePos = BYTE_HIGH_NIBBLE;
-            eRcvState = MB_ASCII_RX_STATE_RCV;
+            inst->rcv_buf_pos = 0;;
+            inst->byte_pos = BYTE_HIGH_NIBBLE;
+            inst->rcv_state = MB_ASCII_RX_STATE_RCV;
         }
         break;
     }
 
-    return xNeedPoll;
+    return need_poll;
 }
 
 BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
 {
-    BOOL            xNeedPoll = FALSE;
+    BOOL            need_poll = FALSE;
     UCHAR           byte_val;
 
-    assert(eRcvState == MB_ASCII_RX_STATE_IDLE);
-    switch (eSndState)
+    assert(inst->rcv_state == MB_ASCII_RX_STATE_IDLE);
+    switch (inst->snd_state)
     {
     /* Start of transmission. The start of a frame is defined by sending
      * the character ':'. */
     case MB_ASCII_TX_STATE_START:
         byte_val = ':';
         mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)byte_val);
-        eSndState = MB_ASCII_TX_STATE_DATA;
-        eBytePos = BYTE_HIGH_NIBBLE;
+        inst->snd_state = MB_ASCII_TX_STATE_DATA;
+        inst->byte_pos = BYTE_HIGH_NIBBLE;
         break;
 
     /* Send the data block. Each data byte is encoded as a character hex
@@ -346,55 +346,55 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
      * last. If all data bytes are exhausted we send a '\r' character
      * to end the transmission. */
     case MB_ASCII_TX_STATE_DATA:
-        if (usSndBufferCount > 0)
+        if (inst->snd_buf_cnt > 0)
         {
-            switch (eBytePos)
+            switch (inst->byte_pos)
             {
             case BYTE_HIGH_NIBBLE:
-                byte_val = prvucMBBIN2CHAR((UCHAR)(*pucSndBufferCur >> 4));
+                byte_val = mb_bin2char((UCHAR)(*inst->snd_buf_cur >> 4));
                 mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR) byte_val);
-                eBytePos = BYTE_LOW_NIBBLE;
+                inst->byte_pos = BYTE_LOW_NIBBLE;
                 break;
 
             case BYTE_LOW_NIBBLE:
-                byte_val = prvucMBBIN2CHAR((UCHAR)(*pucSndBufferCur & 0x0F));
+                byte_val = mb_bin2char((UCHAR)(*inst->snd_buf_cur & 0x0F));
                 mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)byte_val);
-                pucSndBufferCur++;
-                eBytePos = BYTE_HIGH_NIBBLE;
-                usSndBufferCount--;
+                inst->snd_buf_cur++;
+                inst->byte_pos = BYTE_HIGH_NIBBLE;
+                inst->snd_buf_cnt--;
                 break;
             }
         }
         else
         {
             mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, MB_ASCII_DEFAULT_CR);
-            eSndState = MB_ASCII_TX_STATE_END;
+            inst->snd_state = MB_ASCII_TX_STATE_END;
         }
         break;
 
     /* Finish the frame by sending a LF character. */
     case MB_ASCII_TX_STATE_END:
-        mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)ucMBLFCharacter);
+        mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)inst->mb_lf_char);
         /* We need another state to make sure that the CR character has
          * been sent. */
-        eSndState = MB_ASCII_TX_STATE_NOTIFY;
+        inst->snd_state = MB_ASCII_TX_STATE_NOTIFY;
         break;
 
     /* Notify the task which called mb_ascii_send that the frame has
      * been sent. */
     case MB_ASCII_TX_STATE_NOTIFY:
 #if MB_MASTER >0
-        if (asciiMaster==TRUE)
+        if (inst->is_master==TRUE)
         {
 
-            xFrameIsBroadcast = (ucASCIISndBuf[MB_ASCII_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
+            inst->frame_is_broadcast = (inst->snd_buf[MB_ASCII_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
             mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
-            eSndState = MB_ASCII_TX_STATE_XFWR;
+            inst->snd_state = MB_ASCII_TX_STATE_XFWR;
             /* If the frame is broadcast , master will enable timer of convert delay,
              * else master will enable timer of respond timeout. */
-            if (xFrameIsBroadcast == TRUE)
+            if (inst->frame_is_broadcast == TRUE)
             {
                 mb_port_ser_tmr_convert_delay_enable((mb_port_ser *)inst->base.port_obj);
             }
@@ -407,13 +407,13 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
         else
 #endif
         {
-            eSndState = MB_ASCII_TX_STATE_IDLE;
-            xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
+            inst->snd_state = MB_ASCII_TX_STATE_IDLE;
+            need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
 
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
             mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
-            eSndState = MB_ASCII_TX_STATE_IDLE;
+            inst->snd_state = MB_ASCII_TX_STATE_IDLE;
         }
         break;
 
@@ -427,77 +427,77 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
         break;
     }
 
-    return xNeedPoll;
+    return need_poll;
 }
 
 BOOL mb_ascii_tmr_1s_expired(mb_ascii_tr_struct* inst)
 {
-    BOOL            xNeedPoll = FALSE;
-    switch (eRcvState)
+    BOOL            need_poll = FALSE;
+    switch (inst->rcv_state)
     {
     /* If we have a timeout we go back to the idle state and wait for
      * the next frame.
      */
     case MB_ASCII_RX_STATE_RCV:
     case MB_ASCII_RX_STATE_WAIT_EOF:
-        eRcvState = MB_ASCII_RX_STATE_IDLE;
+        inst->rcv_state = MB_ASCII_RX_STATE_IDLE;
         break;
 
     default:
-        assert((eRcvState == MB_ASCII_RX_STATE_RCV) || (eRcvState == MB_ASCII_RX_STATE_WAIT_EOF));
+        assert((inst->rcv_state == MB_ASCII_RX_STATE_RCV) || (inst->rcv_state == MB_ASCII_RX_STATE_WAIT_EOF));
         break;
     }
     mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
 
 
 #if MB_MASTER >0
-    if (asciiMaster == TRUE)
+    if (inst->is_master == TRUE)
     {
-        switch (eSndState)
+        switch (inst->snd_state)
         {
         /* A frame was send finish and convert delay or respond timeout expired.
          * If the frame is broadcast, The master will idle, and if the frame is not
          * broadcast.Notify the listener process error.*/
         case MB_ASCII_TX_STATE_XFWR:
-            if (xFrameIsBroadcast == FALSE)
+            if (inst->frame_is_broadcast == FALSE)
             {
                 //((mb_instance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
                 //vMBSetErrorType(ERR_EV_ERROR_RESPOND_TIMEOUT); //FIXME pass reference to instance
-                //xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
-                xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
+                //need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
+                need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
             }
             break;
         /* Function called in an illegal state. */
         default:
             assert(
-                (eSndState == MB_ASCII_TX_STATE_XFWR) || (eSndState == MB_ASCII_TX_STATE_IDLE));
+                (inst->snd_state == MB_ASCII_TX_STATE_XFWR) || (inst->snd_state == MB_ASCII_TX_STATE_IDLE));
             break;
         }
-        eSndState = MB_ASCII_TX_STATE_IDLE;
+        inst->snd_state = MB_ASCII_TX_STATE_IDLE;
 
         mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
         /* If timer mode is convert delay, the master event then turns EV_MASTER_EXECUTE status. */
-        if (eCurTimerMode == MB_TMODE_CONVERT_DELAY)
+        if (inst->cur_tmr_mode == MB_TMODE_CONVERT_DELAY)
         {
-            xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
+            need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
         }
     }
 #endif
 
     /* no context switch required. */
-    return xNeedPoll;
+    return need_poll;
 }
 
 
-static UCHAR prvucMBCHAR2BIN(UCHAR ucCharacter)
+static UCHAR mb_char2bin(UCHAR char_val)
 {
-    if ((ucCharacter >= '0') && (ucCharacter <= '9'))
+    if ((char_val >= '0') && (char_val <= '9'))
     {
-        return (UCHAR)(ucCharacter - '0');
+        return (UCHAR)(char_val - '0');
     }
-    else if ((ucCharacter >= 'A') && (ucCharacter <= 'F'))
+    else if ((char_val >= 'A') && (char_val <= 'F'))
     {
-        return (UCHAR)(ucCharacter - 'A' + 0x0A);
+        return (UCHAR)(char_val - 'A' + 0x0A);
     }
     else
     {
@@ -505,7 +505,7 @@ static UCHAR prvucMBCHAR2BIN(UCHAR ucCharacter)
     }
 }
 
-static UCHAR prvucMBBIN2CHAR(UCHAR byte_val)
+static UCHAR mb_bin2char(UCHAR byte_val)
 {
     if (byte_val <= 0x09)
     {
@@ -524,24 +524,24 @@ static UCHAR prvucMBBIN2CHAR(UCHAR byte_val)
 }
 
 
-static UCHAR prvucMBLRC(UCHAR * frame_ptr, USHORT len_buf)
+static UCHAR mb_lrc(UCHAR * frame_ptr, USHORT len_buf)
 {
-    UCHAR ucLRC = 0;  /* LRC char initialized */
+    UCHAR lrc = 0;  /* LRC char initialized */
 
     while (len_buf--)
     {
-        ucLRC += *frame_ptr++;   /* Add buffer byte without carry */
+        lrc += *frame_ptr++;   /* Add buffer byte without carry */
     }
 
     /* Return twos complement */
-    ucLRC = (UCHAR) (-((CHAR) ucLRC));
-    return ucLRC;
+    lrc = (UCHAR) (-((CHAR) lrc));
+    return lrc;
 }
 
 /* Get Modbus send PDU's buffer address pointer.*/
 void mb_ascii_get_snd_buf(mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
-    *frame_ptr_buf = (UCHAR *) &ucASCIISndBuf[MB_ASCII_SER_PDU_PDU_OFF];
+    *frame_ptr_buf = (UCHAR *) &inst->snd_buf[MB_ASCII_SER_PDU_PDU_OFF];
 }
 
 
@@ -549,31 +549,31 @@ void mb_ascii_get_snd_buf(mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf)
 /* Get Modbus Master send RTU's buffer address pointer.*/
 void vMBASCIIMasterGetRTUSndBuf(mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
-    *frame_ptr_buf = (UCHAR *) ucASCIISndBuf;
+    *frame_ptr_buf = (UCHAR *) inst->snd_buf;
 }
 
 /* Set Modbus Master send PDU's buffer length.*/
 void mb_ascii_set_snd_len(mb_ascii_tr_struct* inst, USHORT snd_pdu_len)
 {
-    usSendPDULength = snd_pdu_len;
+    inst->snd_pdu_len = snd_pdu_len;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
 USHORT mb_ascii_get_snd_len(mb_ascii_tr_struct* inst)
 {
-    return usSendPDULength;
+    return inst->snd_pdu_len;
 }
 
 /* Set Modbus Master current timer mode.*/
 void mb_ascii_set_cur_tmr_mode(mb_ascii_tr_struct* inst, mb_tmr_mode_enum tmr_mode)
 {
-    eCurTimerMode = tmr_mode;
+    inst->cur_tmr_mode = tmr_mode;
 }
 
 /* The master request is broadcast? */
 BOOL mb_ascii_rq_is_bcast(mb_ascii_tr_struct* inst)
 {
-    return xFrameIsBroadcast;
+    return inst->frame_is_broadcast;
 }
 
 #endif
