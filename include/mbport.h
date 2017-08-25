@@ -135,9 +135,6 @@ void mb_port_tcp_tmr_delay  (mb_port_tcp * inst, USHORT timeout_ms  );
  *   a new byte was received. The port implementation should wake up the
  *   tasks which are currently blocked on the eventqueue.
  */
-//extern BOOL(*pxMBFrameCBByteReceived)    (void* transport);
-//extern BOOL(*pxMBFrameCBTransmitterEmpty)(void* transport);
-//extern BOOL(*pxMBPortCBTimerExpired)     (void* transport);
 /* ----------------------- TCP port functions -------------------------------*/
 #if MB_TCP_ENABLED > 0
 BOOL xMBTCPPortInit        (mb_port_tcp * inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master);

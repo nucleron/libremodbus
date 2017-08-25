@@ -300,22 +300,24 @@ eMBMasterFuncReadHoldingRegister(mb_instance* inst, UCHAR * frame_ptr, USHORT * 
     /* If this request is broadcast, and it's read mode. This request don't need execute. */
     BOOL isBroadcast = FALSE;
 
-    if (inst->cur_mode == MB_RTU)
-    {
-#if MB_TCP_ENABLED
-        isBroadcast = inst->trmt->rq_is_broadcast(inst->transport);
-#endif // MB_TCP_ENABLED
-    }
-    else if (inst->cur_mode == MB_ASCII)
-    {
-#if MB_ASCII_ENABLED
-        isBroadcast = xMBASCIIMasterRequestIsBroadcast((mb_ascii_tr *)inst->transport);
-#endif // MB_ASCII_ENABLED
-    }
-    else //TCP
-    {
-        isBroadcast = FALSE; //No broadcasts in TCP mode
-    }
+    isBroadcast = inst->trmt->rq_is_broadcast(inst->transport);
+
+//    if (inst->cur_mode == MB_RTU)
+//    {
+//#if MB_TCP_ENABLED
+//        isBroadcast = inst->trmt->rq_is_broadcast(inst->transport);
+//#endif // MB_TCP_ENABLED
+//    }
+//    else if (inst->cur_mode == MB_ASCII)
+//    {
+//#if MB_ASCII_ENABLED
+//        isBroadcast = mb_ascii_rq_is_bcast((mb_ascii_tr_struct *)inst->transport);
+//#endif // MB_ASCII_ENABLED
+//    }
+//    else //TCP
+//    {
+//        isBroadcast = FALSE; //No broadcasts in TCP mode
+//    }
 
     if (isBroadcast == TRUE)
     {

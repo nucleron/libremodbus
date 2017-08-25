@@ -85,11 +85,11 @@ typedef union
 {
     mb_trans_base_struct base;
 #if MB_RTU_ENABLED == 1
-    mb_rtu_tr   rtu;
+    mb_rtu_tr_struct   rtu;
 #endif
 
 #if MB_ASCII_ENABLED == 1
-    mb_ascii_tr ascii;
+    mb_ascii_tr_struct ascii;
 #endif
 
 #if MB_TCP_ENABLED == 1
@@ -211,11 +211,11 @@ typedef struct
  */
 mb_err_enum mb_init(mb_instance* inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #if MB_RTU_ENABLED
-mb_err_enum mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_init_rtu(mb_instance* inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #endif
 
 #if MB_ASCII_ENABLED
-mb_err_enum mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_init_ascii(mb_instance* inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #endif
 
 #if MB_TCP_ENABLED > 0
@@ -224,10 +224,10 @@ mb_err_enum mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port
 
 #if MB_MASTER >0
 #   if MB_RTU_ENABLED > 0
-mb_err_enum mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #   endif
 #   if MB_ASCII_ENABLED > 0
-mb_err_enum mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #   endif
 #   if MB_TCP_ENABLED >0
 mb_err_enum mb_mstr_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr);

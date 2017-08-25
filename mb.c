@@ -135,7 +135,7 @@ static mb_fn_handler_struct master_handlers[MB_FUNC_HANDLERS_MAX] =
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_RTU_ENABLED > 0
 mb_err_enum
-mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_init_rtu(mb_instance* inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, FALSE, slv_addr, port_obj, baud, parity);
 }
@@ -143,7 +143,7 @@ mb_init_rtu(mb_instance* inst, mb_rtu_tr* transport, UCHAR slv_addr, mb_port_bas
 
 #if MB_ASCII_ENABLED > 0
 mb_err_enum
-mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_init_ascii(mb_instance* inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
 
     return mb_init(inst, (void*)transport, MB_ASCII, FALSE, slv_addr, port_obj, baud, parity);
@@ -156,7 +156,7 @@ mb_init_ascii(mb_instance* inst, mb_ascii_tr* transport, UCHAR slv_addr, mb_port
 
 #if MB_RTU_ENABLED > 0
 mb_err_enum
-mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, TRUE, 0, port_obj, baud, parity);
 }
@@ -164,7 +164,7 @@ mb_mstr_init_rtu(mb_instance* inst, mb_rtu_tr* transport, mb_port_base_struct * 
 
 #if MB_ASCII_ENABLED > 0
 mb_err_enum
-mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_mstr_init_ascii(mb_instance* inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_ASCII, TRUE, 0, port_obj, baud, parity);
 }
@@ -199,7 +199,7 @@ mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is
     {
         inst->trmt = (mb_tr_mtab *)&mb_rtu_mtab;
         _MB_PDU_SND_LEN = &(transport->rtu.snd_pdu_len);
-        status = eMBRTUInit((mb_rtu_tr*)transport, is_master, _MB_ADDR, baud, parity);
+        status = mb_rtu_init((mb_rtu_tr_struct*)transport, is_master, _MB_ADDR, baud, parity);
         break;
     }
 #endif //RTU
@@ -208,7 +208,7 @@ mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is
     {
         inst->trmt = (mb_tr_mtab *)&mb_ascii_mtab;
         _MB_PDU_SND_LEN = &(transport->ascii.snd_pdu_len);
-        status = eMBASCIIInit((mb_ascii_tr*)transport, is_master, _MB_ADDR, baud, parity);
+        status = mb_ascii_init((mb_ascii_tr_struct*)transport, is_master, _MB_ADDR, baud, parity);
         break;
     }
 #endif//ASCII
@@ -288,7 +288,7 @@ mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKAD
     transport->parent = (void*)(inst);
     int i;
 
-    if (transport->tcpMaster ==  TRUE)
+    if (transport->is_master ==  TRUE)
     {
         _MB_IS_MASTER = TRUE;
         inst->func_handlers = master_handlers;
@@ -298,7 +298,7 @@ mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKAD
         inst->func_handlers = slave_handlers;
     }
 
-    if ((status = eMBTCPDoInit(transport, tcp_port_num, hostaddr, is_master)) != MB_ENOERR)
+    if ((status = mb_tcp_init(transport, tcp_port_num, hostaddr, is_master)) != MB_ENOERR)
     {
         _MB_CURR_STATE = STATE_DISABLED;
     }
@@ -315,7 +315,7 @@ mb_init_tcp(mb_instance* inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKAD
         _MB_ADDR = MB_TCP_PSEUDO_ADDRESS;
         inst->cur_mode = MB_TCP;
         _MB_CURR_STATE = STATE_DISABLED;
-        inst->pdu_snd_len = &(transport->tcp.usSendPDULength);
+        inst->pdu_snd_len = &(transport->tcp.snd_pdu_len);
         //inst->port = (void*) &(((mb_tcp_tr*)transport)->tcp_port);
 
         inst->trmt->get_rx_frm(inst->transport, &_MB_RX_FRAME);

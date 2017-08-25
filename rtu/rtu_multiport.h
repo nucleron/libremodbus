@@ -14,13 +14,13 @@
 //
 //
 //
-//#define mb_rtu_tr* inst, mb_rtu_tr* inst,
-//#define mb_rtu_tr* inst mb_rtu_tr* inst
+//#define mb_rtu_tr_struct* inst, mb_rtu_tr_struct* inst,
+//#define mb_rtu_tr_struct* inst mb_rtu_tr_struct* inst
 //
 //#else
 //
-//#define mb_rtu_tr* inst,
-//#define mb_rtu_tr* inst void
+//#define mb_rtu_tr_struct* inst,
+//#define mb_rtu_tr_struct* inst void
 //#define SERIAL_ARG
 //#define SERIAL_ARG_VOID
 //

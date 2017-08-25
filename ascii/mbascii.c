@@ -66,15 +66,15 @@
 
 const mb_tr_mtab mb_ascii_mtab =
 {
-    .frm_start   = (mb_frm_start_fp)  eMBASCIIStart,
-    .frm_stop    = (mb_frm_stop_fp)   eMBASCIIStop,
-    .frm_send    = (mb_frm_snd_fp)   eMBASCIISend,
-    .frm_rcv     = (mb_frm_rcv_fp)eMBASCIIReceive,
+    .frm_start   = (mb_frm_start_fp)  mb_ascii_start,
+    .frm_stop    = (mb_frm_stop_fp)   mb_ascii_stop,
+    .frm_send    = (mb_frm_snd_fp)   mb_ascii_send,
+    .frm_rcv     = (mb_frm_rcv_fp)mb_ascii_receive,
 
     .get_rx_frm      = NULL,
-    .get_tx_frm      = (mb_get_tx_frm_fp)vMBASCIIMasterGetPDUSndBuf
+    .get_tx_frm      = (mb_get_tx_frm_fp)mb_ascii_get_snd_buf
 #   if MB_MASTER > 0
-    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)xMBASCIIMasterRequestIsBroadcast
+    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)mb_ascii_rq_is_bcast
 #   endif //master
 };
 
@@ -83,15 +83,15 @@ static UCHAR    prvucMBCHAR2BIN(UCHAR ucCharacter           );
 static UCHAR    prvucMBBIN2CHAR(UCHAR byte_val                );
 static UCHAR    prvucMBLRC     (UCHAR * frame_ptr, USHORT len_buf);
 /* ----------------------- Start implementation -----------------------------*/
-mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
     static const mb_port_cb_struct mb_ascii_cb =
     {
-        .byte_rcvd   = (mb_port_cb_fp)xMBASCIIReceiveFSM,
-        .tx_empty    = (mb_port_cb_fp)xMBASCIITransmitFSM,
-        .tmr_expired = (mb_port_cb_fp)xMBASCIITimerT1SExpired
+        .byte_rcvd   = (mb_port_cb_fp)mb_ascii_rcv_fsm,
+        .tx_empty    = (mb_port_cb_fp)mb_ascii_snd_fsm,
+        .tmr_expired = (mb_port_cb_fp)mb_ascii_tmr_1s_expired
     };
 
     (void)slv_addr;
@@ -122,7 +122,7 @@ mb_err_enum eMBASCIIInit(mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULON
     return eStatus;
 }
 
-void eMBASCIIStart(mb_ascii_tr* inst)
+void mb_ascii_start(mb_ascii_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
     mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
@@ -133,7 +133,7 @@ void eMBASCIIStart(mb_ascii_tr* inst)
     (void)mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_READY);
 }
 
-void eMBASCIIStop(mb_ascii_tr* inst)
+void mb_ascii_stop(mb_ascii_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
     mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
@@ -141,7 +141,7 @@ void eMBASCIIStop(mb_ascii_tr* inst)
     EXIT_CRITICAL_SECTION();
 }
 
-mb_err_enum eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
+mb_err_enum mb_ascii_receive(mb_ascii_tr_struct* inst,  UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
@@ -173,7 +173,7 @@ mb_err_enum eMBASCIIReceive(mb_ascii_tr* inst,  UCHAR * rcv_addr_buf, UCHAR ** f
     return eStatus;
 }
 
-mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
+mb_err_enum mb_ascii_send(mb_ascii_tr_struct* inst,  UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     UCHAR           usLRC;
@@ -209,7 +209,7 @@ mb_err_enum eMBASCIISend(mb_ascii_tr* inst,  UCHAR slv_addr, const UCHAR * frame
     return eStatus;
 }
 
-BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
+BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
 {
     BOOL            xNeedPoll = FALSE;
     UCHAR           byte_val;
@@ -280,7 +280,7 @@ BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
             /* Receiver is again in idle state. */
             eRcvState = MB_ASCII_RX_STATE_IDLE;
 
-            /* Notify the caller of eMBASCIIReceive that a new frame
+            /* Notify the caller of mb_ascii_receive that a new frame
              * was received. */
             xNeedPoll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
         }
@@ -324,7 +324,7 @@ BOOL xMBASCIIReceiveFSM(mb_ascii_tr* inst)
     return xNeedPoll;
 }
 
-BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
+BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
 {
     BOOL            xNeedPoll = FALSE;
     UCHAR           byte_val;
@@ -380,7 +380,7 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
         eSndState = MB_ASCII_TX_STATE_NOTIFY;
         break;
 
-    /* Notify the task which called eMBASCIISend that the frame has
+    /* Notify the task which called mb_ascii_send that the frame has
      * been sent. */
     case MB_ASCII_TX_STATE_NOTIFY:
 #if MB_MASTER >0
@@ -430,7 +430,7 @@ BOOL xMBASCIITransmitFSM(mb_ascii_tr* inst)
     return xNeedPoll;
 }
 
-BOOL xMBASCIITimerT1SExpired(mb_ascii_tr* inst)
+BOOL mb_ascii_tmr_1s_expired(mb_ascii_tr_struct* inst)
 {
     BOOL            xNeedPoll = FALSE;
     switch (eRcvState)
@@ -539,7 +539,7 @@ static UCHAR prvucMBLRC(UCHAR * frame_ptr, USHORT len_buf)
 }
 
 /* Get Modbus send PDU's buffer address pointer.*/
-void vMBASCIIMasterGetPDUSndBuf(mb_ascii_tr* inst, UCHAR ** frame_ptr_buf)
+void mb_ascii_get_snd_buf(mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
     *frame_ptr_buf = (UCHAR *) &ucASCIISndBuf[MB_ASCII_SER_PDU_PDU_OFF];
 }
@@ -547,31 +547,31 @@ void vMBASCIIMasterGetPDUSndBuf(mb_ascii_tr* inst, UCHAR ** frame_ptr_buf)
 
 
 /* Get Modbus Master send RTU's buffer address pointer.*/
-void vMBASCIIMasterGetRTUSndBuf(mb_ascii_tr* inst, UCHAR ** frame_ptr_buf)
+void vMBASCIIMasterGetRTUSndBuf(mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
     *frame_ptr_buf = (UCHAR *) ucASCIISndBuf;
 }
 
 /* Set Modbus Master send PDU's buffer length.*/
-void vMBASCIIMasterSetPDUSndLength(mb_ascii_tr* inst, USHORT SendPDULength)
+void mb_ascii_set_snd_len(mb_ascii_tr_struct* inst, USHORT snd_pdu_len)
 {
-    usSendPDULength = SendPDULength;
+    usSendPDULength = snd_pdu_len;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBASCIIMasterGetPDUSndLength(mb_ascii_tr* inst)
+USHORT mb_ascii_get_snd_len(mb_ascii_tr_struct* inst)
 {
     return usSendPDULength;
 }
 
 /* Set Modbus Master current timer mode.*/
-void vMBASCIIMasterSetCurTimerMode(mb_ascii_tr* inst, mb_tmr_mode_enum eMBTimerMode)
+void mb_ascii_set_cur_tmr_mode(mb_ascii_tr_struct* inst, mb_tmr_mode_enum tmr_mode)
 {
-    eCurTimerMode = eMBTimerMode;
+    eCurTimerMode = tmr_mode;
 }
 
 /* The master request is broadcast? */
-BOOL xMBASCIIMasterRequestIsBroadcast(mb_ascii_tr* inst)
+BOOL mb_ascii_rq_is_bcast(mb_ascii_tr_struct* inst)
 {
     return xFrameIsBroadcast;
 }

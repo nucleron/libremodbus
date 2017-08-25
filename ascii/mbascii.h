@@ -71,9 +71,8 @@ typedef enum
 
 typedef struct
 {
-    mb_trans_base_struct                   base;
-	//void                            *parent;
-	//mb_port_ser                serial_port;
+    mb_trans_base_struct            base;
+
 	volatile mb_ascii_tx_state_enum snd_state;
 	volatile mb_ascii_rx_state_enum rcv_state;
 
@@ -90,28 +89,25 @@ typedef struct
 	volatile UCHAR                  mb_lf_char;
 	BOOL                            frame_is_broadcast;
 	BOOL                            is_master;
-	volatile mb_tmr_mode_enum     cur_tmr_mode;
-	//volatile UCHAR                  ucLRC;
-}mb_ascii_tr;
+	volatile mb_tmr_mode_enum       cur_tmr_mode;
+}mb_ascii_tr_struct;
 
 extern const mb_tr_mtab mb_ascii_mtab;
 
-mb_err_enum            eMBASCIIInit                    (mb_ascii_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity);
-void                    eMBASCIIStart                   (mb_ascii_tr* inst                                                                     );
-void                    eMBASCIIStop                    (mb_ascii_tr* inst                                                                     );
-mb_err_enum            eMBASCIIReceive                 (mb_ascii_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf       );
-mb_err_enum            eMBASCIISend                    (mb_ascii_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len        );
-BOOL                    xMBASCIIReceiveFSM              (mb_ascii_tr* inst                                                                     );
-BOOL                    xMBASCIITransmitFSM             (mb_ascii_tr* inst                                                                     );
-BOOL                    xMBASCIITimerT1SExpired         (mb_ascii_tr* inst                                                                     );
+mb_err_enum mb_ascii_init            (mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity);
+void        mb_ascii_start           (mb_ascii_tr_struct* inst                                                                            );
+void        mb_ascii_stop            (mb_ascii_tr_struct* inst                                                                            );
+mb_err_enum mb_ascii_receive         (mb_ascii_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf            );
+mb_err_enum mb_ascii_send            (mb_ascii_tr_struct* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len                       );
+BOOL        mb_ascii_rcv_fsm         (mb_ascii_tr_struct* inst                                                                            );
+BOOL        mb_ascii_snd_fsm         (mb_ascii_tr_struct* inst                                                                            );
+BOOL        mb_ascii_tmr_1s_expired  (mb_ascii_tr_struct* inst                                                                            );
 //master
-void                    vMBASCIIMasterGetPDUSndBuf      (mb_ascii_tr* inst, UCHAR ** frame_ptr_buf                                                  );
-USHORT                  usMBASCIIMasterGetPDUSndLength  (mb_ascii_tr* inst                                                                     );
-void                    vMBASCIIMasterSetPDUSndLength   (mb_ascii_tr* inst, USHORT SendPDULength                                               );
-void                    vMBASCIIMasterSetCurTimerMode   (mb_ascii_tr* inst, mb_tmr_mode_enum eMBTimerMode                                    );
-BOOL                    xMBASCIIMasterRequestIsBroadcast(mb_ascii_tr* inst                                                                     );
-//eMBMasterErrorEventType eMBASCIIMasterGetErrorType      (mb_ascii_tr* inst                                                                     );
-//mb_err_enum     eMBASCIIMasterWaitRequestFinish (void   /*Какого???*/                                                                      );
+void        mb_ascii_get_snd_buf     (mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf                                                    );
+USHORT      mb_ascii_get_snd_len     (mb_ascii_tr_struct* inst                                                                            );
+void        mb_ascii_set_snd_len     (mb_ascii_tr_struct* inst, USHORT snd_pdu_len                                                        );
+void        mb_ascii_set_cur_tmr_mode(mb_ascii_tr_struct* inst, mb_tmr_mode_enum tmr_mode                                                 );
+BOOL        mb_ascii_rq_is_bcast     (mb_ascii_tr_struct* inst                                                                            );
 
 PR_END_EXTERN_C
 #endif

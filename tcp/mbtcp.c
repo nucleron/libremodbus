@@ -28,21 +28,23 @@
  * File: $Id: mbtcp.c,v 1.3 2006/12/07 22:10:34 wolti Exp $
  */
 
-/* ----------------------- System includes ----------------------------------*/
-#include "stdlib.h"
-#include "string.h"
+#include <mb.h>
 
-/* ----------------------- Platform includes --------------------------------*/
-#include "tcp_port.h"
-
-/* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mbconfig.h"
-#include "mbtcp.h"
-#include "mbframe.h"
-#include "mbport.h"
-
-#include "tcp_multiport.h"
+///* ----------------------- System includes ----------------------------------*/
+//#include "stdlib.h"
+//#include "string.h"
+//
+///* ----------------------- Platform includes --------------------------------*/
+//#include "tcp_port.h"
+//
+///* ----------------------- Modbus includes ----------------------------------*/
+//#include "mb.h"
+//#include "mbconfig.h"
+//#include "mbtcp.h"
+//#include "mbframe.h"
+//#include "mbport.h"
+//
+//#include "tcp_multiport.h"
 
 #if MB_TCP_ENABLED > 0
 
@@ -86,24 +88,24 @@
 
 const mb_tr_mtab mb_tcp_mtab =
 {
-    .frm_start   = (mb_frm_start_fp)  eMBTCPStart,
-    .frm_stop    = (mb_frm_stop_fp)   eMBTCPStop,
-    .frm_send    = (mb_frm_snd_fp)   eMBTCPSend,
-    .frm_rcv     = (mb_frm_rcv_fp)eMBTCPReceive,
+    .frm_start   = (mb_frm_start_fp)  mb_tcp_start,
+    .frm_stop    = (mb_frm_stop_fp)   mb_tcp_stop,
+    .frm_send    = (mb_frm_snd_fp)   mb_tcp_send,
+    .frm_rcv     = (mb_frm_rcv_fp)mb_tcp_receive,
 
-    .get_rx_frm      = (mb_get_rx_frm_fp)vMBTCPMasterGetPDURcvBuf,
-    .get_tx_frm      = (mb_get_tx_frm_fp)vMBTCPMasterGetPDUSndBuf
+    .get_rx_frm      = (mb_get_rx_frm_fp)mb_tcp_get_rcv_buf,
+    .get_tx_frm      = (mb_get_tx_frm_fp)mb_tcp_get_snd_buf
 #   if MB_MASTER > 0
-    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)xMBTCPMasterRequestIsBroadcast
+    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)mb_tcp_rq_is_bcast
 #   endif //master
 };
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum
-eMBTCPDoInit(mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL bMaster)
+mb_tcp_init(mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
 {
     mb_err_enum    eStatus = MB_ENOERR;
 
-    if (xMBTCPPortInit(inst->base.port_obj, tcp_port_num,hostaddr, bMaster) == FALSE)
+    if (xMBTCPPortInit(inst->base.port_obj, tcp_port_num,hostaddr, is_master) == FALSE)
     {
         eStatus = MB_EPORTERR;
     }
@@ -111,19 +113,19 @@ eMBTCPDoInit(mb_tcp_tr* inst, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL bM
 }
 
 void
-eMBTCPStart(mb_tcp_tr* inst)
+mb_tcp_start(mb_tcp_tr* inst)
 {
 }
 
 void
-eMBTCPStop(mb_tcp_tr* inst)
+mb_tcp_stop(mb_tcp_tr* inst)
 {
     /* Make sure that no more clients are connected. */
     vMBTCPPortDisable(inst->base.port_obj);
 }
 
 mb_err_enum
-eMBTCPReceive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
+mb_tcp_receive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
 {
     mb_err_enum    eStatus = MB_EIO;
     UCHAR          *pucMBTCPFrame;
@@ -155,7 +157,7 @@ eMBTCPReceive(mb_tcp_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USH
 }
 
 mb_err_enum
-eMBTCPSend(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
+mb_tcp_send(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     UCHAR          *pucMBTCPFrame = (UCHAR *) frame_ptr - MB_TCP_FUNC;
@@ -178,9 +180,9 @@ eMBTCPSend(mb_tcp_tr* inst, UCHAR _unused, const UCHAR * frame_ptr, USHORT len)
 
 #if MB_MASTER > 0
 
-void vMBTCPMasterSetPDUSndLength( mb_tcp_tr* inst, USHORT SendPDULength)
+void vMBTCPMasterSetPDUSndLength( mb_tcp_tr* inst, USHORT snd_pdu_len)
 {
-    usSendPDULength = SendPDULength;
+    usSendPDULength = snd_pdu_len;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
@@ -189,17 +191,17 @@ USHORT usMBTCPMasterGetPDUSndLength( mb_tcp_tr* inst)
     return usSendPDULength;
 }
 
-void vMBTCPMasterGetPDUSndBuf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf)
+void mb_tcp_get_snd_buf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf)
 {
     *frame_ptr_buf = inst->tcp_port.aucTCPSndBuf+MB_TCP_FUNC;
 }
 
-void vMBTCPMasterGetPDURcvBuf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf)
+void mb_tcp_get_rcv_buf(mb_tcp_tr* inst, UCHAR ** frame_ptr_buf)
 {
     *frame_ptr_buf = inst->tcp_port.aucTCPRcvBuf+MB_TCP_FUNC;
 }
 
-BOOL xMBTCPMasterRequestIsBroadcast(mb_tcp_tr* inst)
+BOOL mb_tcp_rq_is_bcast(mb_tcp_tr* inst)
 {
     return FALSE; //no broadcasts on tcp
 }

@@ -52,30 +52,30 @@
 
 const mb_tr_mtab mb_rtu_mtab =
 {
-    .frm_start   = (mb_frm_start_fp)  eMBRTUStart,
-    .frm_stop    = (mb_frm_stop_fp)   eMBRTUStop,
-    .frm_send    = (mb_frm_snd_fp)   eMBRTUSend,
-    .frm_rcv     = (mb_frm_rcv_fp)eMBRTUReceive,
+    .frm_start   = (mb_frm_start_fp)  mb_rtu_start,
+    .frm_stop    = (mb_frm_stop_fp)   mb_rtu_stop,
+    .frm_send    = (mb_frm_snd_fp)   mb_rtu_send,
+    .frm_rcv     = (mb_frm_rcv_fp)mb_rtu_receive,
 
     .get_rx_frm      = NULL,
-    .get_tx_frm      = (mb_get_tx_frm_fp)vMBRTUMasterGetPDUSndBuf
+    .get_tx_frm      = (mb_get_tx_frm_fp)mb_rtu_get_snd_buf
 #   if MB_MASTER > 0
-    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)xMBRTUMasterRequestIsBroadcast
+    , .rq_is_broadcast = (mb_mstr_rq_is_bcast_fp)mb_rtu_rq_is_bcast
 #   endif //master
 };
 
 /* ----------------------- Start implementation -----------------------------*/
 mb_err_enum
-eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
+mb_rtu_init(mb_rtu_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     ULONG           usTimerT35_50us;
 
     static const mb_port_cb_struct mb_rtu_cb =
     {
-        .byte_rcvd   = (mb_port_cb_fp)xMBRTUReceiveFSM,
-        .tx_empty    = (mb_port_cb_fp)xMBRTUTransmitFSM,
-        .tmr_expired = (mb_port_cb_fp)xMBRTUTimerT35Expired
+        .byte_rcvd   = (mb_port_cb_fp)mb_rtu_rcv_fsm,
+        .tx_empty    = (mb_port_cb_fp)mb_rtu_snd_fsm,
+        .tmr_expired = (mb_port_cb_fp)mb_rtu_tmr_35_expired
     };
 
     (void)slv_addr;
@@ -127,7 +127,7 @@ eMBRTUInit(mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_
 }
 
 void
-eMBRTUStart(mb_rtu_tr* inst)
+mb_rtu_start(mb_rtu_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
     /* Initially the receiver is in the state MB_RTU_RX_STATE_INIT. we start
@@ -143,7 +143,7 @@ eMBRTUStart(mb_rtu_tr* inst)
 }
 
 void
-eMBRTUStop(mb_rtu_tr* inst)
+mb_rtu_stop(mb_rtu_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
     mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
@@ -152,7 +152,7 @@ eMBRTUStop(mb_rtu_tr* inst)
 }
 
 mb_err_enum
-eMBRTUReceive(mb_rtu_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
+mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf)
 {
     //BOOL            xFrameReceived = FALSE;
     mb_err_enum    eStatus = MB_ENOERR;
@@ -162,7 +162,7 @@ eMBRTUReceive(mb_rtu_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USH
 
     /* Length and CRC check */
     if ((usRcvBufferPos >= MB_RTU_SER_PDU_SIZE_MIN)
-            && (usMBCRC16((UCHAR *) ucRTURcvBuf, usRcvBufferPos) == 0))
+            && (mb_crc16((UCHAR *) ucRTURcvBuf, usRcvBufferPos) == 0))
     {
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there.
@@ -189,7 +189,7 @@ eMBRTUReceive(mb_rtu_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USH
 }
 
 mb_err_enum
-eMBRTUSend(mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
+mb_rtu_send(mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
 {
     mb_err_enum    eStatus = MB_ENOERR;
     USHORT          usCRC16;
@@ -211,7 +211,7 @@ eMBRTUSend(mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
         usSndBufferCount += len;
 
         /* Calculate CRC16 checksum for Modbus-Serial-Line-PDU. */
-        usCRC16 = usMBCRC16((UCHAR *) pucSndBufferCur, usSndBufferCount);
+        usCRC16 = mb_crc16((UCHAR *) pucSndBufferCur, usSndBufferCount);
         ucRTUSndBuf[usSndBufferCount++] = (UCHAR)(usCRC16 & 0xFF);
         ucRTUSndBuf[usSndBufferCount++] = (UCHAR)(usCRC16 >> 8);
 
@@ -228,7 +228,7 @@ eMBRTUSend(mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len)
 }
 
 BOOL
-xMBRTUReceiveFSM(mb_rtu_tr* inst)
+mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
 {
     BOOL            xTaskNeedSwitch = FALSE;
     UCHAR           byte_val;
@@ -295,7 +295,7 @@ xMBRTUReceiveFSM(mb_rtu_tr* inst)
 }
 
 BOOL
-xMBRTUTransmitFSM(mb_rtu_tr* inst)
+mb_rtu_snd_fsm(mb_rtu_tr_struct* inst)
 {
     BOOL            xNeedPoll = FALSE;
 
@@ -362,7 +362,7 @@ xMBRTUTransmitFSM(mb_rtu_tr* inst)
 
 
 BOOL
-xMBRTUTimerT35Expired(mb_rtu_tr* inst)
+mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
 {
     BOOL            xNeedPoll = FALSE;
 
@@ -429,39 +429,39 @@ xMBRTUTimerT35Expired(mb_rtu_tr* inst)
 }
 
 /* Get Modbus Master send PDU's buffer address pointer.*/
-void vMBRTUMasterGetPDUSndBuf(mb_rtu_tr* inst, UCHAR ** frame_ptr_buf)
+void mb_rtu_get_snd_buf(mb_rtu_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
     *frame_ptr_buf = (UCHAR *) &ucRTUSndBuf[MB_RTU_SER_PDU_PDU_OFF];
 }
 
 #if MB_MASTER > 0
 /* Get Modbus send RTU's buffer address pointer.*/
-void vMBMasterGetRTUSndBuf(mb_rtu_tr* inst, UCHAR ** frame_ptr_buf)
+void vMBMasterGetRTUSndBuf(mb_rtu_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
     *frame_ptr_buf = (UCHAR *) ucRTUSndBuf;
 }
 
 
 /* Set Modbus Master send PDU's buffer length.*/
-void vMBRTUMasterSetPDUSndLength(mb_rtu_tr* inst, USHORT SendPDULength)
+void mb_rtu_set_snd_len(mb_rtu_tr_struct* inst, USHORT snd_pdu_len)
 {
-    usSendPDULength = SendPDULength;
+    usSendPDULength = snd_pdu_len;
 }
 
 /* Get Modbus Master send PDU's buffer length.*/
-USHORT usMBRTUMasterGetPDUSndLength(mb_rtu_tr* inst)
+USHORT mb_rtu_get_snd_len(mb_rtu_tr_struct* inst)
 {
     return usSendPDULength;
 }
 
 /* Set Modbus Master current timer mode.*/
-void vMBRTUMasterSetCurTimerMode(mb_rtu_tr* inst, mb_tmr_mode_enum eMBTimerMode)
+void mb_rtu_set_cur_tmr_mode(mb_rtu_tr_struct* inst, mb_tmr_mode_enum tmr_mode)
 {
-    eCurTimerMode = eMBTimerMode;
+    eCurTimerMode = tmr_mode;
 }
 
 /* The master request is broadcast? */
-BOOL xMBRTUMasterRequestIsBroadcast(mb_rtu_tr* inst)
+BOOL mb_rtu_rq_is_bcast(mb_rtu_tr_struct* inst)
 {
     return xFrameIsBroadcast;
 }

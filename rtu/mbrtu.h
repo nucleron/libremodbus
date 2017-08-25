@@ -60,9 +60,7 @@ typedef enum
 
 typedef struct
 {
-    mb_trans_base_struct                  base;
-    //void                           *parent;
-    //mb_port_ser               serial_port;
+    mb_trans_base_struct           base;
     volatile mb_rtu_snd_state_enum snd_state;
     volatile mb_rtu_rcv_state_enum rcv_state;
 
@@ -78,28 +76,23 @@ typedef struct
     BOOL                           is_master;
     BOOL                           frame_is_broadcast;
     volatile mb_tmr_mode_enum    cur_tmr_mode;
-} mb_rtu_tr;
+} mb_rtu_tr_struct;
 
 extern const mb_tr_mtab mb_rtu_mtab;
 
-mb_err_enum            eMBRTUInit                    (mb_rtu_tr* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity);
-void                    eMBRTUStart                   (mb_rtu_tr* inst                                                                     );
-void                    eMBRTUStop                    (mb_rtu_tr* inst                                                                     );
-mb_err_enum            eMBRTUReceive                 (mb_rtu_tr* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf       );
-mb_err_enum            eMBRTUSend                    (mb_rtu_tr* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len        );
-BOOL                    xMBRTUReceiveFSM              (mb_rtu_tr* inst                                                                     );
-BOOL                    xMBRTUTransmitFSM             (mb_rtu_tr* inst                                                                     );
-BOOL                    xMBRTUTimerT15Expired         (mb_rtu_tr* inst                                                                     );
-BOOL                    xMBRTUTimerT35Expired         (mb_rtu_tr* inst                                                                     );
-//master
-void                    vMBRTUMasterGetPDUSndBuf      (mb_rtu_tr* inst, UCHAR ** frame_ptr_buf                                                  );
-USHORT                  usMBRTUMasterGetPDUSndLength  (mb_rtu_tr* inst                                                                     );
-void                    vMBRTUMasterSetPDUSndLength   (mb_rtu_tr* inst, USHORT SendPDULength                                               );
-void                    vMBRTUMasterSetCurTimerMode   (mb_rtu_tr* inst, mb_tmr_mode_enum eMBTimerMode                                    );
-BOOL                    xMBRTUMasterRequestIsBroadcast(mb_rtu_tr* inst                                                                     );
-//eMBMasterErrorEventType eMBRTUMasterGetErrorType      (mb_rtu_tr* inst                                                                     );
-mb_err_enum     eMBRTUMasterWaitRequestFinish (void /*Какого ???*/                                                                     );
-
+mb_err_enum mb_rtu_init            (mb_rtu_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity);
+void        mb_rtu_start           (mb_rtu_tr_struct* inst                                                                            );
+void        mb_rtu_stop            (mb_rtu_tr_struct* inst                                                                            );
+mb_err_enum mb_rtu_receive         (mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT * len_buf            );
+mb_err_enum mb_rtu_send            (mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR * frame_ptr, USHORT len                       );
+BOOL        mb_rtu_rcv_fsm         (mb_rtu_tr_struct* inst                                                                            );
+BOOL        mb_rtu_snd_fsm         (mb_rtu_tr_struct* inst                                                                            );
+BOOL        mb_rtu_tmr_35_expired  (mb_rtu_tr_struct* inst                                                                            );
+void        mb_rtu_get_snd_buf     (mb_rtu_tr_struct* inst, UCHAR ** frame_ptr_buf                                                    );
+USHORT      mb_rtu_get_snd_len     (mb_rtu_tr_struct* inst                                                                            );
+void        mb_rtu_set_snd_len     (mb_rtu_tr_struct* inst, USHORT snd_pdu_len                                                        );
+void        mb_rtu_set_cur_tmr_mode(mb_rtu_tr_struct* inst, mb_tmr_mode_enum tmr_mode                                                 );
+BOOL        mb_rtu_rq_is_bcast     (mb_rtu_tr_struct* inst                                                                            );
 #ifdef __cplusplus
 PR_END_EXTERN_C
 #endif
