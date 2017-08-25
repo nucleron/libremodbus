@@ -66,16 +66,16 @@ PR_BEGIN_EXTERN_C
  * ucBits[2] = {0, 0};
  *
  * // Set bit 4 to 1 (read: set 1 bit starting at bit offset 4 to value 1)
- * xMBUtilSetBits(ucBits, 4, 1, 1);
+ * mb_util_set_bits(ucBits, 4, 1, 1);
  *
  * // Set bit 7 to 1 and bit 8 to 0.
- * xMBUtilSetBits(ucBits, 7, 2, 0x01);
+ * mb_util_set_bits(ucBits, 7, 2, 0x01);
  *
  * // Set bits 8 - 11 to 0x05 and bits 12 - 15 to 0x0A;
- * xMBUtilSetBits(ucBits, 8, 8, 0x5A);
+ * mb_util_set_bits(ucBits, 8, 8, 0x5A);
  * \endcode
  */
-void xMBUtilSetBits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num, UCHAR ucValues);
+void mb_util_set_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num, UCHAR ucValues);
 
 /*! \brief Function to read bits in a byte buffer.
  *

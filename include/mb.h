@@ -404,7 +404,7 @@ mb_err_enum mb_reg_holding_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num, 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Coil Register</em> value is
  *   read or written by the protocol stack. If you are going to use
- *   this function you might use the functions xMBUtilSetBits() and
+ *   this function you might use the functions mb_util_set_bits() and
  *   mb_util_get_bits() for working with bitfields.
  *
  * \param reg_buff The bits are packed in bytes where the first coil
@@ -440,7 +440,7 @@ mb_err_enum mb_reg_coils_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT coil_num, m
  *   read by the protocol stack.
  *
  * If you are going to use his function you might use the functions
- * xMBUtilSetBits() and mb_util_get_bits() for working with bitfields.
+ * mb_util_set_bits() and mb_util_get_bits() for working with bitfields.
  *
  * \param reg_buff The buffer should be updated with the current
  *   coil values. The first discrete input starting at \c reg_addr must be

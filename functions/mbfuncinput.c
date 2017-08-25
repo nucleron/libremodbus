@@ -46,7 +46,7 @@ mb_exception_enum
 mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
-    USHORT          usRegCount;
+    USHORT          reg_cnt;
     UCHAR          *frame_cur;
 
     mb_exception_enum    status = MB_EX_NONE;
@@ -58,14 +58,14 @@ mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
         reg_addr |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
         reg_addr++;
 
-        usRegCount = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_REGCNT_OFF] << 8);
-        usRegCount |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_REGCNT_OFF + 1]);
+        reg_cnt = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_REGCNT_OFF] << 8);
+        reg_cnt |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_REGCNT_OFF + 1]);
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-        if ((usRegCount >= 1)
-            && (usRegCount < MB_PDU_FUNC_READ_REGCNT_MAX))
+        if ((reg_cnt >= 1)
+            && (reg_cnt < MB_PDU_FUNC_READ_REGCNT_MAX))
         {
             /* Set the current PDU data pointer to the beginning. */
             frame_cur = &frame_ptr[MB_PDU_FUNC_OFF];
@@ -76,11 +76,11 @@ mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
             *len_buf += 1;
 
             /* Second byte in the response contain the number of bytes. */
-            *frame_cur++ = (UCHAR)(usRegCount * 2);
+            *frame_cur++ = (UCHAR)(reg_cnt * 2);
             *len_buf += 1;
 
             reg_status =
-                mb_reg_input_cb(frame_cur, reg_addr, usRegCount);
+                mb_reg_input_cb(frame_cur, reg_addr, reg_cnt);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
@@ -89,7 +89,7 @@ mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
             }
             else
             {
-                *len_buf += usRegCount * 2;
+                *len_buf += reg_cnt * 2;
             }
         }
         else

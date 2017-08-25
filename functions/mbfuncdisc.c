@@ -34,7 +34,7 @@ mb_exception_enum
 mb_fn_read_discrete_inp(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
-    USHORT          usDiscreteCnt;
+    USHORT          discrete_cnt;
     UCHAR           byte_num;
     UCHAR          *frame_cur;
 
@@ -47,14 +47,14 @@ mb_fn_read_discrete_inp(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
         reg_addr |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF + 1]);
         reg_addr++;
 
-        usDiscreteCnt = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF] << 8);
-        usDiscreteCnt |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF + 1]);
+        discrete_cnt = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF] << 8);
+        discrete_cnt |= (USHORT)(frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF + 1]);
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-        if ((usDiscreteCnt >= 1) &&
-            (usDiscreteCnt < MB_PDU_FUNC_READ_DISCCNT_MAX))
+        if ((discrete_cnt >= 1) &&
+            (discrete_cnt < MB_PDU_FUNC_READ_DISCCNT_MAX))
         {
             /* Set the current PDU data pointer to the beginning. */
             frame_cur = &frame_ptr[MB_PDU_FUNC_OFF];
@@ -66,19 +66,19 @@ mb_fn_read_discrete_inp(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 
             /* Test if the quantity of coils is a multiple of 8. If not last
              * byte is only partially field with unused coils set to zero. */
-            if ((usDiscreteCnt & 0x0007) != 0)
+            if ((discrete_cnt & 0x0007) != 0)
             {
-                byte_num = (UCHAR) (usDiscreteCnt / 8 + 1);
+                byte_num = (UCHAR) (discrete_cnt / 8 + 1);
             }
             else
             {
-                byte_num = (UCHAR) (usDiscreteCnt / 8);
+                byte_num = (UCHAR) (discrete_cnt / 8);
             }
             *frame_cur++ = byte_num;
             *len_buf += 1;
 
             reg_status =
-                mb_reg_discrete_cb(frame_cur, reg_addr, usDiscreteCnt);
+                mb_reg_discrete_cb(frame_cur, reg_addr, discrete_cnt);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
