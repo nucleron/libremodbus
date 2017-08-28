@@ -9,7 +9,7 @@ This fork is based o @armink variant of freemodbus.
  * Support for master in ASCII mode.
 
 # Warning!!! 
- * Modbus TCP master anad slave were not tested and may contain miltiple errors!
+ * Modbus TCP master and slave were not tested and may contain miltiple errors!
  * Multiple holding register write functions were not ested and may contain errors!
 
 
