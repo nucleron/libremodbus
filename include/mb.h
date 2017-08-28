@@ -146,10 +146,6 @@ typedef struct
 
 #include <mbfunc.h>
 
-#if MB_MASTER > 0
-#include "mb_master.h"
-#endif
-
 /*! \defgroup modbus Modbus
  * \code #include "mb.h" \endcode
  *
