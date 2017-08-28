@@ -1,7 +1,7 @@
 # libremodbus
 
 A fork of FreeModBus with master and multiport support.
-This fork is based o @armink variant of freemodbus.
+This fork is based o [@armink](https://github.com/armink) [variant](https://github.com/armink/FreeModbus_Slave-Master-RTT-STM32) of freemodbus.
 
 # Differencies from original FreeModbus
  * Master support for RTU, ASCII and we hope for TCP mode.
@@ -15,7 +15,7 @@ This fork is based o @armink variant of freemodbus.
 # Contrubutors in 2016,2017
 
  * Radeon Ww <radeon.w@gmail.com>
- * @shkolnick-kun
+ * [@shkolnick-kun](https://github.com/shkolnick-kun)
 
 
 
