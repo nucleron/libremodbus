@@ -4,15 +4,18 @@ A fork of FreeModBus with master and multiport support.
 This fork is based o @armink variant of freemodbus.
 
 # Differencies from original FreeModbus
- * Master support.
+ * Master support for RTU, ASCII and we hope for TCP mode.
  * Support for multiple instances of ModBus slaves/masters in one project.
- * Support for master in ASCII mode.
+
 
 # Warning!!! 
  * Modbus TCP master and slave were not tested and may contain miltiple errors!
- * Multiple holding register write functions were not ested and may contain errors!
+ * Multiple holding register read+write functions for master/slave were not tested and may contain errors!
 
+# Contrubutors in 2016,2017
 
+ * Radeon Ww <radeon.w@gmail.com>
+ * @shkolnick-kun
 
 
 
