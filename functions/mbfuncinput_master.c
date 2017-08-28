@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (C) 2013 Armink <armink.ztl@gmail.com>
  * All rights reserved.
  *
@@ -27,7 +28,6 @@
  *
  * File: $Id: mbfuncinput_m.c, v 1.60 2013/10/12 14:23:40 Armink Add Master Functions  Exp $
  */
-
 #include <mb.h>
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_REQ_READ_ADDR_OFF            (MB_PDU_DATA_OFF + 0)
@@ -56,11 +56,9 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
  *
  * @return error code
  */
-mb_err_enum
-mb_mstr_rq_read_inp_reg(mb_instance *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_num, LONG timeout)
+mb_err_enum  mb_mstr_rq_read_inp_reg(mb_instance *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_num, LONG timeout)
 {
     UCHAR                 *mb_frame_ptr;
-//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
@@ -70,7 +68,6 @@ mb_mstr_rq_read_inp_reg(mb_instance *inst, UCHAR snd_addr, USHORT reg_addr, USHO
     {
         return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
     inst->master_dst_addr = snd_addr;
     mb_frame_ptr[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_INPUT_REGISTER;
@@ -85,8 +82,7 @@ mb_mstr_rq_read_inp_reg(mb_instance *inst, UCHAR snd_addr, USHORT reg_addr, USHO
     return MB_EX_NONE;
 }
 
-mb_exception_enum
-mb_mstr_fn_read_inp_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     UCHAR          *mb_frame_ptr;
     USHORT          reg_addr;

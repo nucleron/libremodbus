@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *

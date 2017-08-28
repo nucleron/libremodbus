@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *
@@ -28,20 +29,6 @@
  * File: $Id: mbfunccoils.c, v 1.8 2007/02/18 23:47:16 wolti Exp $
  */
 #include <mb.h>
-///* ----------------------- System includes ----------------------------------*/
-//#include <stdlib.h>
-//#include <string.h>
-///* ----------------------- Modbus includes ----------------------------------*/
-//#include <mbconfig.h>
-//#include <mb_types.h>
-//
-//#include <serial_port.h>
-//
-//#include <mbport.h>
-//#include <mbframe.h>
-//#include <mbproto.h>
-//#include <mb.h>
-//#include <mbcrc.h>
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_FUNC_READ_ADDR_OFF           (MB_PDU_DATA_OFF)
 #define MB_PDU_FUNC_READ_COILCNT_OFF        (MB_PDU_DATA_OFF + 2)
@@ -60,14 +47,13 @@
 #define MB_PDU_FUNC_WRITE_MUL_COILCNT_MAX   (0x07B0)
 
 /* ----------------------- Static functions ---------------------------------*/
-mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
+mb_exception_enum  mb_error_to_exception(mb_err_enum error_code);
 
 /* ----------------------- Start implementation -----------------------------*/
 
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
-mb_exception_enum
-mb_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          coil_cnt;
@@ -145,8 +131,7 @@ mb_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 }
 
 #if MB_FUNC_WRITE_COIL_ENABLED > 0
-mb_exception_enum
-mb_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     UCHAR           buf[2];
@@ -199,8 +184,7 @@ mb_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_COILS_ENABLED > 0
-mb_exception_enum
-mb_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          coil_cnt;
@@ -263,7 +247,5 @@ mb_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
     }
     return status;
 }
-
 #endif
-
 #endif

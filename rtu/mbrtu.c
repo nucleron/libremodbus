@@ -1,5 +1,7 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
+ * Copyright (C) 2013 Armink <armink.ztl@gmail.com>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *
@@ -30,26 +32,6 @@
 #include <mb.h>
 #include <mbcrc.h>
 
-//#define inst->snd_state         inst->snd_state
-//#define inst->rcv_state         inst->rcv_state
-//
-//#define inst->rcv_buf       inst->rcv_buf
-//#define inst->snd_buf       inst->snd_buf
-//
-//#define inst->frame_is_broadcast inst->frame_is_broadcast
-//#define inst->cur_tmr_mode     inst->cur_tmr_mode
-//
-//#define inst->is_master         inst->is_master
-//
-//#define inst->snd_buf_cur   inst->snd_buf_cur
-//#define inst->snd_buff_cnt  inst->snd_buff_cnt
-//
-//#define txFrame           inst->txFrame
-//#define rxFrame           inst->rxFrame
-//
-//#define inst->rcv_buf_pos    inst->rcv_buf_pos
-//#define inst->snd_pdu_len   inst->snd_pdu_len
-
 const mb_tr_mtab mb_rtu_mtab =
 {
     .frm_start   = (mb_frm_start_fp) mb_rtu_start,
@@ -65,8 +47,7 @@ const mb_tr_mtab mb_rtu_mtab =
 };
 
 /* ----------------------- Start implementation -----------------------------*/
-mb_err_enum
-mb_rtu_init(mb_rtu_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_rtu_init(mb_rtu_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    status = MB_ENOERR;
     ULONG           tmr_35_50us;
@@ -126,8 +107,7 @@ mb_rtu_init(mb_rtu_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, 
     return status;
 }
 
-void
-mb_rtu_start(mb_rtu_tr_struct* inst)
+void  mb_rtu_start(mb_rtu_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
     /* Initially the receiver is in the state MB_RTU_RX_STATE_INIT. we start
@@ -142,8 +122,7 @@ mb_rtu_start(mb_rtu_tr_struct* inst)
     EXIT_CRITICAL_SECTION();
 }
 
-void
-mb_rtu_stop(mb_rtu_tr_struct* inst)
+void  mb_rtu_stop(mb_rtu_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
     mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
@@ -151,8 +130,7 @@ mb_rtu_stop(mb_rtu_tr_struct* inst)
     EXIT_CRITICAL_SECTION();
 }
 
-mb_err_enum
-mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT *len_buf)
+mb_err_enum  mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_buf, USHORT *len_buf)
 {
     //BOOL            xFrameReceived = FALSE;
     mb_err_enum    status = MB_ENOERR;
@@ -188,8 +166,7 @@ mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR ** frame_ptr_
     return status;
 }
 
-mb_err_enum
-mb_rtu_send(mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR *frame_ptr, USHORT len)
+mb_err_enum  mb_rtu_send(mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR *frame_ptr, USHORT len)
 {
     mb_err_enum    status = MB_ENOERR;
     USHORT          crc16;
@@ -227,8 +204,7 @@ mb_rtu_send(mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR *frame_ptr, USHO
     return status;
 }
 
-BOOL
-mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
+BOOL  mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
 {
     BOOL            task_need_switch = FALSE;
     UCHAR           byte_val;
@@ -294,8 +270,7 @@ mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
     return task_need_switch;
 }
 
-BOOL
-mb_rtu_snd_fsm(mb_rtu_tr_struct* inst)
+BOOL  mb_rtu_snd_fsm(mb_rtu_tr_struct* inst)
 {
     BOOL            need_poll = FALSE;
 
@@ -361,8 +336,7 @@ mb_rtu_snd_fsm(mb_rtu_tr_struct* inst)
 
 
 
-BOOL
-mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
+BOOL  mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
 {
     BOOL            need_poll = FALSE;
 
@@ -402,9 +376,6 @@ mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
         case MB_RTU_TX_STATE_XFWR:
             if (inst->frame_is_broadcast == FALSE)
             {
-                //((mb_instance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
-                //vMBSetErrorType(ERR_EV_ERROR_RESPOND_TIMEOUT); //FIXME pass reference to instance
-                //need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
                 need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
             }
             break;
@@ -435,7 +406,7 @@ void mb_rtu_get_snd_buf(mb_rtu_tr_struct* inst, UCHAR ** frame_ptr_buf)
 }
 
 #if MB_MASTER > 0
-///* Get Modbus send RTU's buffer address pointer.*/
+//* Get Modbus send RTU's buffer address pointer.*/
 //void vMBMasterGetRTUSndBuf(mb_rtu_tr_struct* inst, UCHAR ** frame_ptr_buf)
 //{
 //    *frame_ptr_buf = (UCHAR *) inst->snd_buf;

@@ -1,5 +1,7 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
+ * Copyright (C) 2013 Armink <armink.ztl@gmail.com>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *
@@ -28,36 +30,6 @@
  * File: $Id: mb.c, v 1.28 2010/06/06 13:54:40 wolti Exp $
  */
 #include <mb.h>
-
-//#ifndef MB_PORT_HAS_CLOSE
-//#define MB_PORT_HAS_CLOSE 0
-//#endif
-//
-//#define inst->address       inst->address
-//#define inst->cur_mode  inst->cur_mode
-//#define inst->cur_state inst->cur_state
-//
-//#define inst->trmt->frm_start inst->trmt->frm_start
-//#define inst->trmt->frm_send   inst->trmt->frm_send
-//#define inst->trmt->frm_stop  inst->trmt->frm_stop
-//#define inst->trmt->frm_rcv   inst->trmt->frm_rcv
-//
-//#define inst->trmt->get_rx_frm    inst->trmt->get_rx_frm
-//#define inst->trmt->get_tx_frm    inst->trmt->get_tx_frm
-//
-//#define inst->len         inst->len
-//#define inst->pdu_snd_len inst->pdu_snd_len
-//#define inst->rx_frame    inst->rx_frame
-//#define inst->tx_frame    inst->tx_frame
-//
-//#define inst->pmt->frm_close (inst->pmt->frm_close)
-//#define inst->pmt->evt_post  (inst->pmt->evt_post)
-//#define inst->pmt->evt_get   (inst->pmt->evt_get)
-//
-////master variables
-//#define inst->master_dst_addr inst->master_dst_addr
-//#define inst->master_mode_run     inst->master_mode_run
-
 /* An array of Modbus functions handlers which associates Modbus function
  * codes with implementing functions.
  */
@@ -134,16 +106,14 @@ static mb_fn_handler_struct master_handlers[MB_FUNC_HANDLERS_MAX] =
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_RTU_ENABLED > 0
-mb_err_enum
-mb_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, FALSE, slv_addr, port_obj, baud, parity);
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
-mb_err_enum
-mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
 
     return mb_init(inst, (void*)transport, MB_ASCII, FALSE, slv_addr, port_obj, baud, parity);
@@ -155,16 +125,14 @@ mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, 
 #if MB_MASTER >0
 
 #if MB_RTU_ENABLED > 0
-mb_err_enum
-mb_mstr_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_mstr_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, TRUE, 0, port_obj, baud, parity);
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
-mb_err_enum
-mb_mstr_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_mstr_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_ASCII, TRUE, 0, port_obj, baud, parity);
 }
@@ -182,8 +150,7 @@ mb_err_enum mb_mstr_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp
 #endif //MASTER
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
-mb_err_enum
-mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -229,7 +196,7 @@ mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is
     };
     inst->pmt = (mb_port_mtab_struct *)&mb_serial_mtab;
 
-    inst->trmt->get_tx_frm(inst->transport, (void*)&(inst->tx_frame));      //Можно было прописать сразу.
+    inst->trmt->get_tx_frm(inst->transport, (void*)&(inst->tx_frame));
 
 #if MB_MASTER > 0
     if (is_master == TRUE)
@@ -268,17 +235,12 @@ mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is
             }
         }
     }
-
-    //if(isMaster == TRUE)
-    //vMBMasterOsResInit(); //FIXME: what is it?
-
     return status;
 }
 #endif
 
 #if MB_TCP_ENABLED > 0
-mb_err_enum
-mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
+mb_err_enum  mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -307,17 +269,15 @@ mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKAD
     }
     else
     {
-        //TODO: place const tu mb_ascii.c
         inst->trmt        = (mb_tr_mtab *)&mb_tcp_mtab;
 
         inst->address     = MB_TCP_PSEUDO_ADDRESS;
         inst->cur_mode    = MB_TCP;
         inst->cur_state   = STATE_DISABLED;
         inst->pdu_snd_len = &(transport->tcp.snd_pdu_len);
-        //inst->port = (void*) &(((mb_tcp_tr*)transport)->tcp_port);
 
         inst->trmt->get_rx_frm(inst->transport, &inst->rx_frame);
-        inst->trmt->get_tx_frm(inst->transport, &inst->tx_frame);//Зачем 2 раза???
+        inst->trmt->get_tx_frm(inst->transport, &inst->tx_frame);
 
 #if (MB_PORT_HAS_CLOSE > 0)
 #   define MB_TCP_CLOSE mb_port_ser_close
@@ -355,8 +315,7 @@ mb_close(mb_instance *inst)
     return status;
 }
 
-mb_err_enum
-mb_enable(mb_instance *inst)
+mb_err_enum  mb_enable(mb_instance *inst)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -373,8 +332,7 @@ mb_enable(mb_instance *inst)
     return status;
 }
 
-mb_err_enum
-mb_disable(mb_instance *inst)
+mb_err_enum  mb_disable(mb_instance *inst)
 {
     mb_err_enum    status;
 
@@ -450,8 +408,6 @@ mb_err_enum mb_poll(mb_instance *inst)
 #if MB_MASTER > 0
                 if (inst->master_mode_run)
                 {
-//                    eMBMasterCurErrorType = ERR_EV_ERROR_RECEIVE_DATA;
-//                    (void)inst->pmt->evt_post(inst->port, EV_ERROR_PROCESS);
                     (void)inst->pmt->evt_post(inst->port, EV_MASTER_ERROR_RECEIVE_DATA);
                 }
 #endif // MB_MASTER
@@ -508,8 +464,6 @@ mb_err_enum mb_poll(mb_instance *inst)
             {
                 if (exception != MB_EX_NONE)
                 {
-//                    eMBMasterCurErrorType =  ERR_EV_ERROR_EXECUTE_FUNCTION;
-//                    (void)inst->pmt->evt_post(inst->port, EV_ERROR_PROCESS);
                     (void)inst->pmt->evt_post(inst->port, EV_MASTER_ERROR_EXECUTE_FUNCTION);
                 }
                 else

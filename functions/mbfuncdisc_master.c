@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (C) 2013 Armink <armink.ztl@gmail.com>
  * All rights reserved.
  *
@@ -53,11 +54,9 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
  *
  * @return error code
  */
-mb_err_enum
-mb_mstr_rq_read_discrete_inputs(mb_instance *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num, LONG timeout)
+mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_instance *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num, LONG timeout)
 {
     UCHAR                 *mb_frame_ptr;
-    //mb_err_enum    eErrStatus = MB_ENOERR;
     if (snd_addr > MB_ADDRESS_MAX)
     {
         return MB_EINVAL;
@@ -66,7 +65,6 @@ mb_mstr_rq_read_discrete_inputs(mb_instance *inst, UCHAR snd_addr, USHORT discre
     {
         return MB_EBUSY;
     }
-    // else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME: check
     inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
     inst->master_dst_addr = snd_addr;
     mb_frame_ptr[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
@@ -76,12 +74,10 @@ mb_mstr_rq_read_discrete_inputs(mb_instance *inst, UCHAR snd_addr, USHORT discre
     mb_frame_ptr[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = discrete_num;
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    //eErrStatus = eMBMasterWaitRequestFinish();
     return MB_ENOERR;
 }
 
-mb_exception_enum
-mb_mstr_fn_read_discrete_inputs(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          usDiscreteCnt;
@@ -90,8 +86,6 @@ mb_mstr_fn_read_discrete_inputs(mb_instance *inst, UCHAR *frame_ptr, USHORT *len
 
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
-
-    /* If this request is broadcast, and it's read mode. This request don't need execute. */
     if (inst->trmt->rq_is_broadcast(inst->transport))
     {
         status = MB_EX_NONE;
@@ -144,6 +138,5 @@ mb_mstr_fn_read_discrete_inputs(mb_instance *inst, UCHAR *frame_ptr, USHORT *len
     }
     return status;
 }
-
 #endif
 #endif

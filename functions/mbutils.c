@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *
@@ -28,7 +29,6 @@
  * File: $Id: mbutils.c, v 1.6 2007/02/18 23:49:07 wolti Exp $
  */
 #include <mb.h>
-
 /* ----------------------- Defines ------------------------------------------*/
 #define BITS_UCHAR      8U
 

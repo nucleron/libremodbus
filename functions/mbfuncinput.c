@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *
@@ -41,9 +42,7 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_FUNC_READ_INPUT_ENABLED > 0
-
-mb_exception_enum
-mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          reg_cnt;
@@ -105,5 +104,4 @@ mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
     }
     return status;
 }
-
 #endif

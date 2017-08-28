@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (C) 2013 Armink <armink.ztl@gmail.com>
  * All rights reserved.
  *
@@ -56,7 +57,7 @@
 #define MB_PDU_FUNC_WRITE_MUL_SIZE          (5)
 
 /* ----------------------- Static functions ---------------------------------*/
-mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
+mb_exception_enum  mb_error_to_exception(mb_err_enum error_code);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_MASTER > 0
@@ -72,11 +73,9 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
  *
  * @return error code
  */
-mb_err_enum
-mb_mstr_rq_read_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num , LONG timeout)
+mb_err_enum  mb_mstr_rq_read_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num , LONG timeout)
 {
     UCHAR                 *mb_frame_ptr;
-    //mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
@@ -86,7 +85,6 @@ mb_mstr_rq_read_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHOR
     {
         return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
     inst->master_dst_addr = snd_addr;
     mb_frame_ptr[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_COILS;
@@ -96,12 +94,10 @@ mb_mstr_rq_read_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHOR
     mb_frame_ptr[MB_PDU_REQ_READ_COILCNT_OFF + 1] = coil_num;
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    //eErrStatus = eMBMasterWaitRequestFinish();
     return MB_ENOERR;
 }
 
-mb_exception_enum
-mb_mstr_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     UCHAR          *mb_frame_ptr;
     USHORT          reg_addr;
@@ -181,11 +177,9 @@ mb_mstr_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
  *
  * @see mb_mstr_rq_write_multi_coils
  */
-mb_err_enum
-mb_mstr_rq_write_coil(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_data, LONG timeout)
+mb_err_enum  mb_mstr_rq_write_coil(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_data, LONG timeout)
 {
     UCHAR                 *mb_frame_ptr;
-//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
@@ -199,7 +193,6 @@ mb_mstr_rq_write_coil(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHOR
     {
         return MB_EBUSY;
     }
-    // else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
     inst->master_dst_addr = snd_addr;
     mb_frame_ptr[MB_PDU_FUNC_OFF]                = MB_FUNC_WRITE_SINGLE_COIL;
@@ -209,51 +202,15 @@ mb_mstr_rq_write_coil(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHOR
     mb_frame_ptr[MB_PDU_REQ_WRITE_VALUE_OFF + 1] = coil_data;
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_SIZE);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    //eErrStatus = eMBMasterWaitRequestFinish();
     return MB_ENOERR;
 }
 
-mb_exception_enum
-mb_mstr_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-//    USHORT          reg_addr;
-//    UCHAR           buf[2];
-
     mb_exception_enum    status = MB_EX_NONE;
-//    mb_err_enum    reg_status;
 
     if (*len_buf == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
-//        reg_addr = (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_ADDR_OFF] << 8);
-//        reg_addr |= (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_ADDR_OFF + 1]);
-//        reg_addr++;
-//
-//        if ((frame_ptr[MB_PDU_FUNC_WRITE_VALUE_OFF + 1] == 0x00) &&
-//            ((frame_ptr[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0xFF) ||
-//              (frame_ptr[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0x00)))
-//        {
-//            buf[1] = 0;
-//            if (frame_ptr[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0xFF)
-//            {
-//                buf[0] = 1;
-//            }
-//            else
-//            {
-//                buf[0] = 0;
-//            }
-//            reg_status =
-//                mb_mstr_reg_coils_cb(inst, &buf[0], reg_addr, 1, MB_REG_WRITE);
-//
-//            /* If an error occured convert it into a Modbus exception. */
-//            if (reg_status != MB_ENOERR)
-//            {
-//                status = mb_error_to_exception(reg_status);
-//            }
-//        }
-//        else
-//        {
-//            status = MB_EX_ILLEGAL_DATA_VALUE;
-//        }
         status = MB_EX_NONE;
     }
     else
@@ -282,14 +239,11 @@ mb_mstr_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
  *
  * @see mb_mstr_rq_write_coil
  */
-mb_err_enum
-mb_mstr_rq_write_multi_coils(mb_instance *inst, UCHAR snd_addr,
-                               USHORT coil_addr, USHORT coil_num, UCHAR * data_ptr, LONG timeout)
+mb_err_enum  mb_mstr_rq_write_multi_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num, UCHAR * data_ptr, LONG timeout)
 {
     UCHAR                 *mb_frame_ptr;
     USHORT                 reg_idx = 0;
     UCHAR                  byte_cnt;
-//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
@@ -327,61 +281,17 @@ mb_mstr_rq_write_multi_coils(mb_instance *inst, UCHAR snd_addr,
     }
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_MUL_SIZE_MIN + byte_cnt);
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    //eErrStatus = eMBMasterWaitRequestFinish();
     return MB_ENOERR;
 }
 
 mb_exception_enum
 mb_mstr_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-//    USHORT          reg_addr;
-//    USHORT          coil_cnt;
-//    UCHAR           byte_cnt;
-//    UCHAR           byte_cnt_verify;
-//    UCHAR          *mb_frame_ptr;
-
     mb_exception_enum    status = MB_EX_NONE;
-//    mb_err_enum    reg_status;
 
     /* If this request is broadcast, the *len_buf is not need check. */
     if ((*len_buf == MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
     {
-//    	inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-//        reg_addr = (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF] << 8);
-//        reg_addr |= (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_MUL_ADDR_OFF + 1]);
-//        reg_addr++;
-//
-//        coil_cnt = (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_MUL_COILCNT_OFF] << 8);
-//        coil_cnt |= (USHORT)(frame_ptr[MB_PDU_FUNC_WRITE_MUL_COILCNT_OFF + 1]);
-//
-//        byte_cnt = mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_BYTECNT_OFF];
-//
-//        /* Compute the number of expected bytes in the request. */
-//        if ((coil_cnt & 0x0007) != 0)
-//        {
-//            byte_cnt_verify = (UCHAR)(coil_cnt / 8 + 1);
-//        }
-//        else
-//        {
-//            byte_cnt_verify = (UCHAR)(coil_cnt / 8);
-//        }
-//
-//        if ((coil_cnt >= 1) && (byte_cnt_verify == byte_cnt))
-//        {
-//            reg_status =
-//                mb_mstr_reg_coils_cb(inst, &mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_VALUES_OFF],
-//                               reg_addr, coil_cnt, MB_REG_WRITE);
-//
-//            /* If an error occured convert it into a Modbus exception. */
-//            if (reg_status != MB_ENOERR)
-//            {
-//                status = mb_error_to_exception(reg_status);
-//            }
-//        }
-//        else
-//        {
-//            status = MB_EX_ILLEGAL_DATA_VALUE;
-//        }
         status = MB_EX_NONE;
     }
     else

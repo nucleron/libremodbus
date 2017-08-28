@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *
@@ -35,43 +36,53 @@
 PR_BEGIN_EXTERN_C
 
 #if MB_FUNC_OTHER_REP_SLAVEID_BUF > 0
-    mb_exception_enum mb_fn_report_slv_id(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum mb_fn_report_slv_id(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+//   mb_exception_enum  mb_mstr_fn_report_slv_id                    (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_READ_INPUT_ENABLED > 0
-mb_exception_enum    mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_read_input_reg   (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
-mb_exception_enum    mb_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_read_holding_reg     (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
-mb_exception_enum    mb_fn_write_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_write_holding_reg     (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_write_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
-mb_exception_enum    mb_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_write_multi_holding_reg     (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_READ_COILS_ENABLED > 0
-mb_exception_enum    mb_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_read_coils     (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_WRITE_COIL_ENABLED > 0
-mb_exception_enum    mb_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_write_coil     (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_COILS_ENABLED > 0
-mb_exception_enum    mb_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_write_multi_coils     (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_READ_DISCRETE_INPUTS_ENABLED > 0
-mb_exception_enum    mb_fn_read_discrete_inp(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_read_discrete_inp        (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
-mb_exception_enum    mb_fn_rw_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_fn_rw_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
+mb_exception_enum  mb_mstr_fn_rw_multi_holding_regs  (mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf);
 #endif
 
 PR_END_EXTERN_C

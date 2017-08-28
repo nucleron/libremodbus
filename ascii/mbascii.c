@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *
@@ -27,43 +28,8 @@
  *
  * File: $Id: mbascii.c, v 1.17 2010/06/06 13:47:07 wolti Exp $
  */
-
-/* ----------------------- System includes ----------------------------------*/
-//#include <stdlib.h>
-//#include <string.h>
-/* ----------------------- Modbus includes ----------------------------------*/
 #include <mb.h>
-
-//#include <mbconfig.h>
-//#include <mb_types.h>
-//
-//#include <serial_port.h>
-//
-//#include <mbport.h>
-//#include <mbframe.h>
-//#include <mbascii.h>
-//#include <mb.h>
-//#include <mbcrc.h>
-
 #if MB_ASCII_ENABLED > 0
-
-//#define inst->snd_state         inst->snd_state
-//#define inst->rcv_state         inst->rcv_state
-//
-//#define inst->rcv_buf     inst->rcv_buf
-//#define inst->snd_buf     inst->snd_buf
-//
-//#define inst->rcv_buf_pos    inst->rcv_buf_pos
-//#define inst->byte_pos          inst->byte_pos
-//#define inst->frame_is_broadcast inst->frame_is_broadcast
-//#define inst->cur_tmr_mode     inst->cur_tmr_mode
-//#define inst->snd_pdu_len   inst->snd_pdu_len
-//#define inst->snd_buf_cur   inst->snd_buf_cur
-//#define inst->snd_buf_cnt  inst->snd_buf_cnt
-//
-//#define inst->is_master       inst->is_master
-//#define inst->mb_lf_char   inst->mb_lf_char
-
 const mb_tr_mtab mb_ascii_mtab =
 {
     .frm_start   = (mb_frm_start_fp)  mb_ascii_start,
@@ -79,11 +45,11 @@ const mb_tr_mtab mb_ascii_mtab =
 };
 
 /* ----------------------- Static functions ---------------------------------*/
-static UCHAR    mb_char2bin(UCHAR char_val                );
-static UCHAR    mb_bin2char(UCHAR byte_val                   );
+static UCHAR    mb_char2bin(UCHAR char_val                  );
+static UCHAR    mb_bin2char(UCHAR byte_val                  );
 static UCHAR    mb_lrc     (UCHAR *frame_ptr, USHORT len_buf);
 /* ----------------------- Start implementation -----------------------------*/
-mb_err_enum mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_addr, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -115,7 +81,6 @@ mb_err_enum mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_ad
 
     inst->rcv_state =  MB_ASCII_RX_STATE_IDLE;
     inst->snd_state = MB_ASCII_TX_STATE_IDLE;
-    //inst->serial_port.parent = (void*)(inst);
 
     EXIT_CRITICAL_SECTION();
 

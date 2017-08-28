@@ -1,5 +1,6 @@
 /*
  * FreeModbus Libary: A portable Modbus implementation for Modbus ASCII/RTU.
+ * Copyright (c) 2016, 2017 Nucleron R&D LLC <main@nucleron.ru>
  * Copyright (c) 2006 Christian Walter <wolti@sil.at>
  * All rights reserved.
  *
@@ -60,8 +61,7 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
 
-mb_exception_enum
-mb_fn_write_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_write_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT            reg_addr;
     mb_exception_enum status = MB_EX_NONE;
@@ -93,8 +93,7 @@ mb_fn_write_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
-mb_exception_enum
-mb_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          reg_cnt;
@@ -153,8 +152,7 @@ mb_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_b
 
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
 
-mb_exception_enum
-mb_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          reg_cnt;
@@ -218,8 +216,7 @@ mb_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
 
-mb_exception_enum
-mb_fn_rw_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_rw_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_rd_addr;
     USHORT          reg_rd_cnt;
