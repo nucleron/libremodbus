@@ -72,7 +72,7 @@ mb_exception_enum  mb_error_to_exception(mb_err_enum error_code);
  *
  * @return error code
  */
-mb_err_enum  mb_mstr_rq_read_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num , LONG timeout)
+mb_err_enum  mb_mstr_rq_read_coils(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num , LONG timeout)
 {
     UCHAR                 *mb_frame_ptr;
 
@@ -96,7 +96,7 @@ mb_err_enum  mb_mstr_rq_read_coils(mb_instance *inst, UCHAR snd_addr, USHORT coi
     return MB_ENOERR;
 }
 
-mb_exception_enum  mb_mstr_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     UCHAR          *mb_frame_ptr;
     USHORT          reg_addr;
@@ -176,7 +176,7 @@ mb_exception_enum  mb_mstr_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, US
  *
  * @see mb_mstr_rq_write_multi_coils
  */
-mb_err_enum  mb_mstr_rq_write_coil(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_data, LONG timeout)
+mb_err_enum  mb_mstr_rq_write_coil(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_data, LONG timeout)
 {
     UCHAR                 *mb_frame_ptr;
 
@@ -204,7 +204,7 @@ mb_err_enum  mb_mstr_rq_write_coil(mb_instance *inst, UCHAR snd_addr, USHORT coi
     return MB_ENOERR;
 }
 
-mb_exception_enum  mb_mstr_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_write_coil(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     mb_exception_enum    status = MB_EX_NONE;
 
@@ -238,7 +238,7 @@ mb_exception_enum  mb_mstr_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, US
  *
  * @see mb_mstr_rq_write_coil
  */
-mb_err_enum  mb_mstr_rq_write_multi_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num, UCHAR * data_ptr, LONG timeout)
+mb_err_enum  mb_mstr_rq_write_multi_coils(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num, UCHAR * data_ptr, LONG timeout)
 {
     UCHAR                 *mb_frame_ptr;
     USHORT                 reg_idx = 0;
@@ -284,7 +284,7 @@ mb_err_enum  mb_mstr_rq_write_multi_coils(mb_instance *inst, UCHAR snd_addr, USH
 }
 
 mb_exception_enum
-mb_mstr_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_mstr_fn_write_multi_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     mb_exception_enum    status = MB_EX_NONE;
 

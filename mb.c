@@ -106,14 +106,14 @@ static mb_fn_handler_struct master_handlers[MB_FUNC_HANDLERS_MAX] =
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_RTU_ENABLED > 0
-mb_err_enum  mb_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init_rtu(mb_inst_struct *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, FALSE, slv_addr, port_obj, baud, parity);
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
-mb_err_enum  mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init_ascii(mb_inst_struct *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
 
     return mb_init(inst, (void*)transport, MB_ASCII, FALSE, slv_addr, port_obj, baud, parity);
@@ -125,14 +125,14 @@ mb_err_enum  mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCH
 #if MB_MASTER >0
 
 #if MB_RTU_ENABLED > 0
-mb_err_enum  mb_mstr_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_mstr_init_rtu(mb_inst_struct *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, TRUE, 0, port_obj, baud, parity);
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
-mb_err_enum  mb_mstr_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_mstr_init_ascii(mb_inst_struct *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_ASCII, TRUE, 0, port_obj, baud, parity);
 }
@@ -140,7 +140,7 @@ mb_err_enum  mb_mstr_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport
 #endif
 
 #if MB_TCP_ENABLED > 0
-mb_err_enum mb_mstr_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr)
+mb_err_enum mb_mstr_init_tcp(mb_inst_struct *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr)
 {
     return mb_init_tcp(inst, transport, tcp_port_num, hostaddr, TRUE);
 }
@@ -150,7 +150,7 @@ mb_err_enum mb_mstr_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp
 #endif //MASTER
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
-mb_err_enum  mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init(mb_inst_struct *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -223,7 +223,7 @@ mb_err_enum  mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum 
 
         if (status == MB_ENOERR)
         {
-            if (!mb_port_ser_evt_init((mb_port_ser*)inst->port))
+            if (!mb_port_ser_evt_init((mb_port_ser_struct*)inst->port))
             {
                 /* port dependent event module initalization failed. */
                 status = MB_EPORTERR;
@@ -240,7 +240,7 @@ mb_err_enum  mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum 
 #endif
 
 #if MB_TCP_ENABLED > 0
-mb_err_enum  mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
+mb_err_enum  mb_init_tcp(mb_inst_struct *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -297,7 +297,7 @@ mb_err_enum  mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_por
 #endif
 
 mb_err_enum
-mb_close(mb_instance *inst)
+mb_close(mb_inst_struct *inst)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -315,7 +315,7 @@ mb_close(mb_instance *inst)
     return status;
 }
 
-mb_err_enum  mb_enable(mb_instance *inst)
+mb_err_enum  mb_enable(mb_inst_struct *inst)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -332,7 +332,7 @@ mb_err_enum  mb_enable(mb_instance *inst)
     return status;
 }
 
-mb_err_enum  mb_disable(mb_instance *inst)
+mb_err_enum  mb_disable(mb_inst_struct *inst)
 {
     mb_err_enum    status;
 
@@ -353,7 +353,7 @@ mb_err_enum  mb_disable(mb_instance *inst)
     return status;
 }
 
-mb_err_enum mb_poll(mb_instance *inst)
+mb_err_enum mb_poll(mb_inst_struct *inst)
 {
     static UCHAR             rcv_addr;
     static UCHAR             func_code;
@@ -486,7 +486,7 @@ mb_err_enum mb_poll(mb_instance *inst)
                     }
                     if ((inst->cur_mode == MB_ASCII) && MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS)
                     {
-                        mb_port_ser_tmr_delay((mb_port_ser *)inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS);///WTF?????????
+                        mb_port_ser_tmr_delay((mb_port_ser_struct *)inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS);///WTF?????????
                     }
                     status = inst->trmt->frm_send(inst->transport, inst->address, (UCHAR*)(inst->tx_frame), inst->len);///Where status is used?
                 }

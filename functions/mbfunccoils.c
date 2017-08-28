@@ -53,7 +53,7 @@ mb_exception_enum  mb_error_to_exception(mb_err_enum error_code);
 
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
-mb_exception_enum  mb_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          coil_cnt;
@@ -131,7 +131,7 @@ mb_exception_enum  mb_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT 
 }
 
 #if MB_FUNC_WRITE_COIL_ENABLED > 0
-mb_exception_enum  mb_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_write_coil(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     UCHAR           buf[2];
@@ -184,7 +184,7 @@ mb_exception_enum  mb_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT 
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_COILS_ENABLED > 0
-mb_exception_enum  mb_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_write_multi_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          coil_cnt;

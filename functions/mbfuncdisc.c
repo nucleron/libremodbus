@@ -32,7 +32,7 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 #if MB_FUNC_READ_COILS_ENABLED > 0
 
 mb_exception_enum
-mb_fn_read_discrete_inp(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_fn_read_discrete_inp(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          discrete_cnt;

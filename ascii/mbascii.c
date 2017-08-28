@@ -70,11 +70,11 @@ mb_err_enum  mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_a
     ENTER_CRITICAL_SECTION();
     inst->mb_lf_char = MB_ASCII_DEFAULT_LF;
 
-    if (mb_port_ser_init((mb_port_ser *)inst->base.port_obj, baud, 7, parity) != TRUE)
+    if (mb_port_ser_init((mb_port_ser_struct *)inst->base.port_obj, baud, 7, parity) != TRUE)
     {
         status = MB_EPORTERR;
     }
-    else if (mb_port_ser_tmr_init((mb_port_ser *)inst->base.port_obj, MB_ASCII_TIMEOUT_SEC * 20000UL) != TRUE)
+    else if (mb_port_ser_tmr_init((mb_port_ser_struct *)inst->base.port_obj, MB_ASCII_TIMEOUT_SEC * 20000UL) != TRUE)
     {
         status = MB_EPORTERR;
     }
@@ -90,19 +90,19 @@ mb_err_enum  mb_ascii_init(mb_ascii_tr_struct* inst, BOOL is_master, UCHAR slv_a
 void mb_ascii_start(mb_ascii_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
-    mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+    mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
     inst->rcv_state = MB_ASCII_RX_STATE_IDLE;
     EXIT_CRITICAL_SECTION();
 
     /* No special startup required for ASCII. */
-    (void)mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_READY);
+    (void)mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_READY);
 }
 
 void mb_ascii_stop(mb_ascii_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
-    mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
-    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, FALSE, FALSE);
+    mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
     EXIT_CRITICAL_SECTION();
 }
 
@@ -164,7 +164,7 @@ mb_err_enum mb_ascii_send(mb_ascii_tr_struct* inst,  UCHAR slv_addr, const UCHAR
 
         /* Activate the transmitter. */
         inst->snd_state = MB_ASCII_TX_STATE_START;
-        mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE);
+        mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, FALSE, TRUE);
     }
     else
     {
@@ -182,7 +182,7 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
 
     assert((inst->snd_state == MB_ASCII_TX_STATE_IDLE)|| (inst->snd_state == MB_ASCII_TX_STATE_XFWR));
 
-    (void)mb_port_ser_get_byte((mb_port_ser *)inst->base.port_obj, (CHAR *)&byte_val);
+    (void)mb_port_ser_get_byte((mb_port_ser_struct *)inst->base.port_obj, (CHAR *)&byte_val);
     switch (inst->rcv_state)
     {
     /* A new character is received. If the character is a ':' the input
@@ -192,7 +192,7 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
      */
     case MB_ASCII_RX_STATE_RCV:
         /* Enable timer for character timeout. */
-        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
         if (byte_val == ':')
         {
             /* Empty receive buffer. */
@@ -223,7 +223,7 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
                      * a resonable implementation. */
                     inst->rcv_state = MB_ASCII_RX_STATE_IDLE;
                     /* Disable previously activated timer because of error state. */
-                    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+                    mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
                 }
                 break;
 
@@ -241,13 +241,13 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
         {
             /* Disable character timeout timer because all characters are
              * received. */
-            mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+            mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
             /* Receiver is again in idle state. */
             inst->rcv_state = MB_ASCII_RX_STATE_IDLE;
 
             /* Notify the caller of mb_ascii_receive that a new frame
              * was received. */
-            need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
+            need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_FRAME_RECEIVED);
         }
         else if (byte_val == ':')
         {
@@ -257,7 +257,7 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
             inst->rcv_state = MB_ASCII_RX_STATE_RCV;
 
             /* Enable timer for character timeout. */
-            mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+            mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
         }
         else
         {
@@ -272,12 +272,12 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
 #if MB_MASTER > 0
             if (inst->is_master == TRUE)
             {
-                mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+                mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
                 inst->snd_state = MB_ASCII_TX_STATE_IDLE;
             }
 #endif
             /* Enable timer for character timeout. */
-            mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+            mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
             /* Reset the input buffers to store the frame. */
             inst->rcv_buf_pos = 0;;
             inst->byte_pos = BYTE_HIGH_NIBBLE;
@@ -301,7 +301,7 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
      * the character ':'. */
     case MB_ASCII_TX_STATE_START:
         byte_val = ':';
-        mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)byte_val);
+        mb_port_ser_put_byte((mb_port_ser_struct *)inst->base.port_obj, (CHAR)byte_val);
         inst->snd_state = MB_ASCII_TX_STATE_DATA;
         inst->byte_pos = BYTE_HIGH_NIBBLE;
         break;
@@ -317,13 +317,13 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
             {
             case BYTE_HIGH_NIBBLE:
                 byte_val = mb_bin2char((UCHAR)(*inst->snd_buf_cur >> 4));
-                mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR) byte_val);
+                mb_port_ser_put_byte((mb_port_ser_struct *)inst->base.port_obj, (CHAR) byte_val);
                 inst->byte_pos = BYTE_LOW_NIBBLE;
                 break;
 
             case BYTE_LOW_NIBBLE:
                 byte_val = mb_bin2char((UCHAR)(*inst->snd_buf_cur & 0x0F));
-                mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)byte_val);
+                mb_port_ser_put_byte((mb_port_ser_struct *)inst->base.port_obj, (CHAR)byte_val);
                 inst->snd_buf_cur++;
                 inst->byte_pos = BYTE_HIGH_NIBBLE;
                 inst->snd_buf_cnt--;
@@ -332,14 +332,14 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
         }
         else
         {
-            mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, MB_ASCII_DEFAULT_CR);
+            mb_port_ser_put_byte((mb_port_ser_struct *)inst->base.port_obj, MB_ASCII_DEFAULT_CR);
             inst->snd_state = MB_ASCII_TX_STATE_END;
         }
         break;
 
     /* Finish the frame by sending a LF character. */
     case MB_ASCII_TX_STATE_END:
-        mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)inst->mb_lf_char);
+        mb_port_ser_put_byte((mb_port_ser_struct *)inst->base.port_obj, (CHAR)inst->mb_lf_char);
         /* We need another state to make sure that the CR character has
          * been sent. */
         inst->snd_state = MB_ASCII_TX_STATE_NOTIFY;
@@ -355,17 +355,17 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
             inst->frame_is_broadcast = (inst->snd_buf[MB_ASCII_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
-            mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+            mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
             inst->snd_state = MB_ASCII_TX_STATE_XFWR;
             /* If the frame is broadcast , master will enable timer of convert delay,
              * else master will enable timer of respond timeout. */
             if (inst->frame_is_broadcast == TRUE)
             {
-                mb_port_ser_tmr_convert_delay_enable((mb_port_ser *)inst->base.port_obj);
+                mb_port_ser_tmr_convert_delay_enable((mb_port_ser_struct *)inst->base.port_obj);
             }
             else
             {
-                mb_port_ser_tmr_respond_timeout_enable((mb_port_ser *)inst->base.port_obj);
+                mb_port_ser_tmr_respond_timeout_enable((mb_port_ser_struct *)inst->base.port_obj);
             }
 
         }
@@ -373,11 +373,11 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
 #endif
         {
             inst->snd_state = MB_ASCII_TX_STATE_IDLE;
-            need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
+            need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_FRAME_SENT);
 
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
-            mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+            mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
             inst->snd_state = MB_ASCII_TX_STATE_IDLE;
         }
         break;
@@ -386,7 +386,7 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
      * idle state.  */
     case MB_ASCII_TX_STATE_IDLE:
         /* enable receiver/disable transmitter. */
-        mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+        mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
         break;
     default:
         break;
@@ -412,7 +412,7 @@ BOOL mb_ascii_tmr_1s_expired(mb_ascii_tr_struct* inst)
         assert((inst->rcv_state == MB_ASCII_RX_STATE_RCV) || (inst->rcv_state == MB_ASCII_RX_STATE_WAIT_EOF));
         break;
     }
-    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
 
 
 #if MB_MASTER >0
@@ -426,10 +426,10 @@ BOOL mb_ascii_tmr_1s_expired(mb_ascii_tr_struct* inst)
         case MB_ASCII_TX_STATE_XFWR:
             if (inst->frame_is_broadcast == FALSE)
             {
-                //((mb_instance*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
+                //((mb_inst_struct*)(inst->parent))->master_err_cur = ERR_EV_ERROR_RESPOND_TIMEOUT;
                 //vMBSetErrorType(ERR_EV_ERROR_RESPOND_TIMEOUT); //FIXME pass reference to instance
-                //need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_ERROR_PROCESS);
-                need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
+                //need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_ERROR_PROCESS);
+                need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
             }
             break;
         /* Function called in an illegal state. */
@@ -440,11 +440,11 @@ BOOL mb_ascii_tmr_1s_expired(mb_ascii_tr_struct* inst)
         }
         inst->snd_state = MB_ASCII_TX_STATE_IDLE;
 
-        mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
         /* If timer mode is convert delay, the master event then turns EV_MASTER_EXECUTE status. */
         if (inst->cur_tmr_mode == MB_TMODE_CONVERT_DELAY)
         {
-            need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
+            need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_EXECUTE);
         }
     }
 #endif

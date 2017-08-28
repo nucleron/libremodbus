@@ -142,7 +142,7 @@ typedef struct
     UCHAR master_dst_addr;
     //eMBMasterErrorEventType  master_err_cur;
 #endif //MB_MASTER
-} mb_instance;
+} mb_inst_struct;
 
 #include <mbfunc.h>
 
@@ -206,28 +206,28 @@ typedef struct
  *        slave addresses are in the range 1 - 247.
  *    - mb_err_enum::MB_EPORTERR IF the porting layer returned an error.
  */
-mb_err_enum mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_init(mb_inst_struct *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #if MB_RTU_ENABLED
-mb_err_enum mb_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_init_rtu(mb_inst_struct *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #endif
 
 #if MB_ASCII_ENABLED
-mb_err_enum mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_init_ascii(mb_inst_struct *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #endif
 
 #if MB_TCP_ENABLED > 0
-mb_err_enum mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master);
+mb_err_enum mb_init_tcp(mb_inst_struct *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master);
 #endif
 
 #if MB_MASTER >0
 #   if MB_RTU_ENABLED > 0
-mb_err_enum mb_mstr_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_mstr_init_rtu(mb_inst_struct *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #   endif
 #   if MB_ASCII_ENABLED > 0
-mb_err_enum mb_mstr_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
+mb_err_enum mb_mstr_init_ascii(mb_inst_struct *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity);
 #   endif
 #   if MB_TCP_ENABLED >0
-mb_err_enum mb_mstr_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr);
+mb_err_enum mb_mstr_init_tcp(mb_inst_struct *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr);
 #   endif
 #endif
 /*! \ingroup modbus
@@ -259,7 +259,7 @@ mb_err_enum mb_mstr_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp
  *   If the protocol stack is not in the disabled state it returns
  *   mb_err_enum::MB_EILLSTATE.
  */
-mb_err_enum mb_close(mb_instance *inst);
+mb_err_enum mb_close(mb_inst_struct *inst);
 
 /*! \ingroup modbus
  * \brief Enable the Modbus protocol stack.
@@ -271,7 +271,7 @@ mb_err_enum mb_close(mb_instance *inst);
  *   mb_err_enum::MB_ENOERR. If it was not in the disabled state it
  *   return mb_err_enum::MB_EILLSTATE.
  */
-mb_err_enum mb_enable(mb_instance *inst);
+mb_err_enum mb_enable(mb_inst_struct *inst);
 
 /*! \ingroup modbus
  * \brief Disable the Modbus protocol stack.
@@ -282,7 +282,7 @@ mb_err_enum mb_enable(mb_instance *inst);
  *  mb_err_enum::MB_ENOERR. If it was not in the enabled state it returns
  *  mb_err_enum::MB_EILLSTATE.
  */
-mb_err_enum mb_disable(mb_instance *inst);
+mb_err_enum mb_disable(mb_inst_struct *inst);
 
 /*! \ingroup modbus
  * \brief The main pooling loop of the Modbus protocol stack.
@@ -296,7 +296,7 @@ mb_err_enum mb_disable(mb_instance *inst);
  *   returns mb_err_enum::MB_EILLSTATE. Otherwise it returns
  *   mb_err_enum::MB_ENOERR.
  */
-mb_err_enum mb_poll(mb_instance *inst);
+mb_err_enum mb_poll(mb_inst_struct *inst);
 
 /*! \ingroup modbus
  * \brief Configure the slave id of the device.
@@ -316,7 +316,7 @@ mb_err_enum mb_poll(mb_instance *inst);
  *   mbconfig.h is to small it returns mb_err_enum::MB_ENORES. Otherwise
  *   it returns mb_err_enum::MB_ENOERR.
  */
-mb_err_enum mb_set_slv_id(mb_instance *inst, UCHAR slv_id, BOOL is_running, UCHAR const *slv_idstr, USHORT slv_idstr_len);
+mb_err_enum mb_set_slv_id(mb_inst_struct *inst, UCHAR slv_id, BOOL is_running, UCHAR const *slv_idstr, USHORT slv_idstr_len);
 
 /* ----------------------- Callback -----------------------------------------*/
 
@@ -461,25 +461,25 @@ mb_err_enum mb_reg_coils_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT coil_num, m
 mb_err_enum mb_reg_discrete_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT disc_num);
 
 #if MB_MASTER > 0
-mb_err_enum  mb_mstr_rq_read_inp_reg           (mb_instance *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_write_holding_reg      (mb_instance *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_data,     LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_write_multi_holding_reg(mb_instance *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      USHORT *data_ptr, LONG timeout                                       );
-mb_err_enum  mb_mstr_rq_read_holding_reg       (mb_instance *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_rw_multi_holding_reg   (mb_instance *inst, UCHAR snd_addr, USHORT rd_reg_addr,   USHORT rd_reg_num,   USHORT *data_ptr, USHORT wr_reg_addr, USHORT wr_reg_num, LONG timeout);
-mb_err_enum  mb_mstr_rq_read_coils             (mb_instance *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num,     LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_write_coil             (mb_instance *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_data,    LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_write_multi_coils      (mb_instance *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num,     UCHAR *data_ptr,  LONG timeout                                       );
-mb_err_enum  mb_mstr_rq_read_discrete_inputs   (mb_instance *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num, LONG timeout                                                         );
+mb_err_enum  mb_mstr_rq_read_inp_reg           (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      LONG timeout                                                         );
+mb_err_enum  mb_mstr_rq_write_holding_reg      (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_data,     LONG timeout                                                         );
+mb_err_enum  mb_mstr_rq_write_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      USHORT *data_ptr, LONG timeout                                       );
+mb_err_enum  mb_mstr_rq_read_holding_reg       (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      LONG timeout                                                         );
+mb_err_enum  mb_mstr_rq_rw_multi_holding_reg   (mb_inst_struct *inst, UCHAR snd_addr, USHORT rd_reg_addr,   USHORT rd_reg_num,   USHORT *data_ptr, USHORT wr_reg_addr, USHORT wr_reg_num, LONG timeout);
+mb_err_enum  mb_mstr_rq_read_coils             (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num,     LONG timeout                                                         );
+mb_err_enum  mb_mstr_rq_write_coil             (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_data,    LONG timeout                                                         );
+mb_err_enum  mb_mstr_rq_write_multi_coils      (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num,     UCHAR *data_ptr,  LONG timeout                                       );
+mb_err_enum  mb_mstr_rq_read_discrete_inputs   (mb_inst_struct *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num, LONG timeout                                                         );
 
-void mb_mstr_error_exec_fn_cb (mb_instance *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
-void mb_mstr_error_rcv_data_cb(mb_instance *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
-void mb_mstr_error_timeout_cb (mb_instance *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
-void mb_mstr_rq_success_cb    (mb_instance *inst                                                           );
+void mb_mstr_error_exec_fn_cb (mb_inst_struct *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
+void mb_mstr_error_rcv_data_cb(mb_inst_struct *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
+void mb_mstr_error_timeout_cb (mb_inst_struct *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
+void mb_mstr_rq_success_cb    (mb_inst_struct *inst                                                           );
 
-mb_err_enum  mb_mstr_reg_input_cb   (mb_instance *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num );
-mb_err_enum  mb_mstr_reg_holding_cb (mb_instance *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num );
-mb_err_enum  mb_mstr_reg_discrete_cb(mb_instance *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT disc_num);
-mb_err_enum  mb_mstr_reg_coils_cb   (mb_instance *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT coil_num);
+mb_err_enum  mb_mstr_reg_input_cb   (mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num );
+mb_err_enum  mb_mstr_reg_holding_cb (mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num );
+mb_err_enum  mb_mstr_reg_discrete_cb(mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT disc_num);
+mb_err_enum  mb_mstr_reg_coils_cb   (mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT coil_num);
 #endif /* MB_MASTER */
 PR_END_EXTERN_C
 #endif

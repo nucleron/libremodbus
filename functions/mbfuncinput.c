@@ -42,7 +42,7 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_FUNC_READ_INPUT_ENABLED > 0
-mb_exception_enum mb_fn_read_input_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum mb_fn_read_input_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          reg_cnt;
