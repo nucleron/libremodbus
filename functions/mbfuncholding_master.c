@@ -83,7 +83,7 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
  *
  * @return error code
  */
-mb_err_enum  mb_mstr_rq_write_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_data, LONG timeout)
+mb_err_enum  mb_mstr_rq_write_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_data)
 {
     UCHAR                 *mb_frame_ptr;
 
@@ -142,7 +142,7 @@ mb_exception_enum  mb_mstr_fn_write_holding_reg(mb_inst_struct *inst,  UCHAR *fr
  *
  * @return error code
  */
-mb_err_enum  mb_mstr_rq_write_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_num, USHORT * data_ptr, LONG timeout)
+mb_err_enum  mb_mstr_rq_write_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_num, USHORT * data_ptr)
 {
     UCHAR                 *mb_frame_ptr;
     USHORT                 reg_idx = 0;
@@ -207,7 +207,7 @@ mb_exception_enum  mb_mstr_fn_write_multi_holding_reg(mb_inst_struct *inst,  UCH
  *
  * @return error code
  */
-mb_err_enum  mb_mstr_rq_read_holding_reg(mb_inst_struct *inst,  UCHAR snd_addr, USHORT reg_addr, USHORT reg_num, LONG timeout)
+mb_err_enum  mb_mstr_rq_read_holding_reg(mb_inst_struct *inst,  UCHAR snd_addr, USHORT reg_addr, USHORT reg_num)
 {
     UCHAR                 *mb_frame_ptr;
 
@@ -307,7 +307,7 @@ mb_exception_enum  mb_mstr_fn_read_holding_reg(mb_inst_struct *inst, UCHAR *fram
  *
  * @return error code
  */
-mb_err_enum  mb_mstr_rq_rw_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT rd_reg_addr, USHORT rd_reg_num, USHORT * data_ptr, USHORT wr_reg_addr, USHORT wr_reg_num, LONG timeout)
+mb_err_enum  mb_mstr_rq_rw_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT rd_reg_addr, USHORT rd_reg_num, USHORT * data_ptr, USHORT wr_reg_addr, USHORT wr_reg_num)
 {
     UCHAR                 *mb_frame_ptr;
     USHORT                 reg_idx = 0;

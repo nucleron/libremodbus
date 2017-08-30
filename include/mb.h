@@ -461,15 +461,15 @@ mb_err_enum mb_reg_coils_cb(mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_ad
 mb_err_enum mb_reg_discrete_cb(mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT disc_num);
 
 #if MB_MASTER > 0
-mb_err_enum  mb_mstr_rq_read_inp_reg           (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_write_holding_reg      (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_data,     LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_write_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      USHORT *data_ptr, LONG timeout                                       );
-mb_err_enum  mb_mstr_rq_read_holding_reg       (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_rw_multi_holding_reg   (mb_inst_struct *inst, UCHAR snd_addr, USHORT rd_reg_addr,   USHORT rd_reg_num,   USHORT *data_ptr, USHORT wr_reg_addr, USHORT wr_reg_num, LONG timeout);
-mb_err_enum  mb_mstr_rq_read_coils             (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num,     LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_write_coil             (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_data,    LONG timeout                                                         );
-mb_err_enum  mb_mstr_rq_write_multi_coils      (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num,     UCHAR *data_ptr,  LONG timeout                                       );
-mb_err_enum  mb_mstr_rq_read_discrete_inputs   (mb_inst_struct *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num, LONG timeout                                                         );
+mb_err_enum  mb_mstr_rq_read_inp_reg           (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num                                                                            );
+mb_err_enum  mb_mstr_rq_write_holding_reg      (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_data                                                                           );
+mb_err_enum  mb_mstr_rq_write_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      USHORT *data_ptr                                                     );
+mb_err_enum  mb_mstr_rq_read_holding_reg       (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num                                                                            );
+mb_err_enum  mb_mstr_rq_rw_multi_holding_reg   (mb_inst_struct *inst, UCHAR snd_addr, USHORT rd_reg_addr,   USHORT rd_reg_num,   USHORT *data_ptr, USHORT wr_reg_addr, USHORT wr_reg_num              );
+mb_err_enum  mb_mstr_rq_read_coils             (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num                                                                           );
+mb_err_enum  mb_mstr_rq_write_coil             (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_data                                                                          );
+mb_err_enum  mb_mstr_rq_write_multi_coils      (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num,     UCHAR *data_ptr                                                      );
+mb_err_enum  mb_mstr_rq_read_discrete_inputs   (mb_inst_struct *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num                                                                       );
 
 void mb_mstr_error_exec_fn_cb (mb_inst_struct *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
 void mb_mstr_error_rcv_data_cb(mb_inst_struct *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
