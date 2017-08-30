@@ -78,8 +78,7 @@ mb_exception_enum mb_fn_read_input_reg(mb_inst_struct *inst, UCHAR *frame_ptr, U
             *frame_cur++ = (UCHAR)(reg_cnt * 2);
             *len_buf += 1;
 
-            reg_status =
-                mb_reg_input_cb(frame_cur, reg_addr, reg_cnt);
+            reg_status = mb_reg_input_cb(inst, frame_cur, reg_addr, reg_cnt);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)

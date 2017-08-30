@@ -207,6 +207,8 @@ mb_err_enum  mb_mstr_rq_write_coil(mb_inst_struct *inst, UCHAR snd_addr, USHORT 
 mb_exception_enum  mb_mstr_fn_write_coil(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     mb_exception_enum    status = MB_EX_NONE;
+    (void)inst;
+    (void)frame_ptr;
 
     if (*len_buf == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
@@ -283,11 +285,10 @@ mb_err_enum  mb_mstr_rq_write_multi_coils(mb_inst_struct *inst, UCHAR snd_addr, 
     return MB_ENOERR;
 }
 
-mb_exception_enum
-mb_mstr_fn_write_multi_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum mb_mstr_fn_write_multi_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     mb_exception_enum    status = MB_EX_NONE;
-
+    (void)frame_ptr;
     /* If this request is broadcast, the *len_buf is not need check. */
     if ((*len_buf == MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
     {

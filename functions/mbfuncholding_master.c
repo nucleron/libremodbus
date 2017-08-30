@@ -112,6 +112,10 @@ mb_err_enum  mb_mstr_rq_write_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, 
 mb_exception_enum  mb_mstr_fn_write_holding_reg(mb_inst_struct *inst,  UCHAR *frame_ptr, USHORT *len_buf)
 {
     mb_exception_enum    status = MB_EX_NONE;
+
+    (void)inst;
+    (void)frame_ptr;
+
     if (*len_buf == (MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_SIZE))
     {
         status = MB_EX_NONE;
@@ -174,6 +178,8 @@ mb_exception_enum  mb_mstr_fn_write_multi_holding_reg(mb_inst_struct *inst,  UCH
 {
 
     mb_exception_enum    status = MB_EX_NONE;
+
+    (void)frame_ptr;
 
     /* If this request is broadcast, the *len_buf is not need check. */
     if ((*len_buf == MB_PDU_SIZE_MIN + MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))

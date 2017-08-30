@@ -362,7 +362,7 @@ mb_err_enum mb_set_slv_id(mb_inst_struct *inst, UCHAR slv_id, BOOL is_running, U
  *   - mb_err_enum::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-mb_err_enum mb_reg_input_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num);
+mb_err_enum mb_reg_input_cb(mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Holding Register</em> value is
@@ -396,7 +396,7 @@ mb_err_enum mb_reg_input_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num);
  *   - mb_err_enum::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-mb_err_enum mb_reg_holding_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num, mb_reg_mode_enum mode);
+mb_err_enum mb_reg_holding_cb(mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num, mb_reg_mode_enum mode);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Coil Register</em> value is
@@ -430,7 +430,7 @@ mb_err_enum mb_reg_holding_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num, 
  *   - mb_err_enum::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-mb_err_enum mb_reg_coils_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT coil_num, mb_reg_mode_enum mode);
+mb_err_enum mb_reg_coils_cb(mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT coil_num, mb_reg_mode_enum mode);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Input Discrete Register</em> value is
@@ -458,7 +458,7 @@ mb_err_enum mb_reg_coils_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT coil_num, m
  *   - mb_err_enum::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-mb_err_enum mb_reg_discrete_cb(UCHAR *reg_buff, USHORT reg_addr, USHORT disc_num);
+mb_err_enum mb_reg_discrete_cb(mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT disc_num);
 
 #if MB_MASTER > 0
 mb_err_enum  mb_mstr_rq_read_inp_reg           (mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr,      USHORT reg_num,      LONG timeout                                                         );

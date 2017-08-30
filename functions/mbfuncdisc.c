@@ -42,6 +42,8 @@ mb_fn_read_discrete_inp(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
 
+    (void)inst;
+
     if (*len_buf == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
         reg_addr = (USHORT)(frame_ptr[MB_PDU_FUNC_READ_ADDR_OFF] << 8);
@@ -78,8 +80,7 @@ mb_fn_read_discrete_inp(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
             *frame_cur++ = byte_num;
             *len_buf += 1;
 
-            reg_status =
-                mb_reg_discrete_cb(frame_cur, reg_addr, discrete_cnt);
+            reg_status = mb_reg_discrete_cb(inst, frame_cur, reg_addr, discrete_cnt);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)

@@ -99,9 +99,7 @@ mb_exception_enum  mb_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHO
             *frame_cur++ = byte_num;
             *len_buf += 1;
 
-            reg_status =
-                mb_reg_coils_cb(frame_cur, reg_addr, coil_cnt,
-                               MB_REG_READ);
+            reg_status = mb_reg_coils_cb(inst, frame_cur, reg_addr, coil_cnt, MB_REG_READ);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
@@ -158,8 +156,7 @@ mb_exception_enum  mb_fn_write_coil(mb_inst_struct *inst, UCHAR *frame_ptr, USHO
             {
                 buf[0] = 0;
             }
-            reg_status =
-                mb_reg_coils_cb(&buf[0], reg_addr, 1, MB_REG_WRITE);
+            reg_status = mb_reg_coils_cb(inst, &buf[0], reg_addr, 1, MB_REG_WRITE);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
@@ -219,7 +216,7 @@ mb_exception_enum  mb_fn_write_multi_coils(mb_inst_struct *inst, UCHAR *frame_pt
             (coil_cnt <= MB_PDU_FUNC_WRITE_MUL_COILCNT_MAX) &&
             (byte_cnt_verify == byte_cnt))
         {
-            reg_status = mb_reg_coils_cb(&frame_ptr[MB_PDU_FUNC_WRITE_MUL_VALUES_OFF], reg_addr, coil_cnt, MB_REG_WRITE);
+            reg_status = mb_reg_coils_cb(inst, &frame_ptr[MB_PDU_FUNC_WRITE_MUL_VALUES_OFF], reg_addr, coil_cnt, MB_REG_WRITE);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
