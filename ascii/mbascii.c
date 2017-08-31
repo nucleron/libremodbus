@@ -29,6 +29,7 @@
  * File: $Id: mbascii.c, v 1.17 2010/06/06 13:47:07 wolti Exp $
  */
 #include <mb.h>
+
 #if MB_ASCII_ENABLED > 0
 const mb_tr_mtab mb_ascii_mtab =
 {
