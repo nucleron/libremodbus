@@ -15,7 +15,7 @@ This fork is based o [@armink](https://github.com/armink) [variant](https://gith
 # Contrubutors in 2016,2017
 
  * Radeon Ww <radeon.w@gmail.com>
- * [@shkolnick-kun](https://github.com/shkolnick-kun)
+ * Paul Beltyukov aka [@shkolnick-kun](https://github.com/shkolnick-kun)
 
 
 
