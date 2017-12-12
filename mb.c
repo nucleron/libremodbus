@@ -180,7 +180,7 @@ mb_err_enum  mb_init(mb_inst_struct *inst, mb_trans_union *transport, mb_mode_en
     }
 #endif//ASCII
     default:
-        status = MB_EINVAL;
+        return MB_EINVAL;
     }
 
 #if (MB_PORT_HAS_CLOSE > 0)
@@ -208,33 +208,28 @@ mb_err_enum  mb_init(mb_inst_struct *inst, mb_trans_union *transport, mb_mode_en
     else
 #endif //MB_MASTER
     {
+        if ((slv_addr == MB_ADDRESS_BROADCAST) ||
+            (slv_addr < MB_ADDRESS_MIN) ||
+            (slv_addr > MB_ADDRESS_MAX))
+        {
+            return MB_EINVAL;
+        }
         inst->func_handlers = slave_handlers;
     }
 
-    /* check preconditions */
-    if (((slv_addr == MB_ADDRESS_BROADCAST) ||
-            (slv_addr < MB_ADDRESS_MIN) || (slv_addr > MB_ADDRESS_MAX))&& (is_master == FALSE))
-    {
-        status = MB_EINVAL;
-    }
-    else
-    {
-        inst->address = slv_addr;
+    inst->address = slv_addr;
 
-        if (status == MB_ENOERR)
+    if (status == MB_ENOERR)
+    {
+        if (!mb_port_ser_evt_init((mb_port_ser_struct*)inst->port))
         {
-            if (!mb_port_ser_evt_init((mb_port_ser_struct*)inst->port))
-            {
-                /* port dependent event module initalization failed. */
-                status = MB_EPORTERR;
-            }
-            else
-            {
-                inst->cur_mode  = mode;
-                inst->cur_state = STATE_DISABLED;
-            }
+            /* port dependent event module initalization failed. */
+            return MB_EPORTERR;
         }
+        inst->cur_mode  = mode;
+        inst->cur_state = STATE_DISABLED;
     }
+
     return status;
 }
 #endif
@@ -299,37 +294,33 @@ mb_err_enum  mb_init_tcp(mb_inst_struct *inst, mb_tcp_tr* transport, USHORT tcp_
 mb_err_enum
 mb_close(mb_inst_struct *inst)
 {
-    mb_err_enum    status = MB_ENOERR;
-
     if (inst->cur_state == STATE_DISABLED)
     {
         if (inst->pmt->frm_close != NULL)
         {
             inst->pmt->frm_close((mb_port_base_struct *)inst->transport);
         }
+        return MB_ENOERR;
     }
     else
     {
-        status = MB_EILLSTATE;
+        return MB_EILLSTATE;
     }
-    return status;
 }
 
 mb_err_enum  mb_enable(mb_inst_struct *inst)
 {
-    mb_err_enum    status = MB_ENOERR;
-
     if (inst->cur_state == STATE_DISABLED)
     {
         /* Activate the protocol stack. */
         inst->trmt->frm_start(inst->transport);
         inst->cur_state = STATE_ENABLED;
+        return MB_ENOERR;
     }
     else
     {
-        status = MB_EILLSTATE;
+        return MB_EILLSTATE;
     }
-    return status;
 }
 
 mb_err_enum  mb_disable(mb_inst_struct *inst)
