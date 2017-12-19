@@ -471,10 +471,10 @@ mb_err_enum  mb_mstr_rq_write_coil             (mb_inst_struct *inst, UCHAR snd_
 mb_err_enum  mb_mstr_rq_write_multi_coils      (mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr,     USHORT coil_num,     UCHAR *data_ptr                                                      );
 mb_err_enum  mb_mstr_rq_read_discrete_inputs   (mb_inst_struct *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num                                                                       );
 
-void mb_mstr_error_exec_fn_cb (mb_inst_struct *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
-void mb_mstr_error_rcv_data_cb(mb_inst_struct *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
-void mb_mstr_error_timeout_cb (mb_inst_struct *inst, UCHAR dst_addr, const UCHAR* pdu_data_ptr, USHORT pdu_len);
-void mb_mstr_rq_success_cb    (mb_inst_struct *inst                                                           );
+void mb_mstr_error_exec_fn_cb (mb_inst_struct *inst);
+void mb_mstr_error_rcv_data_cb(mb_inst_struct *inst);
+void mb_mstr_error_timeout_cb (mb_inst_struct *inst);
+void mb_mstr_rq_success_cb    (mb_inst_struct *inst);
 
 mb_err_enum  mb_mstr_reg_input_cb   (mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num );
 mb_err_enum  mb_mstr_reg_holding_cb (mb_inst_struct *inst, UCHAR *reg_buff, USHORT reg_addr, USHORT reg_num );
