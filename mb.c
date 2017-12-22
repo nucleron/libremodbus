@@ -459,8 +459,8 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
                 }
                 else
                 {
-                    mb_mstr_rq_success_cb(inst);
                     inst->master_is_busy = FALSE;
+                    mb_mstr_rq_success_cb(inst);
                 }
             }
             else
@@ -510,22 +510,22 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
 #if MB_MASTER > 0
         case EV_MASTER_ERROR_RESPOND_TIMEOUT:
         {
-            mb_mstr_error_timeout_cb(inst);
             inst->master_is_busy = FALSE;
+            mb_mstr_error_timeout_cb(inst);
             //status = MB_ETIMEDOUT;
         }
         break;
         case EV_MASTER_ERROR_RECEIVE_DATA:
         {
-            mb_mstr_error_rcv_data_cb(inst);
             inst->master_is_busy = FALSE;
+            mb_mstr_error_rcv_data_cb(inst);
             //status = MB_EIO;
         }
         break;
         case EV_MASTER_ERROR_EXECUTE_FUNCTION:
         {
-            mb_mstr_error_exec_fn_cb(inst);
             inst->master_is_busy = FALSE;
+            mb_mstr_error_exec_fn_cb(inst);
             //status = MB_EILLFUNC;
         }
         break;
