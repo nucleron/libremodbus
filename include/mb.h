@@ -140,9 +140,12 @@ typedef struct
 
 #if MB_MASTER > 0
     //master variables
-    BOOL master_mode_run;
-    BOOL master_is_busy;
-    UCHAR master_dst_addr;
+    BOOL   master_mode_run;
+    BOOL   master_is_busy;
+
+    UCHAR  master_dst_addr; /*destination slave address*/
+    USHORT master_el_addr;  /*slave element base addr*/
+    USHORT master_el_cnt;   /*slave element count*/
     //eMBMasterErrorEventType  master_err_cur;
 #endif //MB_MASTER
 } mb_inst_struct;

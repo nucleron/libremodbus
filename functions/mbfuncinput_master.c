@@ -71,10 +71,15 @@ mb_err_enum  mb_mstr_rq_read_inp_reg(mb_inst_struct *inst, UCHAR snd_addr, USHOR
     inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
     inst->master_dst_addr = snd_addr;
     mb_frame_ptr[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_INPUT_REGISTER;
+
+    inst->master_el_addr                         = reg_addr;
     mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF]       = reg_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]   = reg_addr;
+
+    inst->master_el_cnt                          = reg_num;
     mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF]     = reg_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1] = reg_num;
+
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE); ///WTF?????
 
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
@@ -84,9 +89,9 @@ mb_err_enum  mb_mstr_rq_read_inp_reg(mb_inst_struct *inst, UCHAR snd_addr, USHOR
 
 mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    UCHAR          *mb_frame_ptr;
-    USHORT          reg_addr;
-    USHORT          reg_cnt;
+    //UCHAR          *mb_frame_ptr;
+    //USHORT          reg_addr;
+    //USHORT          reg_cnt;
 
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
@@ -98,13 +103,16 @@ mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_inst_struct *inst, UCHAR *frame_pt
     }
     else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
-        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-        reg_addr++;
+        USHORT reg_cnt;
+        reg_cnt = inst->master_el_cnt;
 
-        reg_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF] << 8);
-        reg_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1]);
+//        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
+//        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
+//        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
+//        reg_addr++;
+//
+//        reg_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF] << 8);
+//        reg_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1]);
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
@@ -112,7 +120,7 @@ mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_inst_struct *inst, UCHAR *frame_pt
         if ((reg_cnt >= 1) && (2 * reg_cnt == frame_ptr[MB_PDU_FUNC_READ_BYTECNT_OFF]))
         {
             /* Make callback to fill the buffer. */
-            reg_status = mb_mstr_reg_input_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], reg_addr, reg_cnt);
+            reg_status = mb_mstr_reg_input_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], inst->master_el_addr + 1, reg_cnt);
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
             {

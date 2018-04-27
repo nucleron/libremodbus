@@ -375,7 +375,7 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
 #if MB_MASTER > 0
                 if (inst->master_mode_run == TRUE)
                 {
-                    if (inst->rcv_addr == inst->master_dst_addr || inst->cur_mode== MB_TCP) //All addresses work in tcp mode
+                    if (inst->rcv_addr == inst->master_dst_addr || inst->cur_mode == MB_TCP) //All addresses work in tcp mode
                     {
                         (void)inst->pmt->evt_post(inst->port, EV_EXECUTE);
                     }
