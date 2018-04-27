@@ -347,7 +347,6 @@ mb_err_enum  mb_disable(mb_inst_struct *inst)
 mb_err_enum mb_poll(mb_inst_struct *inst)
 {
     int                      i;
-    //int                      j;
     mb_err_enum              status = MB_ENOERR;
     mb_event_enum            event;
     BOOL                     got_event;
@@ -370,35 +369,28 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
 
         case EV_FRAME_RECEIVED:
             status = inst->trmt->frm_rcv(inst->transport, &(inst->rcv_addr), (UCHAR**) &inst->frame, (USHORT*)&inst->len);
-            if (status == MB_ENOERR)
-            {
 #if MB_MASTER > 0
-                if (inst->master_mode_run == TRUE)
+            if (TRUE == inst->master_mode_run)
+            {
+                if (MB_ENOERR == status)
                 {
-                    if (inst->rcv_addr == inst->master_dst_addr || inst->cur_mode == MB_TCP) //All addresses work in tcp mode
+                    if ((inst->rcv_addr == inst->master_dst_addr) || (MB_TCP == inst->cur_mode)) //All addresses work in tcp mode
                     {
                         (void)inst->pmt->evt_post(inst->port, EV_EXECUTE);
                     }
                 }
                 else
-#endif // MB_MASTER
-                {
-                    /* Check if the frame is for us. If not ignore the frame. */
-                    if ((inst->rcv_addr == inst->address) || (inst->rcv_addr == MB_ADDRESS_BROADCAST))
-                    {
-                        (void)inst->pmt->evt_post(inst->port, EV_EXECUTE);
-                    }
-                }
-
-            }
-            else
-            {
-#if MB_MASTER > 0
-                if (inst->master_mode_run)
                 {
                     (void)inst->pmt->evt_post(inst->port, EV_MASTER_ERROR_RECEIVE_DATA);
                 }
+            }
+            else
 #endif // MB_MASTER
+            {
+                if ((MB_ENOERR == status) && ((inst->rcv_addr == inst->address) || (MB_ADDRESS_BROADCAST == inst->rcv_addr)))
+                {
+                    (void)inst->pmt->evt_post(inst->port, EV_EXECUTE);
+                }
             }
             break;
 

@@ -86,7 +86,7 @@ mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_inst_struct *inst, UCHAR snd_add
 mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     UCHAR           byte_num;
-    UCHAR          *mb_frame_ptr;
+    //UCHAR          *mb_frame_ptr;
 
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
