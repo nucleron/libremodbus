@@ -77,15 +77,14 @@ typedef struct
 	volatile mb_ascii_tx_state_enum snd_state;
 	volatile mb_ascii_rx_state_enum rcv_state;
 
-	volatile UCHAR                  rcv_buf[MB_ASCII_SER_PDU_SIZE_MAX];
-    volatile UCHAR                  snd_buf[MB_ASCII_SER_PDU_SIZE_MAX];
+	volatile UCHAR                  pdu_buf[MB_ASCII_SER_PDU_SIZE_MAX];
     volatile USHORT                 snd_pdu_len;
 
 	volatile UCHAR                  *snd_buf_cur;
-	volatile USHORT                 snd_buf_cnt;
+	volatile USHORT                  snd_buf_cnt;
 
-	volatile USHORT                 rcv_buf_pos;
-	volatile mb_ascii_byte_pos_enum byte_pos;
+	volatile USHORT                  rcv_buf_pos;
+	volatile mb_ascii_byte_pos_enum  byte_pos;
 
 	volatile UCHAR                  mb_lf_char;
 	BOOL                            frame_is_broadcast;

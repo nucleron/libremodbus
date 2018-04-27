@@ -114,8 +114,7 @@ typedef struct
     mb_mode_enum  cur_mode;
     mb_state_enum cur_state;
 
-    volatile UCHAR *rx_frame;
-    volatile UCHAR *tx_frame;
+    volatile UCHAR *frame;
 
     volatile USHORT   len;
 
@@ -134,6 +133,10 @@ typedef struct
     //for slave id
     UCHAR    slave_id[MB_FUNC_OTHER_REP_SLAVEID_BUF];
     USHORT   slave_id_len;
+
+    UCHAR             rcv_addr;
+    UCHAR             func_code;
+    mb_exception_enum exception;
 
 #if MB_MASTER > 0
     //master variables

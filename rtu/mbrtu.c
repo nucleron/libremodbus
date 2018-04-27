@@ -140,12 +140,12 @@ mb_err_enum  mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR 
 
     /* Length and CRC check */
     if ((inst->rcv_buf_pos >= MB_RTU_SER_PDU_SIZE_MIN)
-            && (mb_crc16((UCHAR *) inst->rcv_buf, inst->rcv_buf_pos) == 0))
+            && (mb_crc16((UCHAR *)inst->pdu_buf, inst->rcv_buf_pos) == 0))
     {
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there.
          */
-        *rcv_addr_buf = inst->rcv_buf[MB_RTU_SER_PDU_ADDR_OFF];
+        *rcv_addr_buf = inst->pdu_buf[MB_RTU_SER_PDU_ADDR_OFF];
 
         /* Total length of Modbus-PDU is Modbus-Serial-Line-PDU minus
          * size of address field and CRC checksum.
@@ -153,7 +153,7 @@ mb_err_enum  mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR 
         *len_buf = (USHORT)(inst->rcv_buf_pos - MB_RTU_SER_PDU_PDU_OFF - MB_RTU_SER_PDU_SIZE_CRC);
 
         /* Return the start of the Modbus PDU to the caller. */
-        *frame_ptr_buf = (UCHAR *) & inst->rcv_buf[MB_RTU_SER_PDU_PDU_OFF];
+        *frame_ptr_buf = (UCHAR *)&inst->pdu_buf[MB_RTU_SER_PDU_PDU_OFF];
 
         //xFrameReceived = TRUE;
     }
@@ -179,18 +179,22 @@ mb_err_enum  mb_rtu_send(mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR *fr
      */
     if (inst->rcv_state == MB_RTU_RX_STATE_IDLE)
     {
+#       if MB_MASTER >0
+        inst->frame_is_broadcast = (MB_ADDRESS_BROADCAST == slv_addr) ? TRUE : FALSE;
+#       endif
+
         /* First byte before the Modbus-PDU is the slave address. */
-        inst->snd_buf_cur = (UCHAR *) frame_ptr - 1;
-        inst->snd_buff_cnt = 1;
+        inst->snd_buf_cur = (UCHAR *)frame_ptr - MB_RTU_SER_PDU_PDU_OFF;
+        inst->snd_buf_cnt = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
         inst->snd_buf_cur[MB_RTU_SER_PDU_ADDR_OFF] = slv_addr;
-        inst->snd_buff_cnt += len;
+        inst->snd_buf_cnt += len;
 
         /* Calculate CRC16 checksum for Modbus-Serial-Line-PDU. */
-        crc16 = mb_crc16((UCHAR *) inst->snd_buf_cur, inst->snd_buff_cnt);
-        inst->snd_buf[inst->snd_buff_cnt++] = (UCHAR)(crc16 & 0xFF);
-        inst->snd_buf[inst->snd_buff_cnt++] = (UCHAR)(crc16 >> 8);
+        crc16 = mb_crc16((UCHAR *)inst->snd_buf_cur, inst->snd_buf_cnt);
+        inst->snd_buf_cur[inst->snd_buf_cnt++] = (UCHAR)(crc16 & 0xFF);
+        inst->snd_buf_cur[inst->snd_buf_cnt++] = (UCHAR)(crc16 >> 8);
 
         /* Activate the transmitter. */
         inst->snd_state = MB_RTU_TX_STATE_XMIT;
@@ -243,7 +247,7 @@ BOOL  mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
         }
 #endif
         inst->rcv_buf_pos = 0;
-        inst->rcv_buf[inst->rcv_buf_pos++] = byte_val;
+        inst->pdu_buf[inst->rcv_buf_pos++] = byte_val;
         inst->rcv_state = MB_RTU_RX_STATE_RCV;
 
         /* Enable t3.5 timers. */
@@ -258,7 +262,7 @@ BOOL  mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
     case MB_RTU_RX_STATE_RCV:
         if (inst->rcv_buf_pos < MB_RTU_SER_PDU_SIZE_MAX)
         {
-            inst->rcv_buf[inst->rcv_buf_pos++] = byte_val;
+            inst->pdu_buf[inst->rcv_buf_pos++] = byte_val;
         }
         else
         {
@@ -287,19 +291,17 @@ BOOL  mb_rtu_snd_fsm(mb_rtu_tr_struct* inst)
 
     case MB_RTU_TX_STATE_XMIT:
         /* check if we are finished. */
-        if (inst->snd_buff_cnt != 0)
+        if (inst->snd_buf_cnt != 0)
         {
             mb_port_ser_put_byte((mb_port_ser_struct *)inst->base.port_obj, (CHAR)*inst->snd_buf_cur);
             inst->snd_buf_cur++;  /* next byte in sendbuffer. */
-            inst->snd_buff_cnt--;
+            inst->snd_buf_cnt--;
         }
         else
         {
 #if MB_MASTER >0
             if (inst->is_master==TRUE)
             {
-
-                inst->frame_is_broadcast = (inst->snd_buf[MB_RTU_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
                 /* Disable transmitter. This prevents another transmit buffer
                  * empty interrupt. */
                 mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
@@ -402,14 +404,14 @@ BOOL  mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
 /* Get Modbus Master send PDU's buffer address pointer.*/
 void mb_rtu_get_snd_buf(mb_rtu_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
-    *frame_ptr_buf = (UCHAR *) &inst->snd_buf[MB_RTU_SER_PDU_PDU_OFF];
+    *frame_ptr_buf = (UCHAR *)&inst->pdu_buf[MB_RTU_SER_PDU_PDU_OFF];
 }
 
 #if MB_MASTER > 0
 //* Get Modbus send RTU's buffer address pointer.*/
 //void vMBMasterGetRTUSndBuf(mb_rtu_tr_struct* inst, UCHAR ** frame_ptr_buf)
 //{
-//    *frame_ptr_buf = (UCHAR *) inst->snd_buf;
+//    *frame_ptr_buf = (UCHAR *)inst->snd_buf;
 //}
 
 
