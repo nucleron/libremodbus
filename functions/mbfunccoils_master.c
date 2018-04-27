@@ -106,9 +106,6 @@ mb_err_enum  mb_mstr_rq_read_coils(mb_inst_struct *inst, UCHAR snd_addr, USHORT 
 
 mb_exception_enum  mb_mstr_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    //UCHAR          *mb_frame_ptr;
-    //USHORT          reg_addr;
-    //USHORT          coil_cnt;
     UCHAR           byte_cnt;
 
     mb_exception_enum    status = MB_EX_NONE;
@@ -123,15 +120,6 @@ mb_exception_enum  mb_mstr_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr,
     {
         USHORT coil_cnt;
         coil_cnt = inst->master_el_cnt;
-//        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-//        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-//        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-//        reg_addr++;
-//
-//        coil_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_COILCNT_OFF] << 8);
-//        coil_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_COILCNT_OFF + 1]);
-
-
         /* Test if the quantity of coils is a multiple of 8. If not last
          * byte is only partially field with unused coils set to zero. */
         if ((coil_cnt & 0x0007) != 0)

@@ -425,22 +425,6 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
                     else if (inst->func_handlers[i].func_code == inst->func_code)
                     {
                         inst->exception = inst->func_handlers[i].handler(inst, (UCHAR*)(inst->frame), (USHORT*)&inst->len);
-//#if MB_MASTER > 0
-//                        if (inst->master_mode_run == FALSE)
-//#endif// MB_MASTER
-//                        {
-//                            for (j=0; j<inst->len; j++)
-//                            {
-//                                inst->frame[j]=inst->frame[j];
-//                            }
-//                            inst->exception = inst->func_handlers[i].handler(inst, (UCHAR*)(inst->frame), (USHORT*)&inst->len);
-//                        }
-//#if MB_MASTER > 0
-//                        else
-//                        {
-//                            inst->exception = inst->func_handlers[i].handler(inst, (UCHAR*)(inst->frame), (USHORT*)&inst->len);
-//                        }
-//#endif// MB_MASTER
                         break;
                     }
                 }

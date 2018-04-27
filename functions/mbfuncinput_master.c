@@ -80,19 +80,15 @@ mb_err_enum  mb_mstr_rq_read_inp_reg(mb_inst_struct *inst, UCHAR snd_addr, USHOR
     mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF]     = reg_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1] = reg_num;
 
-    *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE); ///WTF?????
+    *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
 
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    //eErrStatus = eMBMasterWaitRequestFinish();
+
     return MB_EX_NONE;
 }
 
 mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    //UCHAR          *mb_frame_ptr;
-    //USHORT          reg_addr;
-    //USHORT          reg_cnt;
-
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
 
@@ -105,15 +101,6 @@ mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_inst_struct *inst, UCHAR *frame_pt
     {
         USHORT reg_cnt;
         reg_cnt = inst->master_el_cnt;
-
-//        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-//        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-//        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-//        reg_addr++;
-//
-//        reg_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF] << 8);
-//        reg_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1]);
-
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */

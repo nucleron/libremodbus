@@ -95,7 +95,7 @@ mb_err_enum  mb_mstr_rq_write_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, 
     {
         return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME too
+
     inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
     inst->master_dst_addr = snd_addr;
 
@@ -251,16 +251,12 @@ mb_err_enum  mb_mstr_rq_read_holding_reg(mb_inst_struct *inst,  UCHAR snd_addr, 
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
 
     (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    //eErrStatus = eMBMasterWaitRequestFinish();
+
     return MB_EX_NONE;
 }
 
 mb_exception_enum  mb_mstr_fn_read_holding_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-//    UCHAR          *mb_frame_ptr;
-//    USHORT          reg_addr;
-//    USHORT          reg_cnt;
-
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
 
@@ -277,16 +273,6 @@ mb_exception_enum  mb_mstr_fn_read_holding_reg(mb_inst_struct *inst, UCHAR *fram
     {
         USHORT reg_cnt;
         reg_cnt = inst->master_el_cnt;
-//        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-//
-//        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-//        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-//        reg_addr++;
-//
-//        reg_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF] << 8);
-//        reg_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1]);
-
-
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
@@ -334,7 +320,6 @@ mb_err_enum  mb_mstr_rq_rw_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_add
 {
     UCHAR                 *mb_frame_ptr;
     USHORT                 reg_idx = 0;
-//    mb_err_enum    eErrStatus = MB_ENOERR;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
@@ -344,7 +329,7 @@ mb_err_enum  mb_mstr_rq_rw_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_add
     {
         return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME
+
     inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
     inst->master_dst_addr = snd_addr;
 
@@ -381,10 +366,6 @@ mb_err_enum  mb_mstr_rq_rw_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_add
 
 mb_exception_enum  mb_mstr_fn_rw_multi_holding_regs(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-//    USHORT          reg_rd_addr;
-//    USHORT          reg_rd_cnt;
-//    UCHAR          *mb_frame_ptr;
-
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
 
@@ -397,13 +378,6 @@ mb_exception_enum  mb_mstr_fn_rw_multi_holding_regs(mb_inst_struct *inst, UCHAR 
     {
         USHORT reg_rd_cnt;
         reg_rd_cnt = inst->master_el_cnt;
-//        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-//        reg_rd_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_ADDR_OFF] << 8U);
-//        reg_rd_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_ADDR_OFF + 1]);
-//        reg_rd_addr++;
-//
-//        reg_rd_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_REGCNT_OFF] << 8U);
-//        reg_rd_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_REGCNT_OFF + 1]);
 
         if ((2 * reg_rd_cnt) == frame_ptr[MB_PDU_FUNC_READWRITE_READ_BYTECNT_OFF])
         {

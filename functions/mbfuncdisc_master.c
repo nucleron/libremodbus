@@ -85,8 +85,6 @@ mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_inst_struct *inst, UCHAR snd_add
 
 mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    //USHORT          reg_addr;
-    //USHORT          discrete_cnt;
     UCHAR           byte_num;
     UCHAR          *mb_frame_ptr;
 
@@ -100,15 +98,6 @@ mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_inst_struct *inst, UCHAR *
     {
         USHORT discrete_cnt;
         discrete_cnt = inst->master_el_cnt;
-
-//        inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
-//        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-//        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-//        reg_addr++;
-//
-//        discrete_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_DISCCNT_OFF] << 8);
-//        discrete_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_DISCCNT_OFF + 1]);
-
         /* Test if the quantity of coils is a multiple of 8. If not last
          * byte is only partially field with unused coils set to zero. */
         if ((discrete_cnt & 0x0007) != 0)
