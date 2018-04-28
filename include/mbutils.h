@@ -100,7 +100,9 @@ void mb_util_set_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num, UCHAR 
 UCHAR mb_util_get_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num);
 
 
+#if MB_MASTER > 0
 mb_err_enum mb_frame_send(mb_inst_struct *inst, const UCHAR *frame_ptr, USHORT len);
+#endif//MB_MASTER
 
 /*! @} */
 PR_END_EXTERN_C

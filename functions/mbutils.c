@@ -126,6 +126,7 @@ mb_exception_enum mb_error_to_exception(mb_err_enum error_code)
     return status;
 }
 
+#if MB_MASTER > 0
 mb_err_enum  mb_frame_send(mb_inst_struct *inst, const UCHAR *frame_ptr, USHORT len)
 {
     if(MB_ENOERR != inst->trmt->frm_send(inst->transport, inst->master_dst_addr, frame_ptr, len))
@@ -135,6 +136,7 @@ mb_err_enum  mb_frame_send(mb_inst_struct *inst, const UCHAR *frame_ptr, USHORT 
     }
     return MB_ENOERR;
 }
+#endif // MB_MASTER
 
 BOOL mb_default_bool_cas(BOOL * ptr, BOOL oldval, BOOL newval)
 {
