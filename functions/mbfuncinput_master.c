@@ -64,11 +64,12 @@ mb_err_enum  mb_mstr_rq_read_inp_reg(mb_inst_struct *inst, UCHAR snd_addr, USHOR
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
-    inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
+    inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
     mb_frame_ptr[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_INPUT_REGISTER;
 
@@ -80,11 +81,9 @@ mb_err_enum  mb_mstr_rq_read_inp_reg(mb_inst_struct *inst, UCHAR snd_addr, USHOR
     mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF]     = reg_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1] = reg_num;
 
-    *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
+    *inst->pdu_snd_len = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
 
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-
-    return MB_EX_NONE;
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
 }
 
 mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)

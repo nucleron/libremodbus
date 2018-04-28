@@ -139,8 +139,7 @@ mb_err_enum  mb_rtu_receive(mb_rtu_tr_struct* inst, UCHAR * rcv_addr_buf, UCHAR 
     assert(inst->rcv_buf_pos < MB_RTU_SER_PDU_SIZE_MAX);
 
     /* Length and CRC check */
-    if ((inst->rcv_buf_pos >= MB_RTU_SER_PDU_SIZE_MIN)
-            && (mb_crc16((UCHAR *)inst->pdu_buf, inst->rcv_buf_pos) == 0))
+    if ((inst->rcv_buf_pos >= MB_RTU_SER_PDU_SIZE_MIN) && (mb_crc16((UCHAR *)inst->pdu_buf, inst->rcv_buf_pos) == 0))
     {
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there.
@@ -383,8 +382,7 @@ BOOL  mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
             break;
         /* Function called in an illegal state. */
         default:
-            assert(
-                (inst->snd_state == MB_RTU_TX_STATE_XFWR) || (inst->snd_state == MB_RTU_TX_STATE_IDLE));
+            assert((inst->snd_state == MB_RTU_TX_STATE_XFWR) || (inst->snd_state == MB_RTU_TX_STATE_IDLE));
             break;
         }
         inst->snd_state = MB_RTU_TX_STATE_IDLE;

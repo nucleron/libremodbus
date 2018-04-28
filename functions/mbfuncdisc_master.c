@@ -61,12 +61,14 @@ mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_inst_struct *inst, UCHAR snd_add
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
     inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
+
     mb_frame_ptr[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
 
     inst->master_el_addr                          = discrete_addr;
@@ -78,9 +80,11 @@ mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_inst_struct *inst, UCHAR snd_add
     mb_frame_ptr[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = discrete_num;
 
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
 
-    return MB_ENOERR;
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+
+    //return MB_ENOERR;
 }
 
 mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)

@@ -196,7 +196,7 @@ mb_err_enum  mb_init(mb_inst_struct *inst, mb_trans_union *transport, mb_mode_en
     };
     inst->pmt = (mb_port_mtab_struct *)&mb_serial_mtab;
 
-    inst->trmt->get_tx_frm(inst->transport, (void*)&(inst->frame));
+    inst->trmt->get_tx_frm(inst->transport, (void*)&inst->frame);
 
 #if MB_MASTER > 0
     if (is_master == TRUE)
@@ -291,8 +291,7 @@ mb_err_enum  mb_init_tcp(mb_inst_struct *inst, mb_tcp_tr* transport, USHORT tcp_
 }
 #endif
 
-mb_err_enum
-mb_close(mb_inst_struct *inst)
+mb_err_enum mb_close(mb_inst_struct *inst)
 {
     if (inst->cur_state == STATE_DISABLED)
     {
@@ -360,7 +359,7 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
     /* Check if there is a event available. If not return control to caller.
      * Otherwise we will handle the event. */
     got_event = inst->pmt->evt_get(inst->port, inst, &event);
-    if (got_event  == TRUE)
+    if (got_event == TRUE)
     {
         switch (event)
         {
@@ -368,7 +367,7 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
             break;
 
         case EV_FRAME_RECEIVED:
-            status = inst->trmt->frm_rcv(inst->transport, &(inst->rcv_addr), (UCHAR**) &inst->frame, (USHORT*)&inst->len);
+            status = inst->trmt->frm_rcv(inst->transport, &inst->rcv_addr, (UCHAR**)&inst->frame, (USHORT*)&inst->len);
 #if MB_MASTER > 0
             if (TRUE == inst->master_mode_run)
             {
@@ -381,7 +380,8 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
                 }
                 else
                 {
-                    (void)inst->pmt->evt_post(inst->port, EV_MASTER_ERROR_RECEIVE_DATA);
+                    inst->master_is_busy = FALSE;
+                    mb_mstr_error_rcv_data_cb(inst);
                 }
             }
             else
@@ -427,32 +427,35 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
 #if MB_MASTER > 0
             if (inst->master_mode_run)
             {
-                if (inst->exception != MB_EX_NONE)
+                inst->master_is_busy = FALSE;
+
+                if (MB_EX_NONE == inst->exception)
                 {
-                    (void)inst->pmt->evt_post(inst->port, EV_MASTER_ERROR_EXECUTE_FUNCTION);
+                    mb_mstr_rq_success_cb(inst);
                 }
                 else
                 {
-                    inst->master_is_busy = FALSE;
-                    mb_mstr_rq_success_cb(inst);
+                    mb_mstr_error_exec_fn_cb(inst);
                 }
             }
             else
 #endif
             {
-                if (inst->rcv_addr != MB_ADDRESS_BROADCAST)
+                if (MB_ADDRESS_BROADCAST != inst->rcv_addr)
                 {
-                    if (inst->exception != MB_EX_NONE)
+                    if (MB_EX_NONE != inst->exception)
                     {
                         /* An exception occured. Build an error frame. */
                         inst->len = 0;
                         inst->frame[inst->len++] = (UCHAR)(inst->func_code | MB_FUNC_ERROR);
                         inst->frame[inst->len++] = inst->exception;
                     }
-                    if ((inst->cur_mode == MB_ASCII) && MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS)
+
+                    if ((MB_ASCII == inst->cur_mode) && MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS)
                     {
                         mb_port_ser_tmr_delay((mb_port_ser_struct *)inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS);///WTF?????????
                     }
+
                     status = inst->trmt->frm_send(inst->transport, inst->address, (UCHAR*)(inst->frame), inst->len);
                     if (MB_ENOERR != status)
                     {
@@ -464,24 +467,6 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
         break;
 
         case EV_FRAME_SENT:
-#if MB_MASTER > 0
-            if (inst->master_mode_run)
-            {
-                if (FALSE == inst->master_is_busy)
-                {
-                    inst->trmt->get_tx_frm(inst->transport, (UCHAR**)(&inst->frame));
-                    status = inst->trmt->frm_send(inst->transport, inst->master_dst_addr, (UCHAR*)(inst->frame), *inst->pdu_snd_len);
-                    if (MB_ENOERR == status)
-                    {
-                        inst->master_is_busy = TRUE; /* Master is busy now. */
-                    }
-                    else
-                    {
-                        return MB_EIO;
-                    }
-                }
-            }
-#endif
             break;
 
 //        case EV_ERROR_PROCESS:
@@ -491,20 +476,6 @@ mb_err_enum mb_poll(mb_inst_struct *inst)
             inst->master_is_busy = FALSE;
             mb_mstr_error_timeout_cb(inst);
             //status = MB_ETIMEDOUT;
-        }
-        break;
-        case EV_MASTER_ERROR_RECEIVE_DATA:
-        {
-            inst->master_is_busy = FALSE;
-            mb_mstr_error_rcv_data_cb(inst);
-            //status = MB_EIO;
-        }
-        break;
-        case EV_MASTER_ERROR_EXECUTE_FUNCTION:
-        {
-            inst->master_is_busy = FALSE;
-            mb_mstr_error_exec_fn_cb(inst);
-            //status = MB_EILLFUNC;
         }
         break;
 #endif

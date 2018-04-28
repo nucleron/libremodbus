@@ -53,7 +53,7 @@ PR_BEGIN_EXTERN_C
 
 #include <mbframe.h>
 #include <mbproto.h>
-#include <mbutils.h>
+
 
 typedef struct
 {
@@ -81,7 +81,7 @@ mb_tr_mtab;//!< Transport method tab
 #if MB_TCP_ENABLED == 1
 #   include <mbtcp.h>
 #endif
-
+/* ----------------------- Type definitions ---------------------------------*/
 typedef union
 {
     mb_trans_base_struct base;
@@ -120,7 +120,6 @@ typedef struct
 
     volatile USHORT * pdu_snd_len;
 
-
     //Transport methods
     mb_tr_mtab * trmt;
 
@@ -149,9 +148,15 @@ typedef struct
     //eMBMasterErrorEventType  master_err_cur;
 #endif //MB_MASTER
 } mb_inst_struct;
+/* ----------------------- Function definitions -----------------------------*/
+#include <mbutils.h>
+
+#ifndef MB_BOOL_CAS
+extern BOOL mb_default_bool_cas(BOOL * ptr, BOOL oldval, BOOL newval);
+#define MB_BOOL_CAS mb_default_bool_cas
+#endif//MB_BOOL_CAS
 
 #include <mbfunc.h>
-
 /*! \defgroup modbus Modbus
  * \code #include "mb.h" \endcode
  *
