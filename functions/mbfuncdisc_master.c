@@ -54,7 +54,7 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
  *
  * @return error code
  */
-mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_instance *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num, LONG timeout)
+mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_inst_struct *inst, UCHAR snd_addr, USHORT discrete_addr, USHORT discrete_num)
 {
     UCHAR                 *mb_frame_ptr;
     if (snd_addr > MB_ADDRESS_MAX)
@@ -77,7 +77,7 @@ mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_instance *inst, UCHAR snd_addr, 
     return MB_ENOERR;
 }
 
-mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          usDiscreteCnt;

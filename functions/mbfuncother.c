@@ -32,14 +32,8 @@
 #include <mb.h>
 
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
-
-/* ----------------------- Static variables ---------------------------------*/
-
-#define ucMBSlaveID inst->slave_id
-#define usMBSlaveIDLen inst->slave_id_len
-
 /* ----------------------- Start implementation -----------------------------*/
-mb_err_enum mb_set_slv_id(mb_instance *inst, UCHAR slv_id, BOOL is_running, UCHAR const *slv_idstr, USHORT slv_idstr_len)
+mb_err_enum mb_set_slv_id(mb_inst_struct *inst, UCHAR slv_id, BOOL is_running, UCHAR const *slv_idstr, USHORT slv_idstr_len)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -48,14 +42,14 @@ mb_err_enum mb_set_slv_id(mb_instance *inst, UCHAR slv_id, BOOL is_running, UCHA
      * the buffer is available for additional data. */
     if (slv_idstr_len + 2 < MB_FUNC_OTHER_REP_SLAVEID_BUF)
     {
-        usMBSlaveIDLen = 0;
-        ucMBSlaveID[usMBSlaveIDLen++] = slv_id;
-        ucMBSlaveID[usMBSlaveIDLen++] = (UCHAR)(is_running ? 0xFF : 0x00);
+        inst->slave_id_len = 0;
+        inst->slave_id[inst->slave_id_len++] = slv_id;
+        inst->slave_id[inst->slave_id_len++] = (UCHAR)(is_running ? 0xFF : 0x00);
         if (slv_idstr_len > 0)
         {
-            memcpy(&ucMBSlaveID[usMBSlaveIDLen], slv_idstr,
+            memcpy(&inst->slave_id[inst->slave_id_len], slv_idstr,
                     (size_t)slv_idstr_len);
-            usMBSlaveIDLen += slv_idstr_len;
+            inst->slave_id_len += slv_idstr_len;
         }
     }
     else
@@ -65,10 +59,10 @@ mb_err_enum mb_set_slv_id(mb_instance *inst, UCHAR slv_id, BOOL is_running, UCHA
     return status;
 }
 
-mb_exception_enum  mb_fn_report_slv_id(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_report_slv_id(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    memcpy(&frame_ptr[MB_PDU_DATA_OFF], &ucMBSlaveID[0], (size_t)usMBSlaveIDLen);
-    *len_buf = (USHORT)(MB_PDU_DATA_OFF + usMBSlaveIDLen);
+    memcpy(&frame_ptr[MB_PDU_DATA_OFF], &inst->slave_id[0], (size_t)inst->slave_id_len);
+    *len_buf = (USHORT)(MB_PDU_DATA_OFF + inst->slave_id_len);
     return MB_EX_NONE;
 }
 

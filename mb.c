@@ -106,14 +106,14 @@ static mb_fn_handler_struct master_handlers[MB_FUNC_HANDLERS_MAX] =
 
 /* ----------------------- Start implementation -----------------------------*/
 #if MB_RTU_ENABLED > 0
-mb_err_enum  mb_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init_rtu(mb_inst_struct *inst, mb_rtu_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, FALSE, slv_addr, port_obj, baud, parity);
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
-mb_err_enum  mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init_ascii(mb_inst_struct *inst, mb_ascii_tr_struct* transport, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
 
     return mb_init(inst, (void*)transport, MB_ASCII, FALSE, slv_addr, port_obj, baud, parity);
@@ -125,14 +125,14 @@ mb_err_enum  mb_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, UCH
 #if MB_MASTER >0
 
 #if MB_RTU_ENABLED > 0
-mb_err_enum  mb_mstr_init_rtu(mb_instance *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_mstr_init_rtu(mb_inst_struct *inst, mb_rtu_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_RTU, TRUE, 0, port_obj, baud, parity);
 }
 #endif
 
 #if MB_ASCII_ENABLED > 0
-mb_err_enum  mb_mstr_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_mstr_init_ascii(mb_inst_struct *inst, mb_ascii_tr_struct* transport, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     return mb_init(inst, (void*)transport, MB_ASCII, TRUE, 0, port_obj, baud, parity);
 }
@@ -140,7 +140,7 @@ mb_err_enum  mb_mstr_init_ascii(mb_instance *inst, mb_ascii_tr_struct* transport
 #endif
 
 #if MB_TCP_ENABLED > 0
-mb_err_enum mb_mstr_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr)
+mb_err_enum mb_mstr_init_tcp(mb_inst_struct *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr)
 {
     return mb_init_tcp(inst, transport, tcp_port_num, hostaddr, TRUE);
 }
@@ -150,7 +150,7 @@ mb_err_enum mb_mstr_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp
 #endif //MASTER
 
 #if MB_RTU_ENABLED || MB_ASCII_ENABLED
-mb_err_enum  mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
+mb_err_enum  mb_init(mb_inst_struct *inst, mb_trans_union *transport, mb_mode_enum mode, BOOL is_master, UCHAR slv_addr, mb_port_base_struct * port_obj, ULONG baud, mb_port_ser_parity_enum parity)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -180,7 +180,7 @@ mb_err_enum  mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum 
     }
 #endif//ASCII
     default:
-        status = MB_EINVAL;
+        return MB_EINVAL;
     }
 
 #if (MB_PORT_HAS_CLOSE > 0)
@@ -208,39 +208,34 @@ mb_err_enum  mb_init(mb_instance *inst, mb_trans_union *transport, mb_mode_enum 
     else
 #endif //MB_MASTER
     {
+        if ((slv_addr == MB_ADDRESS_BROADCAST) ||
+            (slv_addr < MB_ADDRESS_MIN) ||
+            (slv_addr > MB_ADDRESS_MAX))
+        {
+            return MB_EINVAL;
+        }
         inst->func_handlers = slave_handlers;
     }
 
-    /* check preconditions */
-    if (((slv_addr == MB_ADDRESS_BROADCAST) ||
-            (slv_addr < MB_ADDRESS_MIN) || (slv_addr > MB_ADDRESS_MAX))&& (is_master == FALSE))
-    {
-        status = MB_EINVAL;
-    }
-    else
-    {
-        inst->address = slv_addr;
+    inst->address = slv_addr;
 
-        if (status == MB_ENOERR)
+    if (status == MB_ENOERR)
+    {
+        if (!mb_port_ser_evt_init((mb_port_ser_struct*)inst->port))
         {
-            if (!mb_port_ser_evt_init((mb_port_ser*)inst->port))
-            {
-                /* port dependent event module initalization failed. */
-                status = MB_EPORTERR;
-            }
-            else
-            {
-                inst->cur_mode  = mode;
-                inst->cur_state = STATE_DISABLED;
-            }
+            /* port dependent event module initalization failed. */
+            return MB_EPORTERR;
         }
+        inst->cur_mode  = mode;
+        inst->cur_state = STATE_DISABLED;
     }
+
     return status;
 }
 #endif
 
 #if MB_TCP_ENABLED > 0
-mb_err_enum  mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
+mb_err_enum  mb_init_tcp(mb_inst_struct *inst, mb_tcp_tr* transport, USHORT tcp_port_num, SOCKADDR_IN hostaddr, BOOL is_master)
 {
     mb_err_enum    status = MB_ENOERR;
 
@@ -297,42 +292,38 @@ mb_err_enum  mb_init_tcp(mb_instance *inst, mb_tcp_tr* transport, USHORT tcp_por
 #endif
 
 mb_err_enum
-mb_close(mb_instance *inst)
+mb_close(mb_inst_struct *inst)
 {
-    mb_err_enum    status = MB_ENOERR;
-
     if (inst->cur_state == STATE_DISABLED)
     {
         if (inst->pmt->frm_close != NULL)
         {
             inst->pmt->frm_close((mb_port_base_struct *)inst->transport);
         }
+        return MB_ENOERR;
     }
     else
     {
-        status = MB_EILLSTATE;
+        return MB_EILLSTATE;
     }
-    return status;
 }
 
-mb_err_enum  mb_enable(mb_instance *inst)
+mb_err_enum  mb_enable(mb_inst_struct *inst)
 {
-    mb_err_enum    status = MB_ENOERR;
-
     if (inst->cur_state == STATE_DISABLED)
     {
         /* Activate the protocol stack. */
         inst->trmt->frm_start(inst->transport);
         inst->cur_state = STATE_ENABLED;
+        return MB_ENOERR;
     }
     else
     {
-        status = MB_EILLSTATE;
+        return MB_EILLSTATE;
     }
-    return status;
 }
 
-mb_err_enum  mb_disable(mb_instance *inst)
+mb_err_enum  mb_disable(mb_inst_struct *inst)
 {
     mb_err_enum    status;
 
@@ -353,7 +344,7 @@ mb_err_enum  mb_disable(mb_instance *inst)
     return status;
 }
 
-mb_err_enum mb_poll(mb_instance *inst)
+mb_err_enum mb_poll(mb_inst_struct *inst)
 {
     static UCHAR             rcv_addr;
     static UCHAR             func_code;
@@ -468,8 +459,8 @@ mb_err_enum mb_poll(mb_instance *inst)
                 }
                 else
                 {
-                    mb_mstr_rq_success_cb(inst);
                     inst->master_is_busy = FALSE;
+                    mb_mstr_rq_success_cb(inst);
                 }
             }
             else
@@ -486,7 +477,7 @@ mb_err_enum mb_poll(mb_instance *inst)
                     }
                     if ((inst->cur_mode == MB_ASCII) && MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS)
                     {
-                        mb_port_ser_tmr_delay((mb_port_ser *)inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS);///WTF?????????
+                        mb_port_ser_tmr_delay((mb_port_ser_struct *)inst->port, MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS);///WTF?????????
                     }
                     status = inst->trmt->frm_send(inst->transport, inst->address, (UCHAR*)(inst->tx_frame), inst->len);///Where status is used?
                 }
@@ -519,22 +510,22 @@ mb_err_enum mb_poll(mb_instance *inst)
 #if MB_MASTER > 0
         case EV_MASTER_ERROR_RESPOND_TIMEOUT:
         {
-            mb_mstr_error_timeout_cb(inst, inst->master_dst_addr, (const UCHAR*)inst->tx_frame, *inst->pdu_snd_len);
             inst->master_is_busy = FALSE;
+            mb_mstr_error_timeout_cb(inst);
             //status = MB_ETIMEDOUT;
         }
         break;
         case EV_MASTER_ERROR_RECEIVE_DATA:
         {
-            mb_mstr_error_rcv_data_cb(inst, inst->master_dst_addr, (const UCHAR*)inst->tx_frame, *inst->pdu_snd_len);
             inst->master_is_busy = FALSE;
+            mb_mstr_error_rcv_data_cb(inst);
             //status = MB_EIO;
         }
         break;
         case EV_MASTER_ERROR_EXECUTE_FUNCTION:
         {
-            mb_mstr_error_exec_fn_cb(inst, inst->master_dst_addr, (const UCHAR*)inst->tx_frame, *inst->pdu_snd_len);
             inst->master_is_busy = FALSE;
+            mb_mstr_error_exec_fn_cb(inst);
             //status = MB_EILLFUNC;
         }
         break;

@@ -61,11 +61,13 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
 
-mb_exception_enum  mb_fn_write_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_write_holding_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT            reg_addr;
     mb_exception_enum status = MB_EX_NONE;
     mb_err_enum       reg_status;
+
+    (void)inst;
 
     if (*len_buf == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
@@ -74,8 +76,7 @@ mb_exception_enum  mb_fn_write_holding_reg(mb_instance *inst, UCHAR *frame_ptr, 
         reg_addr++;
 
         /* Make callback to update the value. */
-        reg_status = mb_reg_holding_cb(&frame_ptr[MB_PDU_FUNC_WRITE_VALUE_OFF],
-                                      reg_addr, 1, MB_REG_WRITE);
+        reg_status = mb_reg_holding_cb(inst, &frame_ptr[MB_PDU_FUNC_WRITE_VALUE_OFF], reg_addr, 1, MB_REG_WRITE);
 
         /* If an error occured convert it into a Modbus exception. */
         if (reg_status != MB_ENOERR)
@@ -93,7 +94,7 @@ mb_exception_enum  mb_fn_write_holding_reg(mb_instance *inst, UCHAR *frame_ptr, 
 #endif
 
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
-mb_exception_enum  mb_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_write_multi_holding_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          reg_cnt;
@@ -101,6 +102,8 @@ mb_exception_enum  mb_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame
 
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
+
+    (void)inst;
 
     if (*len_buf >= (MB_PDU_FUNC_WRITE_MUL_SIZE_MIN + MB_PDU_SIZE_MIN))
     {
@@ -118,9 +121,7 @@ mb_exception_enum  mb_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame
             (reg_byte_cnt == (UCHAR) (2 * reg_cnt)))
         {
             /* Make callback to update the register values. */
-            reg_status =
-                mb_reg_holding_cb(&frame_ptr[MB_PDU_FUNC_WRITE_MUL_VALUES_OFF],
-                                 reg_addr, reg_cnt, MB_REG_WRITE);
+            reg_status = mb_reg_holding_cb(inst, &frame_ptr[MB_PDU_FUNC_WRITE_MUL_VALUES_OFF], reg_addr, reg_cnt, MB_REG_WRITE);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
@@ -152,7 +153,7 @@ mb_exception_enum  mb_fn_write_multi_holding_reg(mb_instance *inst, UCHAR *frame
 
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
 
-mb_exception_enum  mb_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_read_holding_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_addr;
     USHORT          reg_cnt;
@@ -160,6 +161,8 @@ mb_exception_enum  mb_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, U
 
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
+
+    (void)inst;
 
     if (*len_buf == (MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN))
     {
@@ -188,7 +191,7 @@ mb_exception_enum  mb_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, U
             *len_buf += 1;
 
             /* Make callback to fill the buffer. */
-            reg_status = mb_reg_holding_cb(frame_cur, reg_addr, reg_cnt, MB_REG_READ);
+            reg_status = mb_reg_holding_cb(inst, frame_cur, reg_addr, reg_cnt, MB_REG_READ);
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
             {
@@ -216,7 +219,7 @@ mb_exception_enum  mb_fn_read_holding_reg(mb_instance *inst, UCHAR *frame_ptr, U
 
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
 
-mb_exception_enum  mb_fn_rw_multi_holding_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_fn_rw_multi_holding_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     USHORT          reg_rd_addr;
     USHORT          reg_rd_cnt;
@@ -227,6 +230,8 @@ mb_exception_enum  mb_fn_rw_multi_holding_reg(mb_instance *inst, UCHAR *frame_pt
 
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
+
+    (void)inst;
 
     if (*len_buf >= (MB_PDU_FUNC_READWRITE_SIZE_MIN + MB_PDU_SIZE_MIN))
     {
@@ -251,8 +256,7 @@ mb_exception_enum  mb_fn_rw_multi_holding_reg(mb_instance *inst, UCHAR *frame_pt
             ((2 * reg_wr_cnt) == reg_wr_byte_cnt))
         {
             /* Make callback to update the register values. */
-            reg_status = mb_reg_holding_cb(&frame_ptr[MB_PDU_FUNC_READWRITE_WRITE_VALUES_OFF],
-                                          reg_wr_addr, reg_wr_cnt, MB_REG_WRITE);
+            reg_status = mb_reg_holding_cb(inst, &frame_ptr[MB_PDU_FUNC_READWRITE_WRITE_VALUES_OFF], reg_wr_addr, reg_wr_cnt, MB_REG_WRITE);
 
             if (reg_status == MB_ENOERR)
             {
@@ -269,8 +273,7 @@ mb_exception_enum  mb_fn_rw_multi_holding_reg(mb_instance *inst, UCHAR *frame_pt
                 *len_buf += 1;
 
                 /* Make the read callback. */
-                reg_status =
-                    mb_reg_holding_cb(frame_cur, reg_rd_addr, reg_rd_cnt, MB_REG_READ);
+                reg_status = mb_reg_holding_cb(inst, frame_cur, reg_rd_addr, reg_rd_cnt, MB_REG_READ);
                 if (reg_status == MB_ENOERR)
                 {
                     *len_buf += 2 * reg_rd_cnt;

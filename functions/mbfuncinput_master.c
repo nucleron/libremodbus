@@ -56,7 +56,7 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
  *
  * @return error code
  */
-mb_err_enum  mb_mstr_rq_read_inp_reg(mb_instance *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_num, LONG timeout)
+mb_err_enum  mb_mstr_rq_read_inp_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_num)
 {
     UCHAR                 *mb_frame_ptr;
 
@@ -82,7 +82,7 @@ mb_err_enum  mb_mstr_rq_read_inp_reg(mb_instance *inst, UCHAR snd_addr, USHORT r
     return MB_EX_NONE;
 }
 
-mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_read_inp_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     UCHAR          *mb_frame_ptr;
     USHORT          reg_addr;

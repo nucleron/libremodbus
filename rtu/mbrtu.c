@@ -68,7 +68,7 @@ mb_err_enum  mb_rtu_init(mb_rtu_tr_struct* inst, BOOL is_master, UCHAR slv_addr,
     ENTER_CRITICAL_SECTION();
 
     /* Modbus RTU uses 8 Databits. */
-    if (mb_port_ser_init((mb_port_ser *)inst->base.port_obj, baud, 8, parity) != TRUE)
+    if (mb_port_ser_init((mb_port_ser_struct *)inst->base.port_obj, baud, 8, parity) != TRUE)
     {
         status = MB_EPORTERR;
     }
@@ -93,7 +93,7 @@ mb_err_enum  mb_rtu_init(mb_rtu_tr_struct* inst, BOOL is_master, UCHAR slv_addr,
              */
             tmr_35_50us = (7UL * 220000UL) / (2UL * baud);
         }
-        if (mb_port_ser_tmr_init((mb_port_ser *)inst->base.port_obj,  (USHORT) tmr_35_50us) != TRUE)
+        if (mb_port_ser_tmr_init((mb_port_ser_struct *)inst->base.port_obj,  (USHORT) tmr_35_50us) != TRUE)
         {
             status = MB_EPORTERR;
         }
@@ -116,8 +116,8 @@ void  mb_rtu_start(mb_rtu_tr_struct* inst)
      * modbus protocol stack until the bus is free.
      */
     inst->rcv_state = MB_RTU_RX_STATE_INIT;
-    mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
-    mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
+    mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
 
     EXIT_CRITICAL_SECTION();
 }
@@ -125,8 +125,8 @@ void  mb_rtu_start(mb_rtu_tr_struct* inst)
 void  mb_rtu_stop(mb_rtu_tr_struct* inst)
 {
     ENTER_CRITICAL_SECTION();
-    mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, FALSE);
-    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, FALSE, FALSE);
+    mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
     EXIT_CRITICAL_SECTION();
 }
 
@@ -194,7 +194,7 @@ mb_err_enum  mb_rtu_send(mb_rtu_tr_struct* inst, UCHAR slv_addr, const UCHAR *fr
 
         /* Activate the transmitter. */
         inst->snd_state = MB_RTU_TX_STATE_XMIT;
-        mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, FALSE, TRUE);
+        mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, FALSE, TRUE);
     }
     else
     {
@@ -212,7 +212,7 @@ BOOL  mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
     assert((inst->snd_state == MB_RTU_TX_STATE_IDLE) || (inst->snd_state == MB_RTU_TX_STATE_XFWR));
 
     /* Always read the character. */
-    (void)mb_port_ser_get_byte((mb_port_ser *)inst->base.port_obj, (CHAR *)&byte_val);
+    (void)mb_port_ser_get_byte((mb_port_ser_struct *)inst->base.port_obj, (CHAR *)&byte_val);
 
     switch (inst->rcv_state)
     {
@@ -220,14 +220,14 @@ BOOL  mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
      * wait until the frame is finished.
      */
     case MB_RTU_RX_STATE_INIT:
-        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
         break;
 
     /* In the error state we wait until all characters in the
      * damaged frame are transmitted.
      */
     case MB_RTU_RX_STATE_ERROR:
-        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
         break;
 
     /* In the idle state we wait for a new character. If a character
@@ -238,7 +238,7 @@ BOOL  mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
 #if MB_MASTER > 0
         if (inst->is_master)
         {
-            mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+            mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
             inst->snd_state = MB_RTU_TX_STATE_IDLE;
         }
 #endif
@@ -247,7 +247,7 @@ BOOL  mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
         inst->rcv_state = MB_RTU_RX_STATE_RCV;
 
         /* Enable t3.5 timers. */
-        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
         break;
 
     /* We are currently receiving a frame. Reset the timer after
@@ -264,7 +264,7 @@ BOOL  mb_rtu_rcv_fsm(mb_rtu_tr_struct* inst)
         {
             inst->rcv_state = MB_RTU_RX_STATE_ERROR;
         }
-        mb_port_ser_tmr_enable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
         break;
     }
     return task_need_switch;
@@ -282,14 +282,14 @@ BOOL  mb_rtu_snd_fsm(mb_rtu_tr_struct* inst)
      * idle state.  */
     case MB_RTU_TX_STATE_IDLE:
         /* enable receiver/disable transmitter. */
-        mb_port_ser_enable((mb_port_ser *)inst->base.port_obj,  TRUE, FALSE);
+        mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj,  TRUE, FALSE);
         break;
 
     case MB_RTU_TX_STATE_XMIT:
         /* check if we are finished. */
         if (inst->snd_buff_cnt != 0)
         {
-            mb_port_ser_put_byte((mb_port_ser *)inst->base.port_obj, (CHAR)*inst->snd_buf_cur);
+            mb_port_ser_put_byte((mb_port_ser_struct *)inst->base.port_obj, (CHAR)*inst->snd_buf_cur);
             inst->snd_buf_cur++;  /* next byte in sendbuffer. */
             inst->snd_buff_cnt--;
         }
@@ -302,27 +302,27 @@ BOOL  mb_rtu_snd_fsm(mb_rtu_tr_struct* inst)
                 inst->frame_is_broadcast = (inst->snd_buf[MB_RTU_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
                 /* Disable transmitter. This prevents another transmit buffer
                  * empty interrupt. */
-                mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+                mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
                 inst->snd_state = MB_RTU_TX_STATE_XFWR;
                 /* If the frame is broadcast , master will enable timer of convert delay,
                  * else master will enable timer of respond timeout. */
                 if (inst->frame_is_broadcast == TRUE)
                 {
-                    mb_port_ser_tmr_convert_delay_enable((mb_port_ser *)inst->base.port_obj);
+                    mb_port_ser_tmr_convert_delay_enable((mb_port_ser_struct *)inst->base.port_obj);
                 }
                 else
                 {
-                    mb_port_ser_tmr_respond_timeout_enable((mb_port_ser *)inst->base.port_obj);
+                    mb_port_ser_tmr_respond_timeout_enable((mb_port_ser_struct *)inst->base.port_obj);
                 }
 
             }
             else
 #endif
             {
-                need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_SENT);
+                need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_FRAME_SENT);
                 /* Disable transmitter. This prevents another transmit buffer
                  * empty interrupt. */
-                mb_port_ser_enable((mb_port_ser *)inst->base.port_obj, TRUE, FALSE);
+                mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
                 inst->snd_state = MB_RTU_TX_STATE_IDLE;
             }
         }
@@ -344,13 +344,13 @@ BOOL  mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
     {
     /* Timer t35 expired. Startup phase is finished. */
     case MB_RTU_RX_STATE_INIT:
-        need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_READY);
+        need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_READY);
         break;
 
     /* A frame was received and t35 expired. Notify the listener that
      * a new frame was received. */
     case MB_RTU_RX_STATE_RCV:
-        need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_FRAME_RECEIVED);
+        need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_FRAME_RECEIVED);
         break;
 
     /* An error occured while receiving the frame. */
@@ -363,7 +363,7 @@ BOOL  mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
                 (inst->rcv_state == MB_RTU_RX_STATE_RCV) || (inst->rcv_state == MB_RTU_RX_STATE_ERROR));
     }
 
-    mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+    mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
     inst->rcv_state = MB_RTU_RX_STATE_IDLE;
 #if MB_MASTER >0
     if (inst->is_master == TRUE)
@@ -376,7 +376,7 @@ BOOL  mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
         case MB_RTU_TX_STATE_XFWR:
             if (inst->frame_is_broadcast == FALSE)
             {
-                need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
+                need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_MASTER_ERROR_RESPOND_TIMEOUT);
             }
             break;
         /* Function called in an illegal state. */
@@ -387,11 +387,11 @@ BOOL  mb_rtu_tmr_35_expired(mb_rtu_tr_struct* inst)
         }
         inst->snd_state = MB_RTU_TX_STATE_IDLE;
 
-        mb_port_ser_tmr_disable((mb_port_ser *)inst->base.port_obj);
+        mb_port_ser_tmr_disable((mb_port_ser_struct *)inst->base.port_obj);
         /* If timer mode is convert delay, the master event then turns EV_MASTER_EXECUTE status. */
         if (inst->cur_tmr_mode == MB_TMODE_CONVERT_DELAY)
         {
-            need_poll = mb_port_ser_evt_post((mb_port_ser *)inst->base.port_obj, EV_EXECUTE);
+            need_poll = mb_port_ser_evt_post((mb_port_ser_struct *)inst->base.port_obj, EV_EXECUTE);
         }
     }
 #endif

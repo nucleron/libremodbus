@@ -29,7 +29,6 @@
  * File: $Id: mbfunccoils_m.c, v 1.60 2013/10/12 15:10:12 Armink Add Master Functions
  */
 #include <mb.h>
-#include <mb_master.h>
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_REQ_READ_ADDR_OFF            (MB_PDU_DATA_OFF + 0)
@@ -73,7 +72,7 @@ mb_exception_enum  mb_error_to_exception(mb_err_enum error_code);
  *
  * @return error code
  */
-mb_err_enum  mb_mstr_rq_read_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num , LONG timeout)
+mb_err_enum  mb_mstr_rq_read_coils(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num)
 {
     UCHAR                 *mb_frame_ptr;
 
@@ -97,7 +96,7 @@ mb_err_enum  mb_mstr_rq_read_coils(mb_instance *inst, UCHAR snd_addr, USHORT coi
     return MB_ENOERR;
 }
 
-mb_exception_enum  mb_mstr_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     UCHAR          *mb_frame_ptr;
     USHORT          reg_addr;
@@ -177,7 +176,7 @@ mb_exception_enum  mb_mstr_fn_read_coils(mb_instance *inst, UCHAR *frame_ptr, US
  *
  * @see mb_mstr_rq_write_multi_coils
  */
-mb_err_enum  mb_mstr_rq_write_coil(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_data, LONG timeout)
+mb_err_enum  mb_mstr_rq_write_coil(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_data)
 {
     UCHAR                 *mb_frame_ptr;
 
@@ -205,9 +204,11 @@ mb_err_enum  mb_mstr_rq_write_coil(mb_instance *inst, UCHAR snd_addr, USHORT coi
     return MB_ENOERR;
 }
 
-mb_exception_enum  mb_mstr_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum  mb_mstr_fn_write_coil(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     mb_exception_enum    status = MB_EX_NONE;
+    (void)inst;
+    (void)frame_ptr;
 
     if (*len_buf == (MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN))
     {
@@ -239,7 +240,7 @@ mb_exception_enum  mb_mstr_fn_write_coil(mb_instance *inst, UCHAR *frame_ptr, US
  *
  * @see mb_mstr_rq_write_coil
  */
-mb_err_enum  mb_mstr_rq_write_multi_coils(mb_instance *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num, UCHAR * data_ptr, LONG timeout)
+mb_err_enum  mb_mstr_rq_write_multi_coils(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num, UCHAR * data_ptr)
 {
     UCHAR                 *mb_frame_ptr;
     USHORT                 reg_idx = 0;
@@ -284,11 +285,10 @@ mb_err_enum  mb_mstr_rq_write_multi_coils(mb_instance *inst, UCHAR snd_addr, USH
     return MB_ENOERR;
 }
 
-mb_exception_enum
-mb_mstr_fn_write_multi_coils(mb_instance *inst, UCHAR *frame_ptr, USHORT *len_buf)
+mb_exception_enum mb_mstr_fn_write_multi_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
     mb_exception_enum    status = MB_EX_NONE;
-
+    (void)frame_ptr;
     /* If this request is broadcast, the *len_buf is not need check. */
     if ((*len_buf == MB_PDU_FUNC_WRITE_MUL_SIZE) || inst->trmt->rq_is_broadcast(inst->transport))
     {
