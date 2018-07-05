@@ -74,8 +74,8 @@ typedef enum
     EV_FRAME_SENT,               /*!< Frame sent. */
 #if MB_MASTER > 0
     EV_MASTER_ERROR_RESPOND_TIMEOUT,  /*!< Request respond timeout. */
-    EV_MASTER_ERROR_RECEIVE_DATA,     /*!< Request receive data error. */
-    EV_MASTER_ERROR_EXECUTE_FUNCTION, /*!< Request execute function error. */
+    //EV_MASTER_ERROR_RECEIVE_DATA,     /*!< Request receive data error. */
+    //EV_MASTER_ERROR_EXECUTE_FUNCTION, /*!< Request execute function error. */
 #endif
 } mb_event_enum;
 

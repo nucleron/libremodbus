@@ -33,9 +33,7 @@
 #define BITS_UCHAR      8U
 
 /* ----------------------- Start implementation -----------------------------*/
-void
-mb_util_set_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num,
-                UCHAR ucValue)
+void mb_util_set_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num, UCHAR ucValue)
 {
     USHORT          word_buf;
     USHORT          msk;
@@ -72,8 +70,7 @@ mb_util_set_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num,
     byte_buf[byte_offset + 1] = (UCHAR)(word_buf >> BITS_UCHAR);
 }
 
-UCHAR
-mb_util_get_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num)
+UCHAR mb_util_get_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num)
 {
     USHORT          word_buf;
     USHORT          msk;
@@ -103,8 +100,7 @@ mb_util_get_bits(UCHAR * byte_buf, USHORT bit_offset, UCHAR but_num)
     return (UCHAR) word_buf;
 }
 
-mb_exception_enum
-mb_error_to_exception(mb_err_enum error_code)
+mb_exception_enum mb_error_to_exception(mb_err_enum error_code)
 {
     mb_exception_enum    status;
 
@@ -126,6 +122,33 @@ mb_error_to_exception(mb_err_enum error_code)
             status = MB_EX_SLAVE_DEVICE_FAILURE;
             break;
     }
+
+    return status;
+}
+
+#if MB_MASTER > 0
+mb_err_enum  mb_frame_send(mb_inst_struct *inst, const UCHAR *frame_ptr, USHORT len)
+{
+    if(MB_ENOERR != inst->trmt->frm_send(inst->transport, inst->master_dst_addr, frame_ptr, len))
+    {
+        inst->master_is_busy = FALSE;
+        return MB_EIO;
+    }
+    return MB_ENOERR;
+}
+#endif // MB_MASTER
+
+BOOL mb_default_bool_cas(BOOL * ptr, BOOL oldval, BOOL newval)
+{
+    BOOL status = FALSE;
+
+    ENTER_CRITICAL_SECTION();
+    if (oldval == *ptr)
+    {
+        status = TRUE;
+        *ptr = newval;
+    }
+    EXIT_CRITICAL_SECTION();
 
     return status;
 }

@@ -53,7 +53,7 @@ PR_BEGIN_EXTERN_C
 
 #include <mbframe.h>
 #include <mbproto.h>
-#include <mbutils.h>
+
 
 typedef struct
 {
@@ -81,7 +81,7 @@ mb_tr_mtab;//!< Transport method tab
 #if MB_TCP_ENABLED == 1
 #   include <mbtcp.h>
 #endif
-
+/* ----------------------- Type definitions ---------------------------------*/
 typedef union
 {
     mb_trans_base_struct base;
@@ -114,13 +114,11 @@ typedef struct
     mb_mode_enum  cur_mode;
     mb_state_enum cur_state;
 
-    volatile UCHAR *rx_frame;
-    volatile UCHAR *tx_frame;
+    volatile UCHAR *frame;
 
     volatile USHORT   len;
 
     volatile USHORT * pdu_snd_len;
-
 
     //Transport methods
     mb_tr_mtab * trmt;
@@ -135,17 +133,30 @@ typedef struct
     UCHAR    slave_id[MB_FUNC_OTHER_REP_SLAVEID_BUF];
     USHORT   slave_id_len;
 
+    UCHAR             rcv_addr;
+    UCHAR             func_code;
+    mb_exception_enum exception;
+
 #if MB_MASTER > 0
     //master variables
-    BOOL master_mode_run;
-    BOOL master_is_busy;
-    UCHAR master_dst_addr;
+    BOOL   master_mode_run;
+    BOOL   master_is_busy;
+
+    UCHAR  master_dst_addr; /*destination slave address*/
+    USHORT master_el_addr;  /*slave element base addr*/
+    USHORT master_el_cnt;   /*slave element count*/
     //eMBMasterErrorEventType  master_err_cur;
 #endif //MB_MASTER
 } mb_inst_struct;
+/* ----------------------- Function definitions -----------------------------*/
+#include <mbutils.h>
+
+#ifndef MB_BOOL_CAS
+extern BOOL mb_default_bool_cas(BOOL * ptr, BOOL oldval, BOOL newval);
+#define MB_BOOL_CAS mb_default_bool_cas
+#endif//MB_BOOL_CAS
 
 #include <mbfunc.h>
-
 /*! \defgroup modbus Modbus
  * \code #include "mb.h" \endcode
  *

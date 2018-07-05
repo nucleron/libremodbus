@@ -75,32 +75,38 @@ mb_exception_enum  mb_error_to_exception(mb_err_enum error_code);
 mb_err_enum  mb_mstr_rq_read_coils(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num)
 {
     UCHAR                 *mb_frame_ptr;
-
     if (snd_addr > MB_ADDRESS_MAX)
     {
         return  MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
     inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
+
     mb_frame_ptr[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_COILS;
+
+    inst->master_el_addr                          = coil_addr;
     mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF]        = coil_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]    = coil_addr;
+
+    inst->master_el_cnt                           = coil_num;
     mb_frame_ptr[MB_PDU_REQ_READ_COILCNT_OFF ]    = coil_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_COILCNT_OFF + 1] = coil_num;
+
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    return MB_ENOERR;
+
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+
+    //return MB_ENOERR;
 }
 
 mb_exception_enum  mb_mstr_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    UCHAR          *mb_frame_ptr;
-    USHORT          reg_addr;
-    USHORT          coil_cnt;
     UCHAR           byte_cnt;
 
     mb_exception_enum    status = MB_EX_NONE;
@@ -113,14 +119,8 @@ mb_exception_enum  mb_mstr_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr,
     }
     else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
-        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-        reg_addr++;
-
-        coil_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_COILCNT_OFF] << 8);
-        coil_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_COILCNT_OFF + 1]);
-
+        USHORT coil_cnt;
+        coil_cnt = inst->master_el_cnt;
         /* Test if the quantity of coils is a multiple of 8. If not last
          * byte is only partially field with unused coils set to zero. */
         if ((coil_cnt & 0x0007) != 0)
@@ -135,11 +135,10 @@ mb_exception_enum  mb_mstr_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr,
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-        if ((coil_cnt >= 1) &&
-                (byte_cnt == frame_ptr[MB_PDU_FUNC_READ_COILCNT_OFF]))
+        if ((coil_cnt >= 1) && (byte_cnt == frame_ptr[MB_PDU_FUNC_READ_COILCNT_OFF]))
         {
             /* Make callback to fill the buffer. */
-            reg_status = mb_mstr_reg_coils_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], reg_addr, coil_cnt);
+            reg_status = mb_mstr_reg_coils_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], inst->master_el_addr + 1, coil_cnt);
 
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
@@ -178,7 +177,7 @@ mb_exception_enum  mb_mstr_fn_read_coils(mb_inst_struct *inst, UCHAR *frame_ptr,
  */
 mb_err_enum  mb_mstr_rq_write_coil(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_data)
 {
-    UCHAR                 *mb_frame_ptr;
+    UCHAR *mb_frame_ptr;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
@@ -188,20 +187,31 @@ mb_err_enum  mb_mstr_rq_write_coil(mb_inst_struct *inst, UCHAR snd_addr, USHORT 
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
     inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
+
     mb_frame_ptr[MB_PDU_FUNC_OFF]                = MB_FUNC_WRITE_SINGLE_COIL;
+
+    inst->master_el_addr                         = coil_addr;
     mb_frame_ptr[MB_PDU_REQ_WRITE_ADDR_OFF]      = coil_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_WRITE_ADDR_OFF + 1]  = coil_addr;
+
+    inst->master_el_cnt                          = 1;
+
     mb_frame_ptr[MB_PDU_REQ_WRITE_VALUE_OFF ]    = coil_data >> 8;
     mb_frame_ptr[MB_PDU_REQ_WRITE_VALUE_OFF + 1] = coil_data;
+
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_SIZE);
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    return MB_ENOERR;
+
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+
+    //return MB_ENOERR;
 }
 
 mb_exception_enum  mb_mstr_fn_write_coil(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
@@ -242,9 +252,10 @@ mb_exception_enum  mb_mstr_fn_write_coil(mb_inst_struct *inst, UCHAR *frame_ptr,
  */
 mb_err_enum  mb_mstr_rq_write_multi_coils(mb_inst_struct *inst, UCHAR snd_addr, USHORT coil_addr, USHORT coil_num, UCHAR * data_ptr)
 {
-    UCHAR                 *mb_frame_ptr;
-    USHORT                 reg_idx = 0;
-    UCHAR                  byte_cnt;
+    UCHAR *mb_frame_ptr;
+    UCHAR *mb_data_ptr;
+    USHORT reg_idx;
+    UCHAR  byte_cnt;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
@@ -254,7 +265,7 @@ mb_err_enum  mb_mstr_rq_write_multi_coils(mb_inst_struct *inst, UCHAR snd_addr, 
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
@@ -262,10 +273,15 @@ mb_err_enum  mb_mstr_rq_write_multi_coils(mb_inst_struct *inst, UCHAR snd_addr, 
     inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
     inst->master_dst_addr = snd_addr;
     mb_frame_ptr[MB_PDU_FUNC_OFF]                      = MB_FUNC_WRITE_MULTIPLE_COILS;
+
+    inst->master_el_addr                               = coil_addr;
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_ADDR_OFF]        = coil_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_ADDR_OFF + 1]    = coil_addr;
+
+    inst->master_el_cnt                                = coil_num;
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_COILCNT_OFF]     = coil_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_COILCNT_OFF + 1] = coil_num ;
+
     if((coil_num & 0x0007) != 0)
     {
         byte_cnt = (UCHAR)(coil_num / 8 + 1);
@@ -274,15 +290,22 @@ mb_err_enum  mb_mstr_rq_write_multi_coils(mb_inst_struct *inst, UCHAR snd_addr, 
     {
         byte_cnt = (UCHAR)(coil_num / 8);
     }
+
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_BYTECNT_OFF]     = byte_cnt;
-    mb_frame_ptr += MB_PDU_REQ_WRITE_MUL_VALUES_OFF;
-    while(byte_cnt > reg_idx)
+    //mb_frame_ptr += MB_PDU_REQ_WRITE_MUL_VALUES_OFF;
+
+    mb_data_ptr = mb_frame_ptr + MB_PDU_REQ_WRITE_MUL_VALUES_OFF;
+    for (reg_idx = 0; reg_idx < byte_cnt; reg_idx++)
     {
-        *mb_frame_ptr++ = data_ptr[reg_idx++];
+        mb_data_ptr[reg_idx] = data_ptr[reg_idx];
     }
+
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_MUL_SIZE_MIN + byte_cnt);
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    return MB_ENOERR;
+
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+
+    //return MB_ENOERR;
 }
 
 mb_exception_enum mb_mstr_fn_write_multi_coils(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)

@@ -116,12 +116,12 @@ mb_err_enum mb_ascii_receive(mb_ascii_tr_struct* inst,  UCHAR * rcv_addr_buf, UC
 
     /* Length and CRC check */
     if ((inst->rcv_buf_pos >= MB_ASCII_SER_PDU_SIZE_MIN)
-            && (mb_lrc((UCHAR *) inst->rcv_buf, inst->rcv_buf_pos) == 0))
+            && (mb_lrc((UCHAR *)inst->pdu_buf, inst->rcv_buf_pos) == 0))
     {
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there.
          */
-        *rcv_addr_buf = inst->rcv_buf[MB_ASCII_SER_PDU_ADDR_OFF];
+        *rcv_addr_buf = inst->pdu_buf[MB_ASCII_SER_PDU_ADDR_OFF];
 
         /* Total length of Modbus-PDU is Modbus-Serial-Line-PDU minus
          * size of address field and CRC checksum.
@@ -129,7 +129,7 @@ mb_err_enum mb_ascii_receive(mb_ascii_tr_struct* inst,  UCHAR * rcv_addr_buf, UC
         *len_buf = (USHORT)(inst->rcv_buf_pos - MB_ASCII_SER_PDU_PDU_OFF - MB_ASCII_SER_PDU_SIZE_LRC);
 
         /* Return the start of the Modbus PDU to the caller. */
-        *frame_ptr_buf = (UCHAR *) & inst->rcv_buf[MB_ASCII_SER_PDU_PDU_OFF];
+        *frame_ptr_buf = (UCHAR *)&inst->pdu_buf[MB_ASCII_SER_PDU_PDU_OFF];
     }
     else
     {
@@ -151,8 +151,11 @@ mb_err_enum mb_ascii_send(mb_ascii_tr_struct* inst,  UCHAR slv_addr, const UCHAR
      */
     if (inst->rcv_state == MB_ASCII_RX_STATE_IDLE)
     {
+#       if MB_MASTER >0
+        inst->frame_is_broadcast = (MB_ADDRESS_BROADCAST == slv_addr) ? TRUE : FALSE;
+#       endif
         /* First byte before the Modbus-PDU is the slave address. */
-        inst->snd_buf_cur = (UCHAR *) frame_ptr - 1;
+        inst->snd_buf_cur = (UCHAR *)frame_ptr - MB_ASCII_SER_PDU_PDU_OFF;
         inst->snd_buf_cnt = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
@@ -160,8 +163,8 @@ mb_err_enum mb_ascii_send(mb_ascii_tr_struct* inst,  UCHAR slv_addr, const UCHAR
         inst->snd_buf_cnt += len;
 
         /* Calculate LRC checksum for Modbus-Serial-Line-PDU. */
-        lrc = mb_lrc((UCHAR *) inst->snd_buf_cur, inst->snd_buf_cnt);
-        inst->snd_buf[inst->snd_buf_cnt++] = lrc;
+        lrc = mb_lrc((UCHAR *)inst->snd_buf_cur, inst->snd_buf_cnt);
+        inst->snd_buf_cur[inst->snd_buf_cnt++] = lrc;
 
         /* Activate the transmitter. */
         inst->snd_state = MB_ASCII_TX_STATE_START;
@@ -214,7 +217,7 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
             case BYTE_HIGH_NIBBLE:
                 if (inst->rcv_buf_pos < MB_ASCII_SER_PDU_SIZE_MAX)
                 {
-                    inst->rcv_buf[inst->rcv_buf_pos] = (UCHAR)(ucResult << 4);
+                    inst->pdu_buf[inst->rcv_buf_pos] = (UCHAR)(ucResult << 4);
                     inst->byte_pos = BYTE_LOW_NIBBLE;
                     break;
                 }
@@ -229,7 +232,7 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
                 break;
 
             case BYTE_LOW_NIBBLE:
-                inst->rcv_buf[inst->rcv_buf_pos] |= ucResult;
+                inst->pdu_buf[inst->rcv_buf_pos] |= ucResult;
                 inst->rcv_buf_pos++;
                 inst->byte_pos = BYTE_HIGH_NIBBLE;
                 break;
@@ -280,7 +283,7 @@ BOOL mb_ascii_rcv_fsm(mb_ascii_tr_struct* inst)
             /* Enable timer for character timeout. */
             mb_port_ser_tmr_enable((mb_port_ser_struct *)inst->base.port_obj);
             /* Reset the input buffers to store the frame. */
-            inst->rcv_buf_pos = 0;;
+            inst->rcv_buf_pos = 0;
             inst->byte_pos = BYTE_HIGH_NIBBLE;
             inst->rcv_state = MB_ASCII_RX_STATE_RCV;
         }
@@ -352,8 +355,6 @@ BOOL mb_ascii_snd_fsm(mb_ascii_tr_struct* inst)
 #if MB_MASTER >0
         if (inst->is_master==TRUE)
         {
-
-            inst->frame_is_broadcast = (inst->snd_buf[MB_ASCII_SER_PDU_ADDR_OFF] == MB_ADDRESS_BROADCAST) ? TRUE : FALSE;
             /* Disable transmitter. This prevents another transmit buffer
              * empty interrupt. */
             mb_port_ser_enable((mb_port_ser_struct *)inst->base.port_obj, TRUE, FALSE);
@@ -507,7 +508,7 @@ static UCHAR mb_lrc(UCHAR *frame_ptr, USHORT len_buf)
 /* Get Modbus send PDU's buffer address pointer.*/
 void mb_ascii_get_snd_buf(mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
-    *frame_ptr_buf = (UCHAR *) &inst->snd_buf[MB_ASCII_SER_PDU_PDU_OFF];
+    *frame_ptr_buf = (UCHAR *)&inst->pdu_buf[MB_ASCII_SER_PDU_PDU_OFF];
 }
 
 
@@ -515,7 +516,7 @@ void mb_ascii_get_snd_buf(mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf)
 /* Get Modbus Master send RTU's buffer address pointer.*/
 void vMBASCIIMasterGetRTUSndBuf(mb_ascii_tr_struct* inst, UCHAR ** frame_ptr_buf)
 {
-    *frame_ptr_buf = (UCHAR *) inst->snd_buf;
+    *frame_ptr_buf = (UCHAR *)inst->pdu_buf;
 }
 
 /* Set Modbus Master send PDU's buffer length.*/

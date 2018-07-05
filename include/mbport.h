@@ -37,6 +37,7 @@ PR_BEGIN_EXTERN_C
 
 #include <mbconfig.h>
 
+/* ----------------------- Type definitions ---------------------------------*/
 #if MB_TCP_ENABLED
 typedef struct _mb_port_tcp mb_port_tcp_struct; //!< TCP port, child of #mb_port_base_struct
 #endif
@@ -81,8 +82,6 @@ typedef enum
     MB_PAR_ODD,                 /*!< Odd parity. */
     MB_PAR_EVEN                 /*!< Even parity. */
 } mb_port_ser_parity_enum;
-
-/* ----------------------- Type definitions ---------------------------------*/
 
 /*! \ingroup modbus
  * \brief Parity used for characters in serial mode.

@@ -33,7 +33,7 @@
 
 #ifdef __cplusplus
 #   define PR_BEGIN_EXTERN_C			extern "C" {
-#   define PR_END_EXTERN_C				}PR_BEGIN_EXTERN_C
+#   define PR_END_EXTERN_C				}
 #else
 #   define PR_BEGIN_EXTERN_C
 #   define PR_END_EXTERN_C

@@ -61,28 +61,36 @@ mb_err_enum  mb_mstr_rq_read_discrete_inputs(mb_inst_struct *inst, UCHAR snd_add
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
     inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
+
     mb_frame_ptr[MB_PDU_FUNC_OFF]                 = MB_FUNC_READ_DISCRETE_INPUTS;
+
+    inst->master_el_addr                          = discrete_addr;
     mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF]        = discrete_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]    = discrete_addr;
+
+    inst->master_el_cnt                           = discrete_num;
     mb_frame_ptr[MB_PDU_REQ_READ_DISCCNT_OFF ]    = discrete_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_DISCCNT_OFF + 1] = discrete_num;
+
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    return MB_ENOERR;
+
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+
+    //return MB_ENOERR;
 }
 
 mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    USHORT          reg_addr;
-    USHORT          usDiscreteCnt;
     UCHAR           byte_num;
-    UCHAR          *mb_frame_ptr;
+    //UCHAR          *mb_frame_ptr;
 
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
@@ -92,32 +100,26 @@ mb_exception_enum  mb_mstr_fn_read_discrete_inputs(mb_inst_struct *inst, UCHAR *
     }
     else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
-        inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
-        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-        reg_addr++;
-
-        usDiscreteCnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_DISCCNT_OFF] << 8);
-        usDiscreteCnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_DISCCNT_OFF + 1]);
-
+        USHORT discrete_cnt;
+        discrete_cnt = inst->master_el_cnt;
         /* Test if the quantity of coils is a multiple of 8. If not last
          * byte is only partially field with unused coils set to zero. */
-        if ((usDiscreteCnt & 0x0007) != 0)
+        if ((discrete_cnt & 0x0007) != 0)
         {
-            byte_num = (UCHAR)(usDiscreteCnt / 8 + 1);
+            byte_num = (UCHAR)(discrete_cnt / 8 + 1);
         }
         else
         {
-            byte_num = (UCHAR)(usDiscreteCnt / 8);
+            byte_num = (UCHAR)(discrete_cnt / 8);
         }
 
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
-        if ((usDiscreteCnt >= 1) && byte_num == frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF])
+        if ((discrete_cnt >= 1) && byte_num == frame_ptr[MB_PDU_FUNC_READ_DISCCNT_OFF])
         {
             /* Make callback to fill the buffer. */
-            reg_status = mb_mstr_reg_discrete_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], reg_addr, usDiscreteCnt);
+            reg_status = mb_mstr_reg_discrete_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], inst->master_el_addr + 1, discrete_cnt);
 
             /* If an error occured convert it into a Modbus exception. */
             if(reg_status != MB_ENOERR)

@@ -65,18 +65,17 @@ typedef struct
     volatile mb_rtu_snd_state_enum snd_state;
     volatile mb_rtu_rcv_state_enum rcv_state;
 
-    volatile UCHAR                 snd_buf[MB_PDU_SIZE_MAX];
-    volatile UCHAR                 rcv_buf[MB_RTU_SER_PDU_SIZE_MAX];
+    volatile UCHAR                 pdu_buf[MB_RTU_SER_PDU_SIZE_MAX];
     volatile USHORT                snd_pdu_len;
 
     volatile UCHAR                 *snd_buf_cur;
-    volatile USHORT                snd_buff_cnt;
+    volatile USHORT                 snd_buf_cnt;
 
-    volatile USHORT                rcv_buf_pos;
+    volatile USHORT                 rcv_buf_pos;
 
     BOOL                           is_master;
     BOOL                           frame_is_broadcast;
-    volatile mb_tmr_mode_enum    cur_tmr_mode;
+    volatile mb_tmr_mode_enum      cur_tmr_mode;
 } mb_rtu_tr_struct;
 
 extern const mb_tr_mtab mb_rtu_mtab;

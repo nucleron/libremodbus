@@ -86,27 +86,35 @@ mb_exception_enum    mb_error_to_exception(mb_err_enum error_code);
 mb_err_enum  mb_mstr_rq_write_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_data)
 {
     UCHAR                 *mb_frame_ptr;
-
     if (snd_addr > MB_ADDRESS_MAX)
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME too
     inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
+
     mb_frame_ptr[MB_PDU_FUNC_OFF]                = MB_FUNC_WRITE_REGISTER;
+
+    inst->master_el_addr                         = reg_addr;
     mb_frame_ptr[MB_PDU_REQ_WRITE_ADDR_OFF]      = reg_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_WRITE_ADDR_OFF + 1]  = reg_addr;
+
+    inst->master_el_cnt                          = 1;
+
     mb_frame_ptr[MB_PDU_REQ_WRITE_VALUE_OFF]     = reg_data >> 8;
     mb_frame_ptr[MB_PDU_REQ_WRITE_VALUE_OFF + 1] = reg_data ;
+
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_SIZE);
 
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    return MB_EX_NONE;
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+    //return MB_EX_NONE;
 }
 
 mb_exception_enum  mb_mstr_fn_write_holding_reg(mb_inst_struct *inst,  UCHAR *frame_ptr, USHORT *len_buf)
@@ -144,34 +152,49 @@ mb_exception_enum  mb_mstr_fn_write_holding_reg(mb_inst_struct *inst,  UCHAR *fr
  */
 mb_err_enum  mb_mstr_rq_write_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT reg_addr, USHORT reg_num, USHORT * data_ptr)
 {
-    UCHAR                 *mb_frame_ptr;
-    USHORT                 reg_idx = 0;
+    UCHAR  *mb_frame_ptr;
+    UCHAR  *mb_data_ptr;
+    USHORT  reg_idx;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
     inst->trmt->get_tx_frm(inst-> transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
+
     mb_frame_ptr[MB_PDU_FUNC_OFF]                     = MB_FUNC_WRITE_MULTIPLE_REGISTERS;
+
+    inst->master_el_addr                              = reg_addr;
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_ADDR_OFF]       = reg_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_ADDR_OFF + 1]   = reg_addr;
+
+    inst->master_el_cnt                               = reg_num;
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_REGCNT_OFF]     = reg_num >> 8;
-    mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_REGCNT_OFF + 1] = reg_num ;
+    mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_REGCNT_OFF + 1] = reg_num;
+
     mb_frame_ptr[MB_PDU_REQ_WRITE_MUL_BYTECNT_OFF]    = reg_num * 2;
-    mb_frame_ptr += MB_PDU_REQ_WRITE_MUL_VALUES_OFF;
-    while(reg_num > reg_idx)
+
+    //mb_frame_ptr += MB_PDU_REQ_WRITE_MUL_VALUES_OFF;
+    mb_data_ptr = mb_frame_ptr + MB_PDU_REQ_WRITE_MUL_VALUES_OFF;
+
+    for (reg_idx = 0; reg_idx < reg_num; reg_idx++)
     {
-        *mb_frame_ptr++ = data_ptr[reg_idx] >> 8;
-        *mb_frame_ptr++ = data_ptr[reg_idx++] ;
+        *mb_data_ptr++ = data_ptr[reg_idx] >> 8;
+        *mb_data_ptr++ = data_ptr[reg_idx] ;
     }
+
     *inst->pdu_snd_len = (MB_PDU_SIZE_MIN + MB_PDU_REQ_WRITE_MUL_SIZE_MIN + 2*reg_num);
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    return MB_EX_NONE;
+
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+
+    //return MB_EX_NONE;
 }
 
 mb_exception_enum  mb_mstr_fn_write_multi_holding_reg(mb_inst_struct *inst,  UCHAR *frame_ptr, USHORT *len_buf)
@@ -215,31 +238,34 @@ mb_err_enum  mb_mstr_rq_read_holding_reg(mb_inst_struct *inst,  UCHAR snd_addr, 
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
     inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
+
     mb_frame_ptr[MB_PDU_FUNC_OFF]                = MB_FUNC_READ_HOLDING_REGISTER;
+
+    inst->master_el_addr                         = reg_addr;
     mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF]       = reg_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]   = reg_addr;
+
+    inst->master_el_cnt                          = reg_num;
     mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF]     = reg_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1] = reg_num;
 
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READ_SIZE);
 
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    //eErrStatus = eMBMasterWaitRequestFinish();
-    return MB_EX_NONE;
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+
+    //return MB_EX_NONE;
 }
 
 mb_exception_enum  mb_mstr_fn_read_holding_reg(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    UCHAR          *mb_frame_ptr;
-    USHORT          reg_addr;
-    USHORT          reg_cnt;
-
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
 
@@ -254,23 +280,15 @@ mb_exception_enum  mb_mstr_fn_read_holding_reg(mb_inst_struct *inst, UCHAR *fram
     }
     else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READ_SIZE_MIN)
     {
-        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-
-        reg_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF] << 8);
-        reg_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_ADDR_OFF + 1]);
-        reg_addr++;
-
-        reg_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF] << 8);
-        reg_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READ_REGCNT_OFF + 1]);
-
-
+        USHORT reg_cnt;
+        reg_cnt = inst->master_el_cnt;
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception.
          */
         if ((reg_cnt >= 1) && (2 * reg_cnt == frame_ptr[MB_PDU_FUNC_READ_BYTECNT_OFF]))
         {
             /* Make callback to fill the buffer. */
-            reg_status = mb_mstr_reg_holding_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], reg_addr, reg_cnt);
+            reg_status = mb_mstr_reg_holding_cb(inst, &frame_ptr[MB_PDU_FUNC_READ_VALUES_OFF], inst->master_el_addr + 1, reg_cnt);
             /* If an error occured convert it into a Modbus exception. */
             if (reg_status != MB_ENOERR)
             {
@@ -309,48 +327,65 @@ mb_exception_enum  mb_mstr_fn_read_holding_reg(mb_inst_struct *inst, UCHAR *fram
  */
 mb_err_enum  mb_mstr_rq_rw_multi_holding_reg(mb_inst_struct *inst, UCHAR snd_addr, USHORT rd_reg_addr, USHORT rd_reg_num, USHORT * data_ptr, USHORT wr_reg_addr, USHORT wr_reg_num)
 {
-    UCHAR                 *mb_frame_ptr;
-    USHORT                 reg_idx = 0;
-//    mb_err_enum    eErrStatus = MB_ENOERR;
+    UCHAR  *mb_frame_ptr;
+    UCHAR  *mb_data_ptr;
+    USHORT reg_idx;
 
     if (snd_addr > MB_ADDRESS_MAX)
     {
         return MB_EINVAL;
     }
-    if (inst->master_is_busy)
+    if (FALSE == MB_BOOL_CAS(&inst->master_is_busy, FALSE, TRUE))
     {
         return MB_EBUSY;
     }
-    //else if (xMBMasterRunResTake(timeout) == FALSE) eErrStatus = MB_EBUSY; //FIXME
     inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
+
     inst->master_dst_addr = snd_addr;
+
     mb_frame_ptr[MB_PDU_FUNC_OFF]                           = MB_FUNC_READWRITE_MULTIPLE_REGISTERS;
+
+    inst->master_el_addr                                    = rd_reg_addr;
     mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_ADDR_OFF]        = rd_reg_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_ADDR_OFF + 1]    = rd_reg_addr;
+
+    inst->master_el_cnt                                     = rd_reg_num;
     mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_REGCNT_OFF]      = rd_reg_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_REGCNT_OFF + 1]  = rd_reg_num ;
+
     mb_frame_ptr[MB_PDU_REQ_READWRITE_WRITE_ADDR_OFF]       = wr_reg_addr >> 8;
     mb_frame_ptr[MB_PDU_REQ_READWRITE_WRITE_ADDR_OFF + 1]   = wr_reg_addr;
+
     mb_frame_ptr[MB_PDU_REQ_READWRITE_WRITE_REGCNT_OFF]     = wr_reg_num >> 8;
     mb_frame_ptr[MB_PDU_REQ_READWRITE_WRITE_REGCNT_OFF + 1] = wr_reg_num ;
     mb_frame_ptr[MB_PDU_REQ_READWRITE_WRITE_BYTECNT_OFF]    = wr_reg_num * 2;
-    mb_frame_ptr += MB_PDU_REQ_READWRITE_WRITE_VALUES_OFF;
-    while(wr_reg_num > reg_idx)
+
+    mb_data_ptr = mb_frame_ptr + MB_PDU_REQ_WRITE_MUL_VALUES_OFF;
+
+    for (reg_idx = 0; reg_idx < wr_reg_num; reg_idx++)
     {
-        *mb_frame_ptr++ = data_ptr[reg_idx] >> 8;
-        *mb_frame_ptr++ = data_ptr[reg_idx++] ;
+        *mb_data_ptr++ = data_ptr[reg_idx] >> 8;
+        *mb_data_ptr++ = data_ptr[reg_idx] ;
     }
+
+//    mb_frame_ptr += MB_PDU_REQ_READWRITE_WRITE_VALUES_OFF;
+//
+//    while(wr_reg_num > reg_idx)
+//    {
+//        *mb_frame_ptr++ = data_ptr[reg_idx] >> 8;
+//        *mb_frame_ptr++ = data_ptr[reg_idx++] ;
+//    }
+
     *(inst->pdu_snd_len) = (MB_PDU_SIZE_MIN + MB_PDU_REQ_READWRITE_SIZE_MIN + 2*wr_reg_num);
-    (void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
-    return MB_EX_NONE;
+
+    return mb_frame_send(inst, mb_frame_ptr, *inst->pdu_snd_len);
+    //(void)inst->pmt->evt_post(inst->port, EV_FRAME_SENT);
+
+    //return MB_EX_NONE;
 }
 
 mb_exception_enum  mb_mstr_fn_rw_multi_holding_regs(mb_inst_struct *inst, UCHAR *frame_ptr, USHORT *len_buf)
 {
-    USHORT          reg_rd_addr;
-    USHORT          reg_rd_cnt;
-    UCHAR          *mb_frame_ptr;
-
     mb_exception_enum    status = MB_EX_NONE;
     mb_err_enum    reg_status;
 
@@ -361,17 +396,12 @@ mb_exception_enum  mb_mstr_fn_rw_multi_holding_regs(mb_inst_struct *inst, UCHAR 
     }
     else if (*len_buf >= MB_PDU_SIZE_MIN + MB_PDU_FUNC_READWRITE_SIZE_MIN)
     {
-        inst->trmt->get_tx_frm(inst->transport, &mb_frame_ptr);
-        reg_rd_addr = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_ADDR_OFF] << 8U);
-        reg_rd_addr |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_ADDR_OFF + 1]);
-        reg_rd_addr++;
-
-        reg_rd_cnt = (USHORT)(mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_REGCNT_OFF] << 8U);
-        reg_rd_cnt |= (USHORT)(mb_frame_ptr[MB_PDU_REQ_READWRITE_READ_REGCNT_OFF + 1]);
+        USHORT reg_rd_cnt;
+        reg_rd_cnt = inst->master_el_cnt;
 
         if ((2 * reg_rd_cnt) == frame_ptr[MB_PDU_FUNC_READWRITE_READ_BYTECNT_OFF])
         {
-            reg_status = mb_mstr_reg_holding_cb(inst, &frame_ptr[MB_PDU_FUNC_READWRITE_READ_VALUES_OFF], reg_rd_addr, reg_rd_cnt);
+            reg_status = mb_mstr_reg_holding_cb(inst, &frame_ptr[MB_PDU_FUNC_READWRITE_READ_VALUES_OFF], inst->master_el_addr + 1, reg_rd_cnt);
             if (reg_status != MB_ENOERR)
             {
                 status = mb_error_to_exception(reg_status);
